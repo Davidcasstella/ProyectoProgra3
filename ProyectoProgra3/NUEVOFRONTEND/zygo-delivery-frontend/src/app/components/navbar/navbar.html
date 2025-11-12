@@ -1,0 +1,81 @@
+<!-- src/app/components/navbar/navbar.html -->
+
+<nav class="sidebar" [class.collapsed]="!menuExpanded()">
+  <!-- Header con Avatar -->
+  <div class="sidebar-header">
+    <div class="user-profile">
+      @if (usuarioActual(); as usuario) {
+        <div class="avatar">
+          {{ getInitials(usuario.nombre) }}
+        </div>
+        @if (menuExpanded()) {
+          <div class="user-info">
+            <div class="user-name">{{ usuario.nombre }}</div>
+            <div class="user-role">{{ usuario.tipo }}</div>
+          </div>
+        }
+      }
+    </div>
+    
+    <button class="toggle-btn" (click)="toggleMenu()" title="Toggle Menu">
+      <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M3 12h18M3 6h18M3 18h18"/>
+      </svg>
+    </button>
+  </div>
+
+  <!-- Navigation Menu -->
+  <div class="sidebar-menu">
+    <div class="menu-section">
+      @if (menuExpanded()) {
+        <div class="section-label">ACCOUNT</div>
+      }
+      
+      @for (item of menuItems; track item.route) {
+        <a 
+          [routerLink]="item.route" 
+          routerLinkActive="active"
+          class="menu-item"
+          [title]="item.label"
+        >
+          <div class="menu-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <g [innerHTML]="item.svg"></g>
+            </svg>
+          </div>
+          @if (menuExpanded()) {
+            <span class="menu-label">{{ item.label }}</span>
+          }
+        </a>
+      }
+    </div>
+
+    <!-- Settings Section -->
+    <div class="menu-section">
+      @if (menuExpanded()) {
+        <div class="section-label">SETTINGS</div>
+      }
+      
+      <button class="menu-item" (click)="logout()" title="Cerrar Sesión">
+        <div class="menu-icon">
+          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
+            <polyline points="16 17 21 12 16 7"/>
+            <line x1="21" y1="12" x2="9" y2="12"/>
+          </svg>
+        </div>
+        @if (menuExpanded()) {
+          <span class="menu-label">Salir</span>
+        }
+      </button>
+    </div>
+  </div>
+
+  <!-- Footer -->
+  @if (menuExpanded()) {
+    <div class="sidebar-footer">
+      <div class="app-title">Zygo Delivery</div>
+      <div class="app-version">v1.0.0</div>
+    </div>
+  }
+</nav>

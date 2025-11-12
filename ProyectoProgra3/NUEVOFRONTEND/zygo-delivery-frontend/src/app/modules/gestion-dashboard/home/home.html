@@ -1,0 +1,196 @@
+<!-- src/app/modules/gestion-dashboard/home/home.html -->
+
+<div class="dashboard-layout">
+  <app-navbar></app-navbar>
+  
+  <div class="main-content">
+    <!-- Header -->
+    <div class="dashboard-header">
+      <div>
+        <h1>Dashboard</h1>
+        @if (usuarioActual(); as usuario) {
+          <p>Bienvenido, {{ usuario.nombre }}</p>
+        }
+      </div>
+      
+      <div class="search-box">
+        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <circle cx="11" cy="11" r="8"></circle>
+          <path d="m21 21-4.35-4.35"></path>
+        </svg>
+        <input type="text" placeholder="Buscar..." />
+      </div>
+    </div>
+
+    @if (loading()) {
+      <div class="loading-container">
+        <div class="spinner-large"></div>
+        <p>Cargando datos...</p>
+      </div>
+    } @else {
+      <!-- Estadísticas Cards -->
+      <div class="stats-grid">
+        @for (stat of estadisticas(); track stat.label) {
+          <div class="stat-card" [style.border-color]="stat.color">
+            <div class="stat-icon" [style.background]="'linear-gradient(135deg, ' + stat.color + ', ' + stat.color + '99)'">
+              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <g [innerHTML]="stat.svg"></g>
+              </svg>
+            </div>
+            <div class="stat-content">
+              <div class="stat-label">{{ stat.label }}</div>
+              <div class="stat-value">{{ stat.value }}</div>
+            </div>
+            <div class="stat-chart">
+              <svg viewBox="0 0 100 30" preserveAspectRatio="none">
+                <path 
+                  d="M0,15 Q25,5 50,15 T100,15" 
+                  fill="none" 
+                  [attr.stroke]="stat.color" 
+                  stroke-width="2"
+                  opacity="0.3"
+                />
+              </svg>
+            </div>
+          </div>
+        }
+      </div>
+
+      <div class="dashboard-grid">
+        <!-- Gráfico de Barras -->
+        <div class="dashboard-card">
+          <div class="card-header">
+            <h3>Pedidos por Estado</h3>
+            <span class="card-badge">Tiempo Real</span>
+          </div>
+          <div class="chart-container">
+            <div class="bar-chart">
+              @for (data of pedidosPorEstado(); track data.label) {
+                <div class="bar-group">
+                  <div class="bar-wrapper">
+                    <div 
+                      class="bar" 
+                      [style.height.%]="getBarHeight(data.value)"
+                    >
+                      <div class="bar-value">{{ data.value }}</div>
+                    </div>
+                  </div>
+                  <div class="bar-label">{{ data.label }}</div>
+                </div>
+              }
+            </div>
+          </div>
+        </div>
+
+        <!-- Pedidos Recientes -->
+        <div class="dashboard-card">
+          <div class="card-header">
+            <h3>Pedidos Recientes</h3>
+            <button class="btn-link">Ver todos</button>
+          </div>
+          <div class="pedidos-list">
+            @if (pedidosRecientes().length === 0) {
+              <div class="empty-state">
+                <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"/>
+                </svg>
+                <p>No hay pedidos registrados</p>
+              </div>
+            } @else {
+              @for (pedido of pedidosRecientes(); track pedido.id) {
+                <div class="pedido-item">
+                  <div class="pedido-icon">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <path d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"/>
+                    </svg>
+                  </div>
+                  <div class="pedido-info">
+                    <div class="pedido-title">{{ pedido.descripcion }}</div>
+                    <div class="pedido-meta">
+                      <span>{{ pedido.nombreCliente }}</span>
+                      <span>•</span>
+                      <span>{{ formatFecha(pedido.fechaCreacion) }}</span>
+                    </div>
+                  </div>
+                  <span class="pedido-estado" [ngClass]="getEstadoClass(pedido.estado)">
+                    {{ pedido.estado }}
+                  </span>
+                </div>
+              }
+            }
+          </div>
+        </div>
+
+        <!-- Progreso Circular -->
+        <div class="dashboard-card progress-card">
+          <div class="card-header">
+            <h3>Tasa de Entrega</h3>
+          </div>
+          <div class="progress-circle-container">
+            <div class="progress-circle">
+              <svg viewBox="0 0 120 120">
+                <circle cx="60" cy="60" r="50" fill="none" stroke="rgba(138, 43, 226, 0.1)" stroke-width="10"/>
+                <circle 
+                  cx="60" 
+                  cy="60" 
+                  r="50" 
+                  fill="none" 
+                  stroke="url(#gradient)" 
+                  stroke-width="10"
+                  stroke-dasharray="314"
+                  stroke-dashoffset="80"
+                  stroke-linecap="round"
+                  transform="rotate(-90 60 60)"
+                />
+                <defs>
+                  <linearGradient id="gradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                    <stop offset="0%" style="stop-color:#8a2be2;stop-opacity:1" />
+                    <stop offset="100%" style="stop-color:#4b0082;stop-opacity:1" />
+                  </linearGradient>
+                </defs>
+              </svg>
+              <div class="progress-text">
+                <div class="progress-value">74.2%</div>
+                <div class="progress-label">Completados</div>
+              </div>
+            </div>
+            <div class="progress-buttons">
+              <button class="progress-btn">EMAIL</button>
+              <button class="progress-btn">EXPORT</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Estadística Simple -->
+        <div class="dashboard-card simple-stat">
+          <div class="card-header">
+            <h3>YOUR TITLE</h3>
+          </div>
+          <div class="simple-stat-content">
+            <div class="simple-stat-value">153.2</div>
+            <div class="simple-stat-chart">
+              <svg viewBox="0 0 200 60" preserveAspectRatio="none">
+                <defs>
+                  <linearGradient id="areaGradient" x1="0%" y1="0%" x2="0%" y2="100%">
+                    <stop offset="0%" style="stop-color:#8a2be2;stop-opacity:0.3" />
+                    <stop offset="100%" style="stop-color:#8a2be2;stop-opacity:0" />
+                  </linearGradient>
+                </defs>
+                <path 
+                  d="M0,45 L20,40 L40,30 L60,35 L80,25 L100,30 L120,20 L140,25 L160,15 L180,20 L200,10" 
+                  fill="none" 
+                  stroke="#8a2be2" 
+                  stroke-width="2"
+                />
+                <path 
+                  d="M0,45 L20,40 L40,30 L60,35 L80,25 L100,30 L120,20 L140,25 L160,15 L180,20 L200,10 L200,60 L0,60 Z" 
+                  fill="url(#areaGradient)"
+                />
+              </svg>
+            </div>
+          </div>
+        </div>
+      </div>
+    }
+  </div>
+</div>

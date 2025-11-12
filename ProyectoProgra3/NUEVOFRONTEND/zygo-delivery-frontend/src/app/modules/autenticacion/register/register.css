@@ -1,0 +1,16 @@
+/* src/app/modules/autenticacion/register/register.css */
+
+/* Reutiliza los estilos de login.css */
+@import '../login/login.css';
+
+.form-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+
+@media (max-width: 640px) {
+  .form-row {
+    grid-template-columns: 1fr;
+  }
+}
