@@ -20,3 +20,14 @@ Este proyecto combina un backend robusto con una interfaz moderna y responsiva, 
 
    ```bash
    mvn spring-boot:run
+
+
+### Frontend (Angular)
+1. Abre el proyecto frontend en **Visual Studio Code** o tu editor preferido.  
+2. Asegúrate de tener instalado **Node.js** y **Angular CLI**.  
+3. En la terminal, ejecuta los siguientes comandos:
+
+   ```bash
+   npm install
+   ng serve
+
