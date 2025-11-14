@@ -45,23 +45,27 @@ public class SecurityConfig {
     public AuthenticationManager authenticationManager(AuthenticationConfiguration authConfig) throws Exception {
         return authConfig.getAuthenticationManager();
     }
+    // En tu SecurityConfig.java, modifica la sección de autorización:
+
+@Bean
+public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+    http
+        .csrf(csrf -> csrf.disable())
+        .cors(cors -> cors.configure(http))
+        .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+        .authorizeHttpRequests(auth -> auth
+            .requestMatchers("/api/auth/**").permitAll()
+            .requestMatchers("/api/admin/osm/**").hasRole("ADMIN")  // ✨ NUEVO
+            .requestMatchers("/api/usuarios/**").hasAnyRole("ADMIN", "CLIENTE", "REPARTIDOR")
+            .requestMatchers("/api/pedidos/**").hasAnyRole("ADMIN", "CLIENTE", "REPARTIDOR")
+            .requestMatchers("/api/rutas/**").hasAnyRole("ADMIN", "CLIENTE", "REPARTIDOR")  // ✨ NUEVO
+            .anyRequest().authenticated()
+        );
     
-    @Bean
-    public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
-        http
-            .csrf(csrf -> csrf.disable())
-            .cors(cors -> cors.configure(http))
-            .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-            .authorizeHttpRequests(auth -> auth
-                .requestMatchers("/api/auth/**").permitAll()
-                .requestMatchers("/api/usuarios/**").hasAnyRole("ADMIN", "CLIENTE", "REPARTIDOR")
-                .requestMatchers("/api/pedidos/**").hasAnyRole("ADMIN", "CLIENTE", "REPARTIDOR")
-                .anyRequest().authenticated()
-            );
-        
-        http.authenticationProvider(authenticationProvider());
-        http.addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
-        
-        return http.build();
-    }
+    http.authenticationProvider(authenticationProvider());
+    http.addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
+    
+    return http.build();
+}
+    
 }
