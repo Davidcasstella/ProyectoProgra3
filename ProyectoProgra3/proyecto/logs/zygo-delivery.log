@@ -35,3 +35,872 @@
 2025-11-16 14:04:36 [SpringApplicationShutdownHook] INFO  o.s.o.j.LocalContainerEntityManagerFactoryBean - Closing JPA EntityManagerFactory for persistence unit 'default'
 2025-11-16 14:04:36 [SpringApplicationShutdownHook] INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-1 - Shutdown initiated...
 2025-11-16 14:04:36 [SpringApplicationShutdownHook] INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-1 - Shutdown completed.
+2025-11-16 14:04:59 [main] INFO  c.Zygo.proyecto.ProyectoApplication - Starting ProyectoApplication using Java 21.0.6 with PID 21580 (C:\Progra3clase\PROGRAFINAL\ProyectoProgra3\proyecto\target\classes started by David in C:\Progra3clase\PROGRAFINAL\ProyectoProgra3\proyecto)
+2025-11-16 14:04:59 [main] DEBUG c.Zygo.proyecto.ProyectoApplication - Running with Spring Boot v3.5.7, Spring v6.2.12
+2025-11-16 14:04:59 [main] INFO  c.Zygo.proyecto.ProyectoApplication - No active profile set, falling back to 1 default profile: "default"
+2025-11-16 14:05:00 [main] INFO  o.s.d.r.c.RepositoryConfigurationDelegate - Bootstrapping Spring Data JPA repositories in DEFAULT mode.
+2025-11-16 14:05:00 [main] INFO  o.s.d.r.c.RepositoryConfigurationDelegate - Finished Spring Data repository scanning in 172 ms. Found 4 JPA repository interfaces.
+2025-11-16 14:05:02 [main] INFO  o.s.b.w.e.tomcat.TomcatWebServer - Tomcat initialized with port 8080 (http)
+2025-11-16 14:05:02 [main] INFO  o.a.catalina.core.StandardService - Starting service [Tomcat]
+2025-11-16 14:05:02 [main] INFO  o.a.catalina.core.StandardEngine - Starting Servlet engine: [Apache Tomcat/10.1.48]
+2025-11-16 14:05:02 [main] INFO  o.a.c.c.C.[Tomcat].[localhost].[/] - Initializing Spring embedded WebApplicationContext
+2025-11-16 14:05:02 [main] INFO  o.s.b.w.s.c.ServletWebServerApplicationContext - Root WebApplicationContext: initialization completed in 2767 ms
+2025-11-16 14:05:02 [main] INFO  o.h.jpa.internal.util.LogHelper - HHH000204: Processing PersistenceUnitInfo [name: default]
+2025-11-16 14:05:02 [main] INFO  org.hibernate.Version - HHH000412: Hibernate ORM core version 6.6.33.Final
+2025-11-16 14:05:02 [main] INFO  o.h.c.i.RegionFactoryInitiator - HHH000026: Second-level cache disabled
+2025-11-16 14:05:03 [main] INFO  o.s.o.j.p.SpringPersistenceUnitInfo - No LoadTimeWeaver setup: ignoring JPA class transformer
+2025-11-16 14:05:03 [main] INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-1 - Starting...
+2025-11-16 14:05:03 [main] INFO  com.zaxxer.hikari.pool.HikariPool - HikariPool-1 - Added connection com.mysql.cj.jdbc.ConnectionImpl@78b9155e
+2025-11-16 14:05:03 [main] INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-1 - Start completed.
+2025-11-16 14:05:03 [main] WARN  org.hibernate.orm.deprecation - HHH90000025: MySQLDialect does not need to be specified explicitly using 'hibernate.dialect' (remove the property setting and it will be selected by default)
+2025-11-16 14:05:03 [main] INFO  o.hibernate.orm.connections.pooling - HHH10001005: Database info:
+	Database JDBC URL [Connecting through datasource 'HikariDataSource (HikariPool-1)']
+	Database driver: undefined/unknown
+	Database version: 8.3
+	Autocommit mode: undefined/unknown
+	Isolation level: undefined/unknown
+	Minimum pool size: undefined/unknown
+	Maximum pool size: undefined/unknown
+2025-11-16 14:05:05 [main] INFO  o.h.e.t.j.p.i.JtaPlatformInitiator - HHH000489: No JTA platform available (set 'hibernate.transaction.jta.platform' to enable JTA platform integration)
+2025-11-16 14:05:05 [main] INFO  o.s.o.j.LocalContainerEntityManagerFactoryBean - Initialized JPA EntityManagerFactory for persistence unit 'default'
+2025-11-16 14:05:06 [main] INFO  o.s.d.j.r.query.QueryEnhancerFactory - Hibernate is in classpath; If applicable, HQL parser will be used.
+2025-11-16 14:05:06 [main] DEBUG c.Z.p.s.JwtAuthenticationFilter - Filter 'jwtAuthenticationFilter' configured for use
+2025-11-16 14:05:08 [main] INFO  o.s.s.c.a.a.c.InitializeAuthenticationProviderBeanManagerConfigurer$InitializeAuthenticationProviderManagerConfigurer - Global AuthenticationManager configured with AuthenticationProvider bean with name authenticationProvider
+2025-11-16 14:05:08 [main] WARN  o.s.s.c.a.a.c.InitializeUserDetailsBeanManagerConfigurer$InitializeUserDetailsManagerConfigurer - Global AuthenticationManager configured with an AuthenticationProvider bean. UserDetailsService beans will not be used by Spring Security for automatically configuring username/password login. Consider removing the AuthenticationProvider bean. Alternatively, consider using the UserDetailsService in a manually instantiated DaoAuthenticationProvider. If the current configuration is intentional, to turn off this warning, increase the logging level of 'org.springframework.security.config.annotation.authentication.configuration.InitializeUserDetailsBeanManagerConfigurer' to ERROR
+2025-11-16 14:05:08 [main] WARN  o.s.b.a.o.j.JpaBaseConfiguration$JpaWebConfiguration - spring.jpa.open-in-view is enabled by default. Therefore, database queries may be performed during view rendering. Explicitly configure spring.jpa.open-in-view to disable this warning
+2025-11-16 14:05:09 [main] INFO  o.s.b.w.e.tomcat.TomcatWebServer - Tomcat started on port 8080 (http) with context path '/'
+2025-11-16 14:05:09 [main] INFO  c.Zygo.proyecto.ProyectoApplication - Started ProyectoApplication in 10.893 seconds (process running for 11.893)
+2025-11-16 14:05:09 [main] INFO  c.Z.proyecto.config.DataInitializer - ========================================
+2025-11-16 14:05:09 [main] INFO  c.Z.proyecto.config.DataInitializer - Sistema Zygo - Verificando grafo
+2025-11-16 14:05:09 [main] INFO  c.Z.proyecto.config.DataInitializer - ========================================
+2025-11-16 14:05:09 [main] INFO  c.Z.proyecto.config.DataInitializer - 💡 Para importar el mapa de Sogamoso:
+2025-11-16 14:05:09 [main] INFO  c.Z.proyecto.config.DataInitializer -    POST /api/admin/osm/importar-sogamoso
+2025-11-16 14:05:09 [main] INFO  c.Z.proyecto.config.DataInitializer - ========================================
+2025-11-16 14:08:44 [http-nio-8080-exec-1] INFO  o.a.c.c.C.[Tomcat].[localhost].[/] - Initializing Spring DispatcherServlet 'dispatcherServlet'
+2025-11-16 14:08:44 [http-nio-8080-exec-1] INFO  o.s.web.servlet.DispatcherServlet - Initializing Servlet 'dispatcherServlet'
+2025-11-16 14:08:44 [http-nio-8080-exec-1] INFO  o.s.web.servlet.DispatcherServlet - Completed initialization in 2 ms
+2025-11-16 14:08:44 [http-nio-8080-exec-2] INFO  c.Z.p.controller.AuthController - Intento de login para: dave@gmail.com
+2025-11-16 14:08:44 [http-nio-8080-exec-2] INFO  c.Z.p.controller.AuthController - Login exitoso para: dave@gmail.com
+2025-11-16 14:08:44 [http-nio-8080-exec-3] DEBUG c.Z.p.s.JwtAuthenticationFilter - Usuario autenticado: dave@gmail.com
+2025-11-16 14:08:44 [http-nio-8080-exec-6] DEBUG c.Z.p.s.JwtAuthenticationFilter - Usuario autenticado: dave@gmail.com
+2025-11-16 14:08:44 [http-nio-8080-exec-6] INFO  c.Z.p.controller.UsuarioController - GET /api/usuarios - Obteniendo todos los usuarios
+2025-11-16 14:08:44 [http-nio-8080-exec-3] INFO  c.Z.p.controller.PedidoController - 📋 GET /api/pedidos - Obteniendo todos los pedidos
+2025-11-16 14:08:44 [http-nio-8080-exec-3] DEBUG c.Z.proyecto.service.PedidoService - Obteniendo todos los pedidos
+2025-11-16 14:08:44 [http-nio-8080-exec-6] DEBUG c.Z.proyecto.service.UsuarioService - Obteniendo todos los usuarios
+2025-11-16 14:08:45 [http-nio-8080-exec-3] INFO  c.Z.p.controller.PedidoController - ✅ Retornando 8 pedidos
+2025-11-16 14:11:41 [http-nio-8080-exec-7] DEBUG c.Z.p.s.JwtAuthenticationFilter - Usuario autenticado: dave@gmail.com
+2025-11-16 14:11:41 [http-nio-8080-exec-7] INFO  c.Z.p.controller.UsuarioController - GET /api/usuarios - Obteniendo todos los usuarios
+2025-11-16 14:11:41 [http-nio-8080-exec-7] DEBUG c.Z.proyecto.service.UsuarioService - Obteniendo todos los usuarios
+2025-11-16 14:12:27 [http-nio-8080-exec-2] DEBUG c.Z.p.s.JwtAuthenticationFilter - Usuario autenticado: dave@gmail.com
+2025-11-16 14:12:27 [http-nio-8080-exec-2] INFO  c.Z.p.controller.LugarController - 📍 Calculando ruta por coordenadas
+2025-11-16 14:12:27 [http-nio-8080-exec-2] INFO  c.Zygo.proyecto.service.LugarService - Buscando nodo más cercano a 5.735858562149079, -72.9155472819108
+2025-11-16 14:12:27 [http-nio-8080-exec-2] INFO  c.Zygo.proyecto.service.LugarService - Buscando nodo más cercano a 5.739210539417143, -72.91567606521537
+2025-11-16 14:12:27 [http-nio-8080-exec-2] INFO  c.Zygo.proyecto.service.LugarService - Calculando ruta de 'Nodo_5.735078_-72.915670' a 'Nodo_5.735639_-72.916541'
+2025-11-16 14:12:27 [http-nio-8080-exec-2] INFO  c.Z.proyecto.service.DijkstraService - Calculando ruta óptima de nodo 37864 a nodo 36585 (considerando tráfico: true)
+2025-11-16 14:15:46 [http-nio-8080-exec-4] DEBUG c.Z.p.s.JwtAuthenticationFilter - Usuario autenticado: dave@gmail.com
+2025-11-16 14:15:46 [http-nio-8080-exec-4] INFO  c.Z.p.controller.LugarController - 📍 Calculando ruta por coordenadas
+2025-11-16 14:15:46 [http-nio-8080-exec-4] INFO  c.Zygo.proyecto.service.LugarService - Buscando nodo más cercano a 5.71391543412841, -72.9358668328822
+2025-11-16 14:15:46 [http-nio-8080-exec-4] INFO  c.Zygo.proyecto.service.LugarService - Buscando nodo más cercano a 5.715895741163694, -72.93575955292152
+2025-11-16 14:15:46 [http-nio-8080-exec-4] INFO  c.Zygo.proyecto.service.LugarService - Calculando ruta de 'Nodo_5.713893_-72.935875' a 'Nodo_5.715893_-72.935765'
+2025-11-16 14:15:46 [http-nio-8080-exec-4] INFO  c.Z.proyecto.service.DijkstraService - Calculando ruta óptima de nodo 32493 a nodo 34881 (considerando tráfico: true)
+2025-11-16 14:17:06 [http-nio-8080-exec-3] DEBUG c.Z.p.s.JwtAuthenticationFilter - Usuario autenticado: dave@gmail.com
+2025-11-16 14:17:06 [http-nio-8080-exec-3] INFO  c.Z.p.controller.UsuarioController - GET /api/usuarios - Obteniendo todos los usuarios
+2025-11-16 14:17:06 [http-nio-8080-exec-3] DEBUG c.Z.proyecto.service.UsuarioService - Obteniendo todos los usuarios
+2025-11-16 14:17:37 [http-nio-8080-exec-7] DEBUG c.Z.p.s.JwtAuthenticationFilter - Usuario autenticado: dave@gmail.com
+2025-11-16 14:17:37 [http-nio-8080-exec-7] INFO  c.Z.p.controller.PedidoController - 🚴 GET /api/pedidos/repartidor/9 - Obteniendo pedidos del repartidor
+2025-11-16 14:17:37 [http-nio-8080-exec-7] DEBUG c.Z.proyecto.service.PedidoService - Obteniendo pedidos del repartidor: 9
+2025-11-16 14:17:39 [http-nio-8080-exec-10] DEBUG c.Z.p.s.JwtAuthenticationFilter - Usuario autenticado: dave@gmail.com
+2025-11-16 14:17:39 [http-nio-8080-exec-10] INFO  c.Z.p.controller.UsuarioController - GET /api/usuarios - Obteniendo todos los usuarios
+2025-11-16 14:17:39 [http-nio-8080-exec-10] DEBUG c.Z.proyecto.service.UsuarioService - Obteniendo todos los usuarios
+2025-11-16 14:17:45 [http-nio-8080-exec-1] DEBUG c.Z.p.s.JwtAuthenticationFilter - Usuario autenticado: dave@gmail.com
+2025-11-16 14:17:45 [http-nio-8080-exec-1] INFO  c.Z.p.controller.UsuarioController - GET /api/usuarios - Obteniendo todos los usuarios
+2025-11-16 14:17:45 [http-nio-8080-exec-1] DEBUG c.Z.proyecto.service.UsuarioService - Obteniendo todos los usuarios
+2025-11-16 14:17:48 [http-nio-8080-exec-5] DEBUG c.Z.p.s.JwtAuthenticationFilter - Usuario autenticado: dave@gmail.com
+2025-11-16 14:17:48 [http-nio-8080-exec-5] INFO  c.Z.p.controller.UsuarioController - GET /api/usuarios - Obteniendo todos los usuarios
+2025-11-16 14:17:48 [http-nio-8080-exec-5] DEBUG c.Z.proyecto.service.UsuarioService - Obteniendo todos los usuarios
+2025-11-16 14:20:21 [http-nio-8080-exec-6] DEBUG c.Z.p.s.JwtAuthenticationFilter - Usuario autenticado: dave@gmail.com
+2025-11-16 14:20:21 [http-nio-8080-exec-6] INFO  c.Z.p.controller.UsuarioController - GET /api/usuarios - Obteniendo todos los usuarios
+2025-11-16 14:20:21 [http-nio-8080-exec-6] DEBUG c.Z.proyecto.service.UsuarioService - Obteniendo todos los usuarios
+2025-11-16 14:20:23 [http-nio-8080-exec-3] DEBUG c.Z.p.s.JwtAuthenticationFilter - Usuario autenticado: dave@gmail.com
+2025-11-16 14:20:23 [http-nio-8080-exec-9] DEBUG c.Z.p.s.JwtAuthenticationFilter - Usuario autenticado: dave@gmail.com
+2025-11-16 14:20:23 [http-nio-8080-exec-9] INFO  c.Z.p.controller.UsuarioController - GET /api/usuarios - Obteniendo todos los usuarios
+2025-11-16 14:20:23 [http-nio-8080-exec-3] INFO  c.Z.p.controller.PedidoController - 📋 GET /api/pedidos - Obteniendo todos los pedidos
+2025-11-16 14:20:23 [http-nio-8080-exec-9] DEBUG c.Z.proyecto.service.UsuarioService - Obteniendo todos los usuarios
+2025-11-16 14:20:23 [http-nio-8080-exec-3] DEBUG c.Z.proyecto.service.PedidoService - Obteniendo todos los pedidos
+2025-11-16 14:20:23 [http-nio-8080-exec-3] INFO  c.Z.p.controller.PedidoController - ✅ Retornando 8 pedidos
+2025-11-16 14:20:39 [http-nio-8080-exec-10] DEBUG c.Z.p.s.JwtAuthenticationFilter - Usuario autenticado: dave@gmail.com
+2025-11-16 14:20:39 [http-nio-8080-exec-1] DEBUG c.Z.p.s.JwtAuthenticationFilter - Usuario autenticado: dave@gmail.com
+2025-11-16 14:20:39 [http-nio-8080-exec-1] INFO  c.Z.p.controller.UsuarioController - GET /api/usuarios - Obteniendo todos los usuarios
+2025-11-16 14:20:39 [http-nio-8080-exec-10] INFO  c.Z.p.controller.PedidoController - 📋 GET /api/pedidos - Obteniendo todos los pedidos
+2025-11-16 14:20:39 [http-nio-8080-exec-10] DEBUG c.Z.proyecto.service.PedidoService - Obteniendo todos los pedidos
+2025-11-16 14:20:39 [http-nio-8080-exec-1] DEBUG c.Z.proyecto.service.UsuarioService - Obteniendo todos los usuarios
+2025-11-16 14:20:39 [http-nio-8080-exec-10] INFO  c.Z.p.controller.PedidoController - ✅ Retornando 8 pedidos
+2025-11-16 14:20:41 [http-nio-8080-exec-2] DEBUG c.Z.p.s.JwtAuthenticationFilter - Usuario autenticado: dave@gmail.com
+2025-11-16 14:20:41 [http-nio-8080-exec-2] INFO  c.Z.p.controller.UsuarioController - GET /api/usuarios - Obteniendo todos los usuarios
+2025-11-16 14:20:41 [http-nio-8080-exec-2] DEBUG c.Z.proyecto.service.UsuarioService - Obteniendo todos los usuarios
+2025-11-16 14:21:47 [http-nio-8080-exec-6] DEBUG c.Z.p.s.JwtAuthenticationFilter - Usuario autenticado: dave@gmail.com
+2025-11-16 14:21:47 [http-nio-8080-exec-9] DEBUG c.Z.p.s.JwtAuthenticationFilter - Usuario autenticado: dave@gmail.com
+2025-11-16 14:21:47 [http-nio-8080-exec-6] INFO  c.Z.p.controller.PedidoController - 📋 GET /api/pedidos - Obteniendo todos los pedidos
+2025-11-16 14:21:47 [http-nio-8080-exec-9] INFO  c.Z.p.controller.UsuarioController - GET /api/usuarios - Obteniendo todos los usuarios
+2025-11-16 14:21:47 [http-nio-8080-exec-9] DEBUG c.Z.proyecto.service.UsuarioService - Obteniendo todos los usuarios
+2025-11-16 14:21:47 [http-nio-8080-exec-6] DEBUG c.Z.proyecto.service.PedidoService - Obteniendo todos los pedidos
+2025-11-16 14:21:47 [http-nio-8080-exec-6] INFO  c.Z.p.controller.PedidoController - ✅ Retornando 8 pedidos
+2025-11-16 14:29:06 [http-nio-8080-exec-8] DEBUG c.Z.p.s.JwtAuthenticationFilter - Usuario autenticado: dave@gmail.com
+2025-11-16 14:29:06 [http-nio-8080-exec-8] INFO  c.Z.p.controller.UsuarioController - GET /api/usuarios - Obteniendo todos los usuarios
+2025-11-16 14:29:06 [http-nio-8080-exec-8] DEBUG c.Z.proyecto.service.UsuarioService - Obteniendo todos los usuarios
+2025-11-16 14:29:07 [http-nio-8080-exec-1] DEBUG c.Z.p.s.JwtAuthenticationFilter - Usuario autenticado: dave@gmail.com
+2025-11-16 14:29:07 [http-nio-8080-exec-10] DEBUG c.Z.p.s.JwtAuthenticationFilter - Usuario autenticado: dave@gmail.com
+2025-11-16 14:29:07 [http-nio-8080-exec-10] INFO  c.Z.p.controller.UsuarioController - GET /api/usuarios - Obteniendo todos los usuarios
+2025-11-16 14:29:07 [http-nio-8080-exec-1] INFO  c.Z.p.controller.PedidoController - 📋 GET /api/pedidos - Obteniendo todos los pedidos
+2025-11-16 14:29:07 [http-nio-8080-exec-10] DEBUG c.Z.proyecto.service.UsuarioService - Obteniendo todos los usuarios
+2025-11-16 14:29:07 [http-nio-8080-exec-1] DEBUG c.Z.proyecto.service.PedidoService - Obteniendo todos los pedidos
+2025-11-16 14:29:07 [http-nio-8080-exec-1] INFO  c.Z.p.controller.PedidoController - ✅ Retornando 8 pedidos
+2025-11-16 14:29:10 [http-nio-8080-exec-2] DEBUG c.Z.p.s.JwtAuthenticationFilter - Usuario autenticado: dave@gmail.com
+2025-11-16 14:29:10 [http-nio-8080-exec-2] INFO  c.Z.p.controller.UsuarioController - GET /api/usuarios - Obteniendo todos los usuarios
+2025-11-16 14:29:10 [http-nio-8080-exec-2] DEBUG c.Z.proyecto.service.UsuarioService - Obteniendo todos los usuarios
+2025-11-16 14:29:28 [http-nio-8080-exec-9] DEBUG c.Z.p.s.JwtAuthenticationFilter - Usuario autenticado: dave@gmail.com
+2025-11-16 14:29:28 [http-nio-8080-exec-9] INFO  c.Z.p.controller.UsuarioController - GET /api/usuarios - Obteniendo todos los usuarios
+2025-11-16 14:29:28 [http-nio-8080-exec-9] DEBUG c.Z.proyecto.service.UsuarioService - Obteniendo todos los usuarios
+2025-11-16 14:30:03 [http-nio-8080-exec-7] DEBUG c.Z.p.s.JwtAuthenticationFilter - Usuario autenticado: dave@gmail.com
+2025-11-16 14:30:03 [http-nio-8080-exec-7] INFO  c.Z.p.controller.LugarController - 📍 Calculando ruta por coordenadas
+2025-11-16 14:30:03 [http-nio-8080-exec-7] INFO  c.Zygo.proyecto.service.LugarService - Buscando nodo más cercano a 5.712223360072605, -72.93679475784303
+2025-11-16 14:30:03 [http-nio-8080-exec-7] INFO  c.Zygo.proyecto.service.LugarService - Buscando nodo más cercano a 5.717070044032088, -72.93595790863039
+2025-11-16 14:30:03 [http-nio-8080-exec-7] INFO  c.Zygo.proyecto.service.LugarService - Calculando ruta de 'Nodo_5.712007_-72.936697' a 'Nodo_5.717147_-72.935944'
+2025-11-16 14:30:03 [http-nio-8080-exec-7] INFO  c.Z.proyecto.service.DijkstraService - Calculando ruta óptima de nodo 38329 a nodo 34023 (considerando tráfico: true)
+2025-11-16 14:33:17 [http-nio-8080-exec-8] DEBUG c.Z.p.s.JwtAuthenticationFilter - Usuario autenticado: dave@gmail.com
+2025-11-16 14:33:17 [http-nio-8080-exec-8] INFO  c.Z.p.controller.UsuarioController - GET /api/usuarios - Obteniendo todos los usuarios
+2025-11-16 14:33:17 [http-nio-8080-exec-8] DEBUG c.Z.proyecto.service.UsuarioService - Obteniendo todos los usuarios
+2025-11-16 14:33:20 [http-nio-8080-exec-10] DEBUG c.Z.p.s.JwtAuthenticationFilter - Usuario autenticado: dave@gmail.com
+2025-11-16 14:33:20 [http-nio-8080-exec-10] INFO  c.Z.p.controller.PedidoController - 🚴 GET /api/pedidos/repartidor/9 - Obteniendo pedidos del repartidor
+2025-11-16 14:33:20 [http-nio-8080-exec-10] DEBUG c.Z.proyecto.service.PedidoService - Obteniendo pedidos del repartidor: 9
+2025-11-16 14:33:23 [http-nio-8080-exec-1] DEBUG c.Z.p.s.JwtAuthenticationFilter - Usuario autenticado: dave@gmail.com
+2025-11-16 14:33:23 [http-nio-8080-exec-1] INFO  c.Z.p.controller.UsuarioController - GET /api/usuarios - Obteniendo todos los usuarios
+2025-11-16 14:33:23 [http-nio-8080-exec-1] DEBUG c.Z.proyecto.service.UsuarioService - Obteniendo todos los usuarios
+2025-11-16 14:50:21 [http-nio-8080-exec-4] DEBUG c.Z.p.s.JwtAuthenticationFilter - Usuario autenticado: dave@gmail.com
+2025-11-16 14:50:21 [http-nio-8080-exec-4] INFO  c.Z.p.controller.UsuarioController - GET /api/usuarios - Obteniendo todos los usuarios
+2025-11-16 14:50:22 [http-nio-8080-exec-4] DEBUG c.Z.proyecto.service.UsuarioService - Obteniendo todos los usuarios
+2025-11-16 14:50:22 [HikariPool-1:housekeeper] WARN  com.zaxxer.hikari.pool.HikariPool - HikariPool-1 - Thread starvation or clock leap detected (housekeeper delta=7m18s242ms480µs400ns).
+2025-11-16 15:26:34 [http-nio-8080-exec-6] INFO  c.Z.p.controller.AuthController - Intento de login para: dave@gmail.com
+2025-11-16 15:26:34 [http-nio-8080-exec-6] INFO  c.Z.p.controller.AuthController - Login exitoso para: dave@gmail.com
+2025-11-16 15:26:34 [http-nio-8080-exec-8] DEBUG c.Z.p.s.JwtAuthenticationFilter - Usuario autenticado: dave@gmail.com
+2025-11-16 15:26:34 [http-nio-8080-exec-8] INFO  c.Z.p.controller.PedidoController - 📋 GET /api/pedidos - Obteniendo todos los pedidos
+2025-11-16 15:26:34 [http-nio-8080-exec-10] DEBUG c.Z.p.s.JwtAuthenticationFilter - Usuario autenticado: dave@gmail.com
+2025-11-16 15:26:34 [http-nio-8080-exec-10] INFO  c.Z.p.controller.UsuarioController - GET /api/usuarios - Obteniendo todos los usuarios
+2025-11-16 15:26:34 [http-nio-8080-exec-8] DEBUG c.Z.proyecto.service.PedidoService - Obteniendo todos los pedidos
+2025-11-16 15:26:34 [http-nio-8080-exec-10] DEBUG c.Z.proyecto.service.UsuarioService - Obteniendo todos los usuarios
+2025-11-16 15:26:34 [http-nio-8080-exec-8] INFO  c.Z.p.controller.PedidoController - ✅ Retornando 8 pedidos
+2025-11-16 15:26:36 [http-nio-8080-exec-4] DEBUG c.Z.p.s.JwtAuthenticationFilter - Usuario autenticado: dave@gmail.com
+2025-11-16 15:26:36 [http-nio-8080-exec-4] INFO  c.Z.p.controller.UsuarioController - GET /api/usuarios - Obteniendo todos los usuarios
+2025-11-16 15:26:36 [http-nio-8080-exec-4] DEBUG c.Z.proyecto.service.UsuarioService - Obteniendo todos los usuarios
+2025-11-16 15:26:38 [http-nio-8080-exec-5] DEBUG c.Z.p.s.JwtAuthenticationFilter - Usuario autenticado: dave@gmail.com
+2025-11-16 15:26:38 [http-nio-8080-exec-5] INFO  c.Z.p.controller.UsuarioController - GET /api/usuarios - Obteniendo todos los usuarios
+2025-11-16 15:26:38 [http-nio-8080-exec-5] DEBUG c.Z.proyecto.service.UsuarioService - Obteniendo todos los usuarios
+2025-11-16 15:27:04 [http-nio-8080-exec-7] DEBUG c.Z.p.s.JwtAuthenticationFilter - Usuario autenticado: dave@gmail.com
+2025-11-16 15:27:04 [http-nio-8080-exec-7] INFO  c.Z.p.controller.LugarController - 📍 Calculando ruta por coordenadas
+2025-11-16 15:27:04 [http-nio-8080-exec-7] INFO  c.Zygo.proyecto.service.LugarService - Buscando nodo más cercano a 5.713092516250003, -72.92931661350664
+2025-11-16 15:27:04 [http-nio-8080-exec-7] INFO  c.Zygo.proyecto.service.LugarService - Buscando nodo más cercano a 5.714940830957103, -72.92708070177567
+2025-11-16 15:27:04 [http-nio-8080-exec-7] INFO  c.Zygo.proyecto.service.LugarService - Calculando ruta de 'Nodo_5.713068_-72.929307' a 'Nodo_5.714945_-72.927107'
+2025-11-16 15:27:04 [http-nio-8080-exec-7] INFO  c.Z.proyecto.service.DijkstraService - Calculando ruta óptima de nodo 34133 a nodo 37007 (considerando tráfico: true)
+2025-11-16 15:27:27 [http-nio-8080-exec-3] DEBUG c.Z.p.s.JwtAuthenticationFilter - Usuario autenticado: dave@gmail.com
+2025-11-16 15:27:27 [http-nio-8080-exec-3] INFO  c.Z.p.controller.LugarController - 📍 Calculando ruta por coordenadas
+2025-11-16 15:27:27 [http-nio-8080-exec-3] INFO  c.Zygo.proyecto.service.LugarService - Buscando nodo más cercano a 5.713092516250003, -72.92931661350664
+2025-11-16 15:27:27 [http-nio-8080-exec-3] INFO  c.Zygo.proyecto.service.LugarService - Buscando nodo más cercano a 5.714940830957103, -72.92708070177567
+2025-11-16 15:27:27 [http-nio-8080-exec-3] INFO  c.Zygo.proyecto.service.LugarService - Calculando ruta de 'Nodo_5.713068_-72.929307' a 'Nodo_5.714945_-72.927107'
+2025-11-16 15:27:27 [http-nio-8080-exec-3] INFO  c.Z.proyecto.service.DijkstraService - Calculando ruta óptima de nodo 34133 a nodo 37007 (considerando tráfico: true)
+2025-11-16 15:28:46 [http-nio-8080-exec-1] DEBUG c.Z.p.s.JwtAuthenticationFilter - Usuario autenticado: dave@gmail.com
+2025-11-16 15:28:46 [http-nio-8080-exec-1] INFO  c.Z.p.controller.UsuarioController - GET /api/usuarios - Obteniendo todos los usuarios
+2025-11-16 15:28:46 [http-nio-8080-exec-1] DEBUG c.Z.proyecto.service.UsuarioService - Obteniendo todos los usuarios
+2025-11-16 15:28:51 [http-nio-8080-exec-2] DEBUG c.Z.p.s.JwtAuthenticationFilter - Usuario autenticado: dave@gmail.com
+2025-11-16 15:28:51 [http-nio-8080-exec-2] INFO  c.Z.p.controller.UsuarioController - GET /api/usuarios - Obteniendo todos los usuarios
+2025-11-16 15:28:51 [http-nio-8080-exec-2] DEBUG c.Z.proyecto.service.UsuarioService - Obteniendo todos los usuarios
+2025-11-16 15:28:54 [http-nio-8080-exec-5] DEBUG c.Z.p.s.JwtAuthenticationFilter - Usuario autenticado: dave@gmail.com
+2025-11-16 15:28:54 [http-nio-8080-exec-5] INFO  c.Z.p.controller.PedidoController - 🚴 GET /api/pedidos/repartidor/9 - Obteniendo pedidos del repartidor
+2025-11-16 15:28:54 [http-nio-8080-exec-5] DEBUG c.Z.proyecto.service.PedidoService - Obteniendo pedidos del repartidor: 9
+2025-11-16 15:29:03 [http-nio-8080-exec-6] DEBUG c.Z.p.s.JwtAuthenticationFilter - Usuario autenticado: dave@gmail.com
+2025-11-16 15:29:03 [http-nio-8080-exec-6] INFO  c.Z.p.controller.UsuarioController - GET /api/usuarios - Obteniendo todos los usuarios
+2025-11-16 15:29:03 [http-nio-8080-exec-6] DEBUG c.Z.proyecto.service.UsuarioService - Obteniendo todos los usuarios
+2025-11-16 15:29:04 [http-nio-8080-exec-10] DEBUG c.Z.p.s.JwtAuthenticationFilter - Usuario autenticado: dave@gmail.com
+2025-11-16 15:29:04 [http-nio-8080-exec-7] DEBUG c.Z.p.s.JwtAuthenticationFilter - Usuario autenticado: dave@gmail.com
+2025-11-16 15:29:04 [http-nio-8080-exec-10] INFO  c.Z.p.controller.UsuarioController - GET /api/usuarios - Obteniendo todos los usuarios
+2025-11-16 15:29:04 [http-nio-8080-exec-7] INFO  c.Z.p.controller.PedidoController - 📋 GET /api/pedidos - Obteniendo todos los pedidos
+2025-11-16 15:29:04 [http-nio-8080-exec-7] DEBUG c.Z.proyecto.service.PedidoService - Obteniendo todos los pedidos
+2025-11-16 15:29:04 [http-nio-8080-exec-10] DEBUG c.Z.proyecto.service.UsuarioService - Obteniendo todos los usuarios
+2025-11-16 15:29:04 [http-nio-8080-exec-7] INFO  c.Z.p.controller.PedidoController - ✅ Retornando 8 pedidos
+2025-11-16 15:29:06 [http-nio-8080-exec-1] DEBUG c.Z.p.s.JwtAuthenticationFilter - Usuario autenticado: dave@gmail.com
+2025-11-16 15:29:06 [http-nio-8080-exec-1] INFO  c.Z.p.controller.UsuarioController - GET /api/usuarios - Obteniendo todos los usuarios
+2025-11-16 15:29:06 [http-nio-8080-exec-1] DEBUG c.Z.proyecto.service.UsuarioService - Obteniendo todos los usuarios
+2025-11-16 15:36:51 [http-nio-8080-exec-4] DEBUG c.Z.p.s.JwtAuthenticationFilter - Usuario autenticado: dave@gmail.com
+2025-11-16 15:36:51 [http-nio-8080-exec-4] INFO  c.Z.p.controller.UsuarioController - GET /api/usuarios - Obteniendo todos los usuarios
+2025-11-16 15:36:51 [http-nio-8080-exec-4] DEBUG c.Z.proyecto.service.UsuarioService - Obteniendo todos los usuarios
+2025-11-16 15:36:56 [http-nio-8080-exec-9] DEBUG c.Z.p.s.JwtAuthenticationFilter - Usuario autenticado: dave@gmail.com
+2025-11-16 15:36:56 [http-nio-8080-exec-9] INFO  c.Z.p.controller.UsuarioController - GET /api/usuarios - Obteniendo todos los usuarios
+2025-11-16 15:36:56 [http-nio-8080-exec-9] DEBUG c.Z.proyecto.service.UsuarioService - Obteniendo todos los usuarios
+2025-11-16 15:36:59 [http-nio-8080-exec-6] DEBUG c.Z.p.s.JwtAuthenticationFilter - Usuario autenticado: dave@gmail.com
+2025-11-16 15:36:59 [http-nio-8080-exec-6] INFO  c.Z.p.controller.UsuarioController - GET /api/usuarios - Obteniendo todos los usuarios
+2025-11-16 15:36:59 [http-nio-8080-exec-6] DEBUG c.Z.proyecto.service.UsuarioService - Obteniendo todos los usuarios
+2025-11-16 15:37:30 [http-nio-8080-exec-7] DEBUG c.Z.p.s.JwtAuthenticationFilter - Usuario autenticado: dave@gmail.com
+2025-11-16 15:37:30 [http-nio-8080-exec-7] INFO  c.Z.p.controller.UsuarioController - GET /api/usuarios - Obteniendo todos los usuarios
+2025-11-16 15:37:30 [http-nio-8080-exec-7] DEBUG c.Z.proyecto.service.UsuarioService - Obteniendo todos los usuarios
+2025-11-16 15:39:49 [http-nio-8080-exec-3] DEBUG c.Z.p.s.JwtAuthenticationFilter - Usuario autenticado: dave@gmail.com
+2025-11-16 15:39:49 [http-nio-8080-exec-3] INFO  c.Z.p.controller.UsuarioController - GET /api/usuarios - Obteniendo todos los usuarios
+2025-11-16 15:39:49 [http-nio-8080-exec-3] DEBUG c.Z.proyecto.service.UsuarioService - Obteniendo todos los usuarios
+2025-11-16 15:39:54 [http-nio-8080-exec-1] DEBUG c.Z.p.s.JwtAuthenticationFilter - Usuario autenticado: dave@gmail.com
+2025-11-16 15:39:54 [http-nio-8080-exec-1] INFO  c.Z.p.controller.UsuarioController - GET /api/usuarios - Obteniendo todos los usuarios
+2025-11-16 15:39:54 [http-nio-8080-exec-1] DEBUG c.Z.proyecto.service.UsuarioService - Obteniendo todos los usuarios
+2025-11-16 15:39:56 [http-nio-8080-exec-4] INFO  c.Z.p.controller.AuthController - Intento de login para: dave@gmail.com
+2025-11-16 15:39:56 [http-nio-8080-exec-4] INFO  c.Z.p.controller.AuthController - Login exitoso para: dave@gmail.com
+2025-11-16 15:39:56 [http-nio-8080-exec-5] DEBUG c.Z.p.s.JwtAuthenticationFilter - Usuario autenticado: dave@gmail.com
+2025-11-16 15:39:56 [http-nio-8080-exec-5] INFO  c.Z.p.controller.PedidoController - 📋 GET /api/pedidos - Obteniendo todos los pedidos
+2025-11-16 15:39:56 [http-nio-8080-exec-5] DEBUG c.Z.proyecto.service.PedidoService - Obteniendo todos los pedidos
+2025-11-16 15:39:56 [http-nio-8080-exec-9] DEBUG c.Z.p.s.JwtAuthenticationFilter - Usuario autenticado: dave@gmail.com
+2025-11-16 15:39:56 [http-nio-8080-exec-9] INFO  c.Z.p.controller.UsuarioController - GET /api/usuarios - Obteniendo todos los usuarios
+2025-11-16 15:39:56 [http-nio-8080-exec-9] DEBUG c.Z.proyecto.service.UsuarioService - Obteniendo todos los usuarios
+2025-11-16 15:39:56 [http-nio-8080-exec-5] INFO  c.Z.p.controller.PedidoController - ✅ Retornando 8 pedidos
+2025-11-16 15:39:59 [http-nio-8080-exec-6] DEBUG c.Z.p.s.JwtAuthenticationFilter - Usuario autenticado: dave@gmail.com
+2025-11-16 15:39:59 [http-nio-8080-exec-6] INFO  c.Z.p.controller.PedidoController - 🚴 GET /api/pedidos/repartidor/9 - Obteniendo pedidos del repartidor
+2025-11-16 15:39:59 [http-nio-8080-exec-6] DEBUG c.Z.proyecto.service.PedidoService - Obteniendo pedidos del repartidor: 9
+2025-11-16 15:40:01 [http-nio-8080-exec-7] DEBUG c.Z.p.s.JwtAuthenticationFilter - Usuario autenticado: dave@gmail.com
+2025-11-16 15:40:01 [http-nio-8080-exec-10] DEBUG c.Z.p.s.JwtAuthenticationFilter - Usuario autenticado: dave@gmail.com
+2025-11-16 15:40:01 [http-nio-8080-exec-7] INFO  c.Z.p.controller.UsuarioController - GET /api/usuarios - Obteniendo todos los usuarios
+2025-11-16 15:40:01 [http-nio-8080-exec-10] INFO  c.Z.p.controller.PedidoController - 📋 GET /api/pedidos - Obteniendo todos los pedidos
+2025-11-16 15:40:01 [http-nio-8080-exec-7] DEBUG c.Z.proyecto.service.UsuarioService - Obteniendo todos los usuarios
+2025-11-16 15:40:01 [http-nio-8080-exec-10] DEBUG c.Z.proyecto.service.PedidoService - Obteniendo todos los pedidos
+2025-11-16 15:40:01 [http-nio-8080-exec-10] INFO  c.Z.p.controller.PedidoController - ✅ Retornando 8 pedidos
+2025-11-16 15:40:02 [http-nio-8080-exec-8] DEBUG c.Z.p.s.JwtAuthenticationFilter - Usuario autenticado: dave@gmail.com
+2025-11-16 15:40:02 [http-nio-8080-exec-3] DEBUG c.Z.p.s.JwtAuthenticationFilter - Usuario autenticado: dave@gmail.com
+2025-11-16 15:40:02 [http-nio-8080-exec-8] INFO  c.Z.p.controller.PedidoController - 📋 GET /api/pedidos - Obteniendo todos los pedidos
+2025-11-16 15:40:02 [http-nio-8080-exec-3] INFO  c.Z.p.controller.UsuarioController - GET /api/usuarios - Obteniendo todos los usuarios
+2025-11-16 15:40:02 [http-nio-8080-exec-8] DEBUG c.Z.proyecto.service.PedidoService - Obteniendo todos los pedidos
+2025-11-16 15:40:02 [http-nio-8080-exec-3] DEBUG c.Z.proyecto.service.UsuarioService - Obteniendo todos los usuarios
+2025-11-16 15:40:02 [http-nio-8080-exec-8] INFO  c.Z.p.controller.PedidoController - ✅ Retornando 8 pedidos
+2025-11-16 15:40:04 [http-nio-8080-exec-1] DEBUG c.Z.p.s.JwtAuthenticationFilter - Usuario autenticado: dave@gmail.com
+2025-11-16 15:40:04 [http-nio-8080-exec-1] INFO  c.Z.p.controller.UsuarioController - GET /api/usuarios - Obteniendo todos los usuarios
+2025-11-16 15:40:04 [http-nio-8080-exec-1] DEBUG c.Z.proyecto.service.UsuarioService - Obteniendo todos los usuarios
+2025-11-16 15:40:40 [http-nio-8080-exec-9] DEBUG c.Z.p.s.JwtAuthenticationFilter - Usuario autenticado: dave@gmail.com
+2025-11-16 15:40:40 [http-nio-8080-exec-9] INFO  c.Z.p.controller.LugarController - 📍 Calculando ruta por coordenadas
+2025-11-16 15:40:40 [http-nio-8080-exec-9] INFO  c.Zygo.proyecto.service.LugarService - Buscando nodo más cercano a 5.7154896318850605, -72.93012445361656
+2025-11-16 15:40:41 [http-nio-8080-exec-9] INFO  c.Zygo.proyecto.service.LugarService - Buscando nodo más cercano a 5.720361457033993, -72.92418339512382
+2025-11-16 15:40:41 [http-nio-8080-exec-9] INFO  c.Zygo.proyecto.service.LugarService - Calculando ruta de 'Nodo_5.715486_-72.930123' a 'Nodo_5.720366_-72.924257'
+2025-11-16 15:40:41 [http-nio-8080-exec-9] INFO  c.Z.proyecto.service.DijkstraService - Calculando ruta óptima de nodo 35597 a nodo 37841 (considerando tráfico: true)
+2025-11-16 15:40:53 [http-nio-8080-exec-5] DEBUG c.Z.p.s.JwtAuthenticationFilter - Usuario autenticado: dave@gmail.com
+2025-11-16 15:40:53 [http-nio-8080-exec-5] INFO  c.Z.p.controller.LugarController - 📍 Calculando ruta por coordenadas
+2025-11-16 15:40:53 [http-nio-8080-exec-5] INFO  c.Zygo.proyecto.service.LugarService - Buscando nodo más cercano a 5.7154896318850605, -72.93012445361656
+2025-11-16 15:40:53 [http-nio-8080-exec-5] INFO  c.Zygo.proyecto.service.LugarService - Buscando nodo más cercano a 5.720361457033993, -72.92418339512382
+2025-11-16 15:40:53 [http-nio-8080-exec-5] INFO  c.Zygo.proyecto.service.LugarService - Calculando ruta de 'Nodo_5.715486_-72.930123' a 'Nodo_5.720366_-72.924257'
+2025-11-16 15:40:53 [http-nio-8080-exec-5] INFO  c.Z.proyecto.service.DijkstraService - Calculando ruta óptima de nodo 35597 a nodo 37841 (considerando tráfico: true)
+2025-11-16 15:48:39 [http-nio-8080-exec-10] DEBUG c.Z.p.s.JwtAuthenticationFilter - Usuario autenticado: dave@gmail.com
+2025-11-16 15:48:39 [http-nio-8080-exec-10] INFO  c.Z.p.controller.UsuarioController - GET /api/usuarios - Obteniendo todos los usuarios
+2025-11-16 15:48:39 [http-nio-8080-exec-10] DEBUG c.Z.proyecto.service.UsuarioService - Obteniendo todos los usuarios
+2025-11-16 15:48:48 [http-nio-8080-exec-8] DEBUG c.Z.p.s.JwtAuthenticationFilter - Usuario autenticado: dave@gmail.com
+2025-11-16 15:48:48 [http-nio-8080-exec-8] INFO  c.Z.p.controller.UsuarioController - GET /api/usuarios - Obteniendo todos los usuarios
+2025-11-16 15:48:48 [http-nio-8080-exec-8] DEBUG c.Z.proyecto.service.UsuarioService - Obteniendo todos los usuarios
+2025-11-16 15:48:57 [http-nio-8080-exec-2] DEBUG c.Z.p.s.JwtAuthenticationFilter - Usuario autenticado: dave@gmail.com
+2025-11-16 15:48:57 [http-nio-8080-exec-2] INFO  c.Z.p.controller.LugarController - 📍 Calculando ruta por coordenadas
+2025-11-16 15:48:57 [http-nio-8080-exec-2] INFO  c.Zygo.proyecto.service.LugarService - Buscando nodo más cercano a 5.716493821058411, -72.93185842425981
+2025-11-16 15:48:57 [http-nio-8080-exec-2] INFO  c.Zygo.proyecto.service.LugarService - Buscando nodo más cercano a 5.720082125224767, -72.92535333932737
+2025-11-16 15:48:57 [http-nio-8080-exec-2] INFO  c.Zygo.proyecto.service.LugarService - Calculando ruta de 'Nodo_5.716526_-72.931868' a 'Nodo_5.720086_-72.925361'
+2025-11-16 15:48:57 [http-nio-8080-exec-2] INFO  c.Z.proyecto.service.DijkstraService - Calculando ruta óptima de nodo 34416 a nodo 36050 (considerando tráfico: true)
+2025-11-16 15:49:02 [http-nio-8080-exec-4] DEBUG c.Z.p.s.JwtAuthenticationFilter - Usuario autenticado: dave@gmail.com
+2025-11-16 15:49:02 [http-nio-8080-exec-4] INFO  c.Z.p.controller.LugarController - 📍 Calculando ruta por coordenadas
+2025-11-16 15:49:02 [http-nio-8080-exec-4] INFO  c.Zygo.proyecto.service.LugarService - Buscando nodo más cercano a 5.716493821058411, -72.93185842425981
+2025-11-16 15:49:02 [http-nio-8080-exec-4] INFO  c.Zygo.proyecto.service.LugarService - Buscando nodo más cercano a 5.720082125224767, -72.92535333932737
+2025-11-16 15:49:02 [http-nio-8080-exec-4] INFO  c.Zygo.proyecto.service.LugarService - Calculando ruta de 'Nodo_5.716526_-72.931868' a 'Nodo_5.720086_-72.925361'
+2025-11-16 15:49:02 [http-nio-8080-exec-4] INFO  c.Z.proyecto.service.DijkstraService - Calculando ruta óptima de nodo 34416 a nodo 36050 (considerando tráfico: true)
+2025-11-16 15:54:10 [http-nio-8080-exec-5] DEBUG c.Z.p.s.JwtAuthenticationFilter - Usuario autenticado: dave@gmail.com
+2025-11-16 15:54:10 [http-nio-8080-exec-5] INFO  c.Z.p.controller.UsuarioController - GET /api/usuarios - Obteniendo todos los usuarios
+2025-11-16 15:54:10 [http-nio-8080-exec-5] DEBUG c.Z.proyecto.service.UsuarioService - Obteniendo todos los usuarios
+2025-11-16 15:54:23 [http-nio-8080-exec-10] DEBUG c.Z.p.s.JwtAuthenticationFilter - Usuario autenticado: dave@gmail.com
+2025-11-16 15:54:23 [http-nio-8080-exec-10] INFO  c.Z.p.controller.UsuarioController - GET /api/usuarios - Obteniendo todos los usuarios
+2025-11-16 15:54:23 [http-nio-8080-exec-10] DEBUG c.Z.proyecto.service.UsuarioService - Obteniendo todos los usuarios
+2025-11-16 15:54:28 [http-nio-8080-exec-3] DEBUG c.Z.p.s.JwtAuthenticationFilter - Usuario autenticado: dave@gmail.com
+2025-11-16 15:54:28 [http-nio-8080-exec-3] INFO  c.Z.p.controller.LugarController - 📍 Calculando ruta por coordenadas
+2025-11-16 15:54:28 [http-nio-8080-exec-3] INFO  c.Zygo.proyecto.service.LugarService - Buscando nodo más cercano a 5.717796944011034, -72.92984305745605
+2025-11-16 15:54:28 [http-nio-8080-exec-3] INFO  c.Zygo.proyecto.service.LugarService - Buscando nodo más cercano a 5.714966873263176, -72.92916678625022
+2025-11-16 15:54:28 [http-nio-8080-exec-3] INFO  c.Zygo.proyecto.service.LugarService - Calculando ruta de 'Nodo_5.717876_-72.929883' a 'Nodo_5.715079_-72.929255'
+2025-11-16 15:54:28 [http-nio-8080-exec-3] INFO  c.Z.proyecto.service.DijkstraService - Calculando ruta óptima de nodo 38688 a nodo 32956 (considerando tráfico: true)
+2025-11-16 15:54:30 [http-nio-8080-exec-8] DEBUG c.Z.p.s.JwtAuthenticationFilter - Usuario autenticado: dave@gmail.com
+2025-11-16 15:54:30 [http-nio-8080-exec-8] INFO  c.Z.p.controller.LugarController - 📍 Calculando ruta por coordenadas
+2025-11-16 15:54:30 [http-nio-8080-exec-8] INFO  c.Zygo.proyecto.service.LugarService - Buscando nodo más cercano a 5.717796944011034, -72.92984305745605
+2025-11-16 15:54:30 [http-nio-8080-exec-8] INFO  c.Zygo.proyecto.service.LugarService - Buscando nodo más cercano a 5.714966873263176, -72.92916678625022
+2025-11-16 15:54:30 [http-nio-8080-exec-8] INFO  c.Zygo.proyecto.service.LugarService - Calculando ruta de 'Nodo_5.717876_-72.929883' a 'Nodo_5.715079_-72.929255'
+2025-11-16 15:54:30 [http-nio-8080-exec-8] INFO  c.Z.proyecto.service.DijkstraService - Calculando ruta óptima de nodo 38688 a nodo 32956 (considerando tráfico: true)
+2025-11-16 15:57:10 [http-nio-8080-exec-9] DEBUG c.Z.p.s.JwtAuthenticationFilter - Usuario autenticado: dave@gmail.com
+2025-11-16 15:57:10 [http-nio-8080-exec-9] INFO  c.Z.p.controller.UsuarioController - GET /api/usuarios - Obteniendo todos los usuarios
+2025-11-16 15:57:10 [http-nio-8080-exec-9] DEBUG c.Z.proyecto.service.UsuarioService - Obteniendo todos los usuarios
+2025-11-16 15:57:22 [http-nio-8080-exec-6] DEBUG c.Z.p.s.JwtAuthenticationFilter - Usuario autenticado: dave@gmail.com
+2025-11-16 15:57:22 [http-nio-8080-exec-6] INFO  c.Z.p.controller.LugarController - 📍 Calculando ruta por coordenadas
+2025-11-16 15:57:22 [http-nio-8080-exec-6] INFO  c.Zygo.proyecto.service.LugarService - Buscando nodo más cercano a 5.716849417715296, -72.93296424553223
+2025-11-16 15:57:22 [http-nio-8080-exec-6] INFO  c.Zygo.proyecto.service.LugarService - Buscando nodo más cercano a 5.714095138731556, -72.93330783649067
+2025-11-16 15:57:22 [http-nio-8080-exec-6] INFO  c.Zygo.proyecto.service.LugarService - Calculando ruta de 'Nodo_5.717047_-72.932852' a 'Nodo_5.714165_-72.933401'
+2025-11-16 15:57:22 [http-nio-8080-exec-6] INFO  c.Z.proyecto.service.DijkstraService - Calculando ruta óptima de nodo 35741 a nodo 33186 (considerando tráfico: true)
+2025-11-16 15:57:45 [http-nio-8080-exec-5] DEBUG c.Z.p.s.JwtAuthenticationFilter - Usuario autenticado: dave@gmail.com
+2025-11-16 15:57:45 [http-nio-8080-exec-5] INFO  c.Z.p.controller.LugarController - 📍 Calculando ruta por coordenadas
+2025-11-16 15:57:45 [http-nio-8080-exec-5] INFO  c.Zygo.proyecto.service.LugarService - Buscando nodo más cercano a 5.716849417715296, -72.93296424553223
+2025-11-16 15:57:45 [http-nio-8080-exec-5] INFO  c.Zygo.proyecto.service.LugarService - Buscando nodo más cercano a 5.714095138731556, -72.93330783649067
+2025-11-16 15:57:45 [http-nio-8080-exec-5] INFO  c.Zygo.proyecto.service.LugarService - Calculando ruta de 'Nodo_5.717047_-72.932852' a 'Nodo_5.714165_-72.933401'
+2025-11-16 15:57:45 [http-nio-8080-exec-5] INFO  c.Z.proyecto.service.DijkstraService - Calculando ruta óptima de nodo 35741 a nodo 33186 (considerando tráfico: true)
+2025-11-16 16:03:52 [http-nio-8080-exec-3] DEBUG c.Z.p.s.JwtAuthenticationFilter - Usuario autenticado: dave@gmail.com
+2025-11-16 16:03:52 [http-nio-8080-exec-3] INFO  c.Z.p.controller.UsuarioController - GET /api/usuarios - Obteniendo todos los usuarios
+2025-11-16 16:03:52 [http-nio-8080-exec-3] DEBUG c.Z.proyecto.service.UsuarioService - Obteniendo todos los usuarios
+2025-11-16 16:11:08 [http-nio-8080-exec-1] DEBUG c.Z.p.s.JwtAuthenticationFilter - Usuario autenticado: dave@gmail.com
+2025-11-16 16:11:08 [http-nio-8080-exec-1] INFO  c.Z.p.controller.UsuarioController - GET /api/usuarios - Obteniendo todos los usuarios
+2025-11-16 16:11:08 [http-nio-8080-exec-1] DEBUG c.Z.proyecto.service.UsuarioService - Obteniendo todos los usuarios
+2025-11-16 16:11:21 [http-nio-8080-exec-9] DEBUG c.Z.p.s.JwtAuthenticationFilter - Usuario autenticado: dave@gmail.com
+2025-11-16 16:11:21 [http-nio-8080-exec-9] INFO  c.Z.p.controller.LugarController - 📍 Calculando ruta por coordenadas
+2025-11-16 16:11:21 [http-nio-8080-exec-9] INFO  c.Zygo.proyecto.service.LugarService - Buscando nodo más cercano a 5.717102070441594, -72.93593645095827
+2025-11-16 16:11:21 [http-nio-8080-exec-9] INFO  c.Zygo.proyecto.service.LugarService - Buscando nodo más cercano a 5.714604005117881, -72.93641924858095
+2025-11-16 16:11:21 [http-nio-8080-exec-9] INFO  c.Zygo.proyecto.service.LugarService - Calculando ruta de 'Nodo_5.717147_-72.935944' a 'Nodo_5.714697_-72.936411'
+2025-11-16 16:11:21 [http-nio-8080-exec-9] INFO  c.Z.proyecto.service.DijkstraService - Calculando ruta óptima de nodo 34023 a nodo 35120 (considerando tráfico: true)
+2025-11-16 16:11:31 [http-nio-8080-exec-4] DEBUG c.Z.p.s.JwtAuthenticationFilter - Usuario autenticado: dave@gmail.com
+2025-11-16 16:11:31 [http-nio-8080-exec-4] INFO  c.Z.p.controller.UsuarioController - GET /api/usuarios - Obteniendo todos los usuarios
+2025-11-16 16:11:31 [http-nio-8080-exec-4] DEBUG c.Z.proyecto.service.UsuarioService - Obteniendo todos los usuarios
+2025-11-16 16:11:36 [http-nio-8080-exec-6] DEBUG c.Z.p.s.JwtAuthenticationFilter - Usuario autenticado: dave@gmail.com
+2025-11-16 16:11:36 [http-nio-8080-exec-6] INFO  c.Z.p.controller.LugarController - 📍 Calculando ruta por coordenadas
+2025-11-16 16:11:36 [http-nio-8080-exec-6] INFO  c.Zygo.proyecto.service.LugarService - Buscando nodo más cercano a 5.715981145042147, -72.93797492980958
+2025-11-16 16:11:36 [http-nio-8080-exec-6] INFO  c.Zygo.proyecto.service.LugarService - Buscando nodo más cercano a 5.716194654811289, -72.93449878692628
+2025-11-16 16:11:36 [http-nio-8080-exec-6] INFO  c.Zygo.proyecto.service.LugarService - Calculando ruta de 'Nodo_5.716083_-72.937910' a 'Nodo_5.716243_-72.934567'
+2025-11-16 16:11:36 [http-nio-8080-exec-6] INFO  c.Z.proyecto.service.DijkstraService - Calculando ruta óptima de nodo 38699 a nodo 34243 (considerando tráfico: true)
+2025-11-16 16:11:38 [http-nio-8080-exec-7] DEBUG c.Z.p.s.JwtAuthenticationFilter - Usuario autenticado: dave@gmail.com
+2025-11-16 16:11:38 [http-nio-8080-exec-7] INFO  c.Z.p.controller.UsuarioController - GET /api/usuarios - Obteniendo todos los usuarios
+2025-11-16 16:11:38 [http-nio-8080-exec-7] DEBUG c.Z.proyecto.service.UsuarioService - Obteniendo todos los usuarios
+2025-11-16 16:11:41 [http-nio-8080-exec-5] DEBUG c.Z.p.s.JwtAuthenticationFilter - Usuario autenticado: dave@gmail.com
+2025-11-16 16:11:41 [http-nio-8080-exec-5] INFO  c.Z.p.controller.LugarController - 📍 Calculando ruta por coordenadas
+2025-11-16 16:11:41 [http-nio-8080-exec-5] INFO  c.Zygo.proyecto.service.LugarService - Buscando nodo más cercano a 5.716098575425028, -72.93784618377687
+2025-11-16 16:11:41 [http-nio-8080-exec-5] INFO  c.Zygo.proyecto.service.LugarService - Buscando nodo más cercano a 5.7171447723181705, -72.93482065200807
+2025-11-16 16:11:41 [http-nio-8080-exec-5] INFO  c.Zygo.proyecto.service.LugarService - Calculando ruta de 'Nodo_5.716083_-72.937910' a 'Nodo_5.717183_-72.934855'
+2025-11-16 16:11:41 [http-nio-8080-exec-5] INFO  c.Z.proyecto.service.DijkstraService - Calculando ruta óptima de nodo 38699 a nodo 36838 (considerando tráfico: true)
+2025-11-16 16:11:44 [http-nio-8080-exec-10] DEBUG c.Z.p.s.JwtAuthenticationFilter - Usuario autenticado: dave@gmail.com
+2025-11-16 16:11:44 [http-nio-8080-exec-10] INFO  c.Z.p.controller.UsuarioController - GET /api/usuarios - Obteniendo todos los usuarios
+2025-11-16 16:11:44 [http-nio-8080-exec-10] DEBUG c.Z.proyecto.service.UsuarioService - Obteniendo todos los usuarios
+2025-11-16 16:12:06 [http-nio-8080-exec-8] DEBUG c.Z.p.s.JwtAuthenticationFilter - Usuario autenticado: dave@gmail.com
+2025-11-16 16:12:06 [http-nio-8080-exec-8] INFO  c.Z.p.controller.LugarController - 📍 Calculando ruta por coordenadas
+2025-11-16 16:12:06 [http-nio-8080-exec-8] INFO  c.Zygo.proyecto.service.LugarService - Buscando nodo más cercano a 5.71829772178112, -72.9410755634308
+2025-11-16 16:12:06 [http-nio-8080-exec-8] INFO  c.Zygo.proyecto.service.LugarService - Buscando nodo más cercano a 5.718948923691882, -72.93858647346498
+2025-11-16 16:12:06 [http-nio-8080-exec-8] INFO  c.Zygo.proyecto.service.LugarService - Calculando ruta de 'Nodo_5.718293_-72.941069' a 'Nodo_5.718899_-72.938620'
+2025-11-16 16:12:06 [http-nio-8080-exec-8] INFO  c.Z.proyecto.service.DijkstraService - Calculando ruta óptima de nodo 33364 a nodo 36162 (considerando tráfico: true)
+2025-11-16 16:13:01 [http-nio-8080-exec-1] DEBUG c.Z.p.s.JwtAuthenticationFilter - Usuario autenticado: dave@gmail.com
+2025-11-16 16:13:01 [http-nio-8080-exec-1] INFO  c.Z.p.controller.UsuarioController - GET /api/usuarios - Obteniendo todos los usuarios
+2025-11-16 16:13:01 [http-nio-8080-exec-1] DEBUG c.Z.proyecto.service.UsuarioService - Obteniendo todos los usuarios
+2025-11-16 16:14:55 [http-nio-8080-exec-4] DEBUG c.Z.p.s.JwtAuthenticationFilter - Usuario autenticado: dave@gmail.com
+2025-11-16 16:14:55 [http-nio-8080-exec-4] INFO  c.Z.p.controller.UsuarioController - GET /api/usuarios - Obteniendo todos los usuarios
+2025-11-16 16:14:55 [http-nio-8080-exec-4] DEBUG c.Z.proyecto.service.UsuarioService - Obteniendo todos los usuarios
+2025-11-16 16:15:19 [http-nio-8080-exec-10] DEBUG c.Z.p.s.JwtAuthenticationFilter - Usuario autenticado: dave@gmail.com
+2025-11-16 16:15:19 [http-nio-8080-exec-10] INFO  c.Z.p.controller.LugarController - 📍 Calculando ruta por coordenadas
+2025-11-16 16:15:19 [http-nio-8080-exec-10] INFO  c.Zygo.proyecto.service.LugarService - Buscando nodo más cercano a 5.715434025895223, -72.93511569499971
+2025-11-16 16:15:19 [http-nio-8080-exec-10] INFO  c.Zygo.proyecto.service.LugarService - Buscando nodo más cercano a 5.713162808626828, -72.9341232776642
+2025-11-16 16:15:19 [http-nio-8080-exec-10] INFO  c.Zygo.proyecto.service.LugarService - Calculando ruta de 'Nodo_5.715442_-72.935126' a 'Nodo_5.713153_-72.934164'
+2025-11-16 16:15:19 [http-nio-8080-exec-10] INFO  c.Z.proyecto.service.DijkstraService - Calculando ruta óptima de nodo 33740 a nodo 38047 (considerando tráfico: true)
+2025-11-16 16:17:45 [http-nio-8080-exec-9] DEBUG c.Z.p.s.JwtAuthenticationFilter - Usuario autenticado: dave@gmail.com
+2025-11-16 16:17:45 [http-nio-8080-exec-9] INFO  c.Z.p.controller.UsuarioController - GET /api/usuarios - Obteniendo todos los usuarios
+2025-11-16 16:17:45 [http-nio-8080-exec-9] DEBUG c.Z.proyecto.service.UsuarioService - Obteniendo todos los usuarios
+2025-11-16 16:20:09 [http-nio-8080-exec-1] DEBUG c.Z.p.s.JwtAuthenticationFilter - Usuario autenticado: dave@gmail.com
+2025-11-16 16:20:09 [http-nio-8080-exec-1] INFO  c.Z.p.controller.UsuarioController - GET /api/usuarios - Obteniendo todos los usuarios
+2025-11-16 16:20:09 [http-nio-8080-exec-1] DEBUG c.Z.proyecto.service.UsuarioService - Obteniendo todos los usuarios
+2025-11-16 16:20:19 [http-nio-8080-exec-2] DEBUG c.Z.p.s.JwtAuthenticationFilter - Usuario autenticado: dave@gmail.com
+2025-11-16 16:20:19 [http-nio-8080-exec-2] INFO  c.Z.p.controller.UsuarioController - GET /api/usuarios - Obteniendo todos los usuarios
+2025-11-16 16:20:19 [http-nio-8080-exec-2] DEBUG c.Z.proyecto.service.UsuarioService - Obteniendo todos los usuarios
+2025-11-16 16:20:31 [http-nio-8080-exec-4] DEBUG c.Z.p.s.JwtAuthenticationFilter - Usuario autenticado: dave@gmail.com
+2025-11-16 16:20:31 [http-nio-8080-exec-4] INFO  c.Z.p.controller.UsuarioController - GET /api/usuarios - Obteniendo todos los usuarios
+2025-11-16 16:20:31 [http-nio-8080-exec-4] DEBUG c.Z.proyecto.service.UsuarioService - Obteniendo todos los usuarios
+2025-11-16 16:22:59 [http-nio-8080-exec-10] DEBUG c.Z.p.s.JwtAuthenticationFilter - Usuario autenticado: dave@gmail.com
+2025-11-16 16:22:59 [http-nio-8080-exec-10] INFO  c.Z.p.controller.UsuarioController - GET /api/usuarios - Obteniendo todos los usuarios
+2025-11-16 16:22:59 [http-nio-8080-exec-10] DEBUG c.Z.proyecto.service.UsuarioService - Obteniendo todos los usuarios
+2025-11-16 16:26:50 [http-nio-8080-exec-6] DEBUG c.Z.p.s.JwtAuthenticationFilter - Usuario autenticado: dave@gmail.com
+2025-11-16 16:26:50 [http-nio-8080-exec-6] INFO  c.Z.p.controller.UsuarioController - GET /api/usuarios - Obteniendo todos los usuarios
+2025-11-16 16:26:50 [http-nio-8080-exec-6] DEBUG c.Z.proyecto.service.UsuarioService - Obteniendo todos los usuarios
+2025-11-16 16:27:02 [http-nio-8080-exec-5] DEBUG c.Z.p.s.JwtAuthenticationFilter - Usuario autenticado: dave@gmail.com
+2025-11-16 16:27:02 [http-nio-8080-exec-5] INFO  c.Z.p.controller.UsuarioController - GET /api/usuarios - Obteniendo todos los usuarios
+2025-11-16 16:27:02 [http-nio-8080-exec-5] DEBUG c.Z.proyecto.service.UsuarioService - Obteniendo todos los usuarios
+2025-11-16 16:28:11 [http-nio-8080-exec-8] DEBUG c.Z.p.s.JwtAuthenticationFilter - Usuario autenticado: dave@gmail.com
+2025-11-16 16:28:11 [http-nio-8080-exec-8] INFO  c.Z.p.controller.UsuarioController - GET /api/usuarios - Obteniendo todos los usuarios
+2025-11-16 16:28:11 [http-nio-8080-exec-8] DEBUG c.Z.proyecto.service.UsuarioService - Obteniendo todos los usuarios
+2025-11-16 16:28:16 [http-nio-8080-exec-4] DEBUG c.Z.p.s.JwtAuthenticationFilter - Usuario autenticado: dave@gmail.com
+2025-11-16 16:28:16 [http-nio-8080-exec-4] INFO  c.Z.p.controller.UsuarioController - GET /api/usuarios - Obteniendo todos los usuarios
+2025-11-16 16:28:16 [http-nio-8080-exec-4] DEBUG c.Z.proyecto.service.UsuarioService - Obteniendo todos los usuarios
+2025-11-16 16:28:33 [http-nio-8080-exec-10] DEBUG c.Z.p.s.JwtAuthenticationFilter - Usuario autenticado: dave@gmail.com
+2025-11-16 16:28:33 [http-nio-8080-exec-10] INFO  c.Z.p.controller.UsuarioController - GET /api/usuarios - Obteniendo todos los usuarios
+2025-11-16 16:28:33 [http-nio-8080-exec-10] DEBUG c.Z.proyecto.service.UsuarioService - Obteniendo todos los usuarios
+2025-11-16 16:28:46 [http-nio-8080-exec-9] DEBUG c.Z.p.s.JwtAuthenticationFilter - Usuario autenticado: dave@gmail.com
+2025-11-16 16:28:46 [http-nio-8080-exec-9] INFO  c.Z.p.controller.UsuarioController - GET /api/usuarios - Obteniendo todos los usuarios
+2025-11-16 16:28:46 [http-nio-8080-exec-9] DEBUG c.Z.proyecto.service.UsuarioService - Obteniendo todos los usuarios
+2025-11-16 16:29:07 [http-nio-8080-exec-1] DEBUG c.Z.p.s.JwtAuthenticationFilter - Usuario autenticado: dave@gmail.com
+2025-11-16 16:29:07 [http-nio-8080-exec-1] INFO  c.Z.p.controller.UsuarioController - GET /api/usuarios - Obteniendo todos los usuarios
+2025-11-16 16:29:07 [http-nio-8080-exec-1] DEBUG c.Z.proyecto.service.UsuarioService - Obteniendo todos los usuarios
+2025-11-16 16:29:25 [http-nio-8080-exec-2] DEBUG c.Z.p.s.JwtAuthenticationFilter - Usuario autenticado: dave@gmail.com
+2025-11-16 16:29:25 [http-nio-8080-exec-2] INFO  c.Z.p.controller.UsuarioController - GET /api/usuarios - Obteniendo todos los usuarios
+2025-11-16 16:29:25 [http-nio-8080-exec-2] DEBUG c.Z.proyecto.service.UsuarioService - Obteniendo todos los usuarios
+2025-11-16 16:29:45 [http-nio-8080-exec-4] DEBUG c.Z.p.s.JwtAuthenticationFilter - Usuario autenticado: dave@gmail.com
+2025-11-16 16:29:45 [http-nio-8080-exec-4] INFO  c.Z.p.controller.UsuarioController - GET /api/usuarios - Obteniendo todos los usuarios
+2025-11-16 16:29:45 [http-nio-8080-exec-4] DEBUG c.Z.proyecto.service.UsuarioService - Obteniendo todos los usuarios
+2025-11-16 16:30:08 [http-nio-8080-exec-10] DEBUG c.Z.p.s.JwtAuthenticationFilter - Usuario autenticado: dave@gmail.com
+2025-11-16 16:30:08 [http-nio-8080-exec-10] INFO  c.Z.p.controller.UsuarioController - GET /api/usuarios - Obteniendo todos los usuarios
+2025-11-16 16:30:08 [http-nio-8080-exec-10] DEBUG c.Z.proyecto.service.UsuarioService - Obteniendo todos los usuarios
+2025-11-16 16:30:18 [http-nio-8080-exec-9] DEBUG c.Z.p.s.JwtAuthenticationFilter - Usuario autenticado: dave@gmail.com
+2025-11-16 16:30:18 [http-nio-8080-exec-9] INFO  c.Z.p.controller.UsuarioController - GET /api/usuarios - Obteniendo todos los usuarios
+2025-11-16 16:30:18 [http-nio-8080-exec-9] DEBUG c.Z.proyecto.service.UsuarioService - Obteniendo todos los usuarios
+2025-11-16 16:30:28 [http-nio-8080-exec-1] DEBUG c.Z.p.s.JwtAuthenticationFilter - Usuario autenticado: dave@gmail.com
+2025-11-16 16:30:28 [http-nio-8080-exec-1] INFO  c.Z.p.controller.UsuarioController - GET /api/usuarios - Obteniendo todos los usuarios
+2025-11-16 16:30:28 [http-nio-8080-exec-1] DEBUG c.Z.proyecto.service.UsuarioService - Obteniendo todos los usuarios
+2025-11-16 16:30:37 [http-nio-8080-exec-2] DEBUG c.Z.p.s.JwtAuthenticationFilter - Usuario autenticado: dave@gmail.com
+2025-11-16 16:30:37 [http-nio-8080-exec-2] INFO  c.Z.p.controller.UsuarioController - GET /api/usuarios - Obteniendo todos los usuarios
+2025-11-16 16:30:37 [http-nio-8080-exec-2] DEBUG c.Z.proyecto.service.UsuarioService - Obteniendo todos los usuarios
+2025-11-16 16:32:59 [http-nio-8080-exec-4] DEBUG c.Z.p.s.JwtAuthenticationFilter - Usuario autenticado: dave@gmail.com
+2025-11-16 16:32:59 [http-nio-8080-exec-4] INFO  c.Z.p.controller.UsuarioController - GET /api/usuarios - Obteniendo todos los usuarios
+2025-11-16 16:32:59 [http-nio-8080-exec-4] DEBUG c.Z.proyecto.service.UsuarioService - Obteniendo todos los usuarios
+2025-11-16 16:33:18 [http-nio-8080-exec-10] DEBUG c.Z.p.s.JwtAuthenticationFilter - Usuario autenticado: dave@gmail.com
+2025-11-16 16:33:18 [http-nio-8080-exec-10] INFO  c.Z.p.controller.UsuarioController - GET /api/usuarios - Obteniendo todos los usuarios
+2025-11-16 16:33:18 [http-nio-8080-exec-10] DEBUG c.Z.proyecto.service.UsuarioService - Obteniendo todos los usuarios
+2025-11-16 16:34:08 [http-nio-8080-exec-9] DEBUG c.Z.p.s.JwtAuthenticationFilter - Usuario autenticado: dave@gmail.com
+2025-11-16 16:34:08 [http-nio-8080-exec-9] INFO  c.Z.p.controller.UsuarioController - GET /api/usuarios - Obteniendo todos los usuarios
+2025-11-16 16:34:08 [http-nio-8080-exec-9] DEBUG c.Z.proyecto.service.UsuarioService - Obteniendo todos los usuarios
+2025-11-16 16:34:09 [http-nio-8080-exec-6] DEBUG c.Z.p.s.JwtAuthenticationFilter - Usuario autenticado: dave@gmail.com
+2025-11-16 16:34:09 [http-nio-8080-exec-6] INFO  c.Z.p.controller.UsuarioController - GET /api/usuarios - Obteniendo todos los usuarios
+2025-11-16 16:34:09 [http-nio-8080-exec-6] DEBUG c.Z.proyecto.service.UsuarioService - Obteniendo todos los usuarios
+2025-11-16 16:34:21 [http-nio-8080-exec-5] DEBUG c.Z.p.s.JwtAuthenticationFilter - Usuario autenticado: dave@gmail.com
+2025-11-16 16:34:21 [http-nio-8080-exec-5] INFO  c.Z.p.controller.UsuarioController - GET /api/usuarios - Obteniendo todos los usuarios
+2025-11-16 16:34:21 [http-nio-8080-exec-5] DEBUG c.Z.proyecto.service.UsuarioService - Obteniendo todos los usuarios
+2025-11-16 16:34:22 [http-nio-8080-exec-2] DEBUG c.Z.p.s.JwtAuthenticationFilter - Usuario autenticado: dave@gmail.com
+2025-11-16 16:34:22 [http-nio-8080-exec-2] INFO  c.Z.p.controller.UsuarioController - GET /api/usuarios - Obteniendo todos los usuarios
+2025-11-16 16:34:22 [http-nio-8080-exec-2] DEBUG c.Z.proyecto.service.UsuarioService - Obteniendo todos los usuarios
+2025-11-16 16:34:27 [http-nio-8080-exec-8] DEBUG c.Z.p.s.JwtAuthenticationFilter - Usuario autenticado: dave@gmail.com
+2025-11-16 16:34:27 [http-nio-8080-exec-8] INFO  c.Z.p.controller.UsuarioController - GET /api/usuarios - Obteniendo todos los usuarios
+2025-11-16 16:34:27 [http-nio-8080-exec-8] DEBUG c.Z.proyecto.service.UsuarioService - Obteniendo todos los usuarios
+2025-11-16 16:34:28 [http-nio-8080-exec-4] DEBUG c.Z.p.s.JwtAuthenticationFilter - Usuario autenticado: dave@gmail.com
+2025-11-16 16:34:28 [http-nio-8080-exec-4] INFO  c.Z.p.controller.UsuarioController - GET /api/usuarios - Obteniendo todos los usuarios
+2025-11-16 16:34:28 [http-nio-8080-exec-4] DEBUG c.Z.proyecto.service.UsuarioService - Obteniendo todos los usuarios
+2025-11-16 16:35:13 [http-nio-8080-exec-10] DEBUG c.Z.p.s.JwtAuthenticationFilter - Usuario autenticado: dave@gmail.com
+2025-11-16 16:35:13 [http-nio-8080-exec-10] INFO  c.Z.p.controller.UsuarioController - GET /api/usuarios - Obteniendo todos los usuarios
+2025-11-16 16:35:13 [http-nio-8080-exec-10] DEBUG c.Z.proyecto.service.UsuarioService - Obteniendo todos los usuarios
+2025-11-16 16:38:31 [http-nio-8080-exec-9] DEBUG c.Z.p.s.JwtAuthenticationFilter - Usuario autenticado: dave@gmail.com
+2025-11-16 16:38:31 [http-nio-8080-exec-9] INFO  c.Z.p.controller.UsuarioController - GET /api/usuarios - Obteniendo todos los usuarios
+2025-11-16 16:38:31 [http-nio-8080-exec-9] DEBUG c.Z.proyecto.service.UsuarioService - Obteniendo todos los usuarios
+2025-11-16 16:38:44 [http-nio-8080-exec-1] DEBUG c.Z.p.s.JwtAuthenticationFilter - Usuario autenticado: dave@gmail.com
+2025-11-16 16:38:44 [http-nio-8080-exec-1] INFO  c.Z.p.controller.UsuarioController - GET /api/usuarios - Obteniendo todos los usuarios
+2025-11-16 16:38:44 [http-nio-8080-exec-1] DEBUG c.Z.proyecto.service.UsuarioService - Obteniendo todos los usuarios
+2025-11-16 16:39:47 [http-nio-8080-exec-2] DEBUG c.Z.p.s.JwtAuthenticationFilter - Usuario autenticado: dave@gmail.com
+2025-11-16 16:39:47 [http-nio-8080-exec-2] INFO  c.Z.p.controller.UsuarioController - GET /api/usuarios - Obteniendo todos los usuarios
+2025-11-16 16:39:47 [http-nio-8080-exec-2] DEBUG c.Z.proyecto.service.UsuarioService - Obteniendo todos los usuarios
+2025-11-16 16:41:54 [http-nio-8080-exec-4] DEBUG c.Z.p.s.JwtAuthenticationFilter - Usuario autenticado: dave@gmail.com
+2025-11-16 16:41:54 [http-nio-8080-exec-4] INFO  c.Z.p.controller.UsuarioController - GET /api/usuarios - Obteniendo todos los usuarios
+2025-11-16 16:41:54 [http-nio-8080-exec-4] DEBUG c.Z.proyecto.service.UsuarioService - Obteniendo todos los usuarios
+2025-11-16 16:42:04 [http-nio-8080-exec-10] DEBUG c.Z.p.s.JwtAuthenticationFilter - Usuario autenticado: dave@gmail.com
+2025-11-16 16:42:04 [http-nio-8080-exec-10] INFO  c.Z.p.controller.UsuarioController - GET /api/usuarios - Obteniendo todos los usuarios
+2025-11-16 16:42:04 [http-nio-8080-exec-10] DEBUG c.Z.proyecto.service.UsuarioService - Obteniendo todos los usuarios
+2025-11-16 16:42:33 [http-nio-8080-exec-9] DEBUG c.Z.p.s.JwtAuthenticationFilter - Usuario autenticado: dave@gmail.com
+2025-11-16 16:42:33 [http-nio-8080-exec-9] INFO  c.Z.p.controller.UsuarioController - GET /api/usuarios - Obteniendo todos los usuarios
+2025-11-16 16:42:33 [http-nio-8080-exec-9] DEBUG c.Z.proyecto.service.UsuarioService - Obteniendo todos los usuarios
+2025-11-16 16:42:44 [http-nio-8080-exec-1] DEBUG c.Z.p.s.JwtAuthenticationFilter - Usuario autenticado: dave@gmail.com
+2025-11-16 16:42:44 [http-nio-8080-exec-1] INFO  c.Z.p.controller.UsuarioController - GET /api/usuarios - Obteniendo todos los usuarios
+2025-11-16 16:42:44 [http-nio-8080-exec-1] DEBUG c.Z.proyecto.service.UsuarioService - Obteniendo todos los usuarios
+2025-11-16 16:43:51 [http-nio-8080-exec-2] DEBUG c.Z.p.s.JwtAuthenticationFilter - Usuario autenticado: dave@gmail.com
+2025-11-16 16:43:51 [http-nio-8080-exec-2] INFO  c.Z.p.controller.UsuarioController - GET /api/usuarios - Obteniendo todos los usuarios
+2025-11-16 16:43:51 [http-nio-8080-exec-2] DEBUG c.Z.proyecto.service.UsuarioService - Obteniendo todos los usuarios
+2025-11-16 16:44:10 [http-nio-8080-exec-4] DEBUG c.Z.p.s.JwtAuthenticationFilter - Usuario autenticado: dave@gmail.com
+2025-11-16 16:44:10 [http-nio-8080-exec-4] INFO  c.Z.p.controller.UsuarioController - GET /api/usuarios - Obteniendo todos los usuarios
+2025-11-16 16:44:10 [http-nio-8080-exec-4] DEBUG c.Z.proyecto.service.UsuarioService - Obteniendo todos los usuarios
+2025-11-16 16:45:14 [http-nio-8080-exec-10] DEBUG c.Z.p.s.JwtAuthenticationFilter - Usuario autenticado: dave@gmail.com
+2025-11-16 16:45:14 [http-nio-8080-exec-10] INFO  c.Z.p.controller.UsuarioController - GET /api/usuarios - Obteniendo todos los usuarios
+2025-11-16 16:45:14 [http-nio-8080-exec-10] DEBUG c.Z.proyecto.service.UsuarioService - Obteniendo todos los usuarios
+2025-11-16 16:45:18 [http-nio-8080-exec-9] DEBUG c.Z.p.s.JwtAuthenticationFilter - Usuario autenticado: dave@gmail.com
+2025-11-16 16:45:18 [http-nio-8080-exec-9] INFO  c.Z.p.controller.UsuarioController - GET /api/usuarios - Obteniendo todos los usuarios
+2025-11-16 16:45:18 [http-nio-8080-exec-9] DEBUG c.Z.proyecto.service.UsuarioService - Obteniendo todos los usuarios
+2025-11-16 16:45:57 [http-nio-8080-exec-1] DEBUG c.Z.p.s.JwtAuthenticationFilter - Usuario autenticado: dave@gmail.com
+2025-11-16 16:45:57 [http-nio-8080-exec-1] INFO  c.Z.p.controller.UsuarioController - GET /api/usuarios - Obteniendo todos los usuarios
+2025-11-16 16:45:57 [http-nio-8080-exec-1] DEBUG c.Z.proyecto.service.UsuarioService - Obteniendo todos los usuarios
+2025-11-16 16:46:35 [http-nio-8080-exec-2] DEBUG c.Z.p.s.JwtAuthenticationFilter - Usuario autenticado: dave@gmail.com
+2025-11-16 16:46:35 [http-nio-8080-exec-2] INFO  c.Z.p.controller.UsuarioController - GET /api/usuarios - Obteniendo todos los usuarios
+2025-11-16 16:46:35 [http-nio-8080-exec-2] DEBUG c.Z.proyecto.service.UsuarioService - Obteniendo todos los usuarios
+2025-11-16 16:47:09 [http-nio-8080-exec-4] DEBUG c.Z.p.s.JwtAuthenticationFilter - Usuario autenticado: dave@gmail.com
+2025-11-16 16:47:09 [http-nio-8080-exec-4] INFO  c.Z.p.controller.UsuarioController - GET /api/usuarios - Obteniendo todos los usuarios
+2025-11-16 16:47:09 [http-nio-8080-exec-4] DEBUG c.Z.proyecto.service.UsuarioService - Obteniendo todos los usuarios
+2025-11-16 16:49:41 [http-nio-8080-exec-10] DEBUG c.Z.p.s.JwtAuthenticationFilter - Usuario autenticado: dave@gmail.com
+2025-11-16 16:49:41 [http-nio-8080-exec-10] INFO  c.Z.p.controller.UsuarioController - GET /api/usuarios - Obteniendo todos los usuarios
+2025-11-16 16:49:41 [http-nio-8080-exec-10] DEBUG c.Z.proyecto.service.UsuarioService - Obteniendo todos los usuarios
+2025-11-16 16:50:28 [http-nio-8080-exec-9] DEBUG c.Z.p.s.JwtAuthenticationFilter - Usuario autenticado: dave@gmail.com
+2025-11-16 16:50:28 [http-nio-8080-exec-9] INFO  c.Z.p.controller.UsuarioController - GET /api/usuarios - Obteniendo todos los usuarios
+2025-11-16 16:50:28 [http-nio-8080-exec-9] DEBUG c.Z.proyecto.service.UsuarioService - Obteniendo todos los usuarios
+2025-11-16 16:50:46 [http-nio-8080-exec-1] DEBUG c.Z.p.s.JwtAuthenticationFilter - Usuario autenticado: dave@gmail.com
+2025-11-16 16:50:46 [http-nio-8080-exec-1] INFO  c.Z.p.controller.UsuarioController - GET /api/usuarios - Obteniendo todos los usuarios
+2025-11-16 16:50:46 [http-nio-8080-exec-1] DEBUG c.Z.proyecto.service.UsuarioService - Obteniendo todos los usuarios
+2025-11-16 16:51:20 [http-nio-8080-exec-2] DEBUG c.Z.p.s.JwtAuthenticationFilter - Usuario autenticado: dave@gmail.com
+2025-11-16 16:51:20 [http-nio-8080-exec-2] INFO  c.Z.p.controller.UsuarioController - GET /api/usuarios - Obteniendo todos los usuarios
+2025-11-16 16:51:20 [http-nio-8080-exec-2] DEBUG c.Z.proyecto.service.UsuarioService - Obteniendo todos los usuarios
+2025-11-16 16:51:22 [http-nio-8080-exec-7] INFO  c.Z.p.controller.AuthController - Intento de login para: dave@gmail.com
+2025-11-16 16:51:22 [http-nio-8080-exec-7] INFO  c.Z.p.controller.AuthController - Login exitoso para: dave@gmail.com
+2025-11-16 16:51:22 [http-nio-8080-exec-3] DEBUG c.Z.p.s.JwtAuthenticationFilter - Usuario autenticado: dave@gmail.com
+2025-11-16 16:51:22 [http-nio-8080-exec-9] DEBUG c.Z.p.s.JwtAuthenticationFilter - Usuario autenticado: dave@gmail.com
+2025-11-16 16:51:22 [http-nio-8080-exec-3] INFO  c.Z.p.controller.UsuarioController - GET /api/usuarios - Obteniendo todos los usuarios
+2025-11-16 16:51:22 [http-nio-8080-exec-3] DEBUG c.Z.proyecto.service.UsuarioService - Obteniendo todos los usuarios
+2025-11-16 16:51:22 [http-nio-8080-exec-9] INFO  c.Z.p.controller.PedidoController - 📋 GET /api/pedidos - Obteniendo todos los pedidos
+2025-11-16 16:51:22 [http-nio-8080-exec-9] DEBUG c.Z.proyecto.service.PedidoService - Obteniendo todos los pedidos
+2025-11-16 16:51:22 [http-nio-8080-exec-9] INFO  c.Z.p.controller.PedidoController - ✅ Retornando 8 pedidos
+2025-11-16 16:51:23 [http-nio-8080-exec-6] DEBUG c.Z.p.s.JwtAuthenticationFilter - Usuario autenticado: dave@gmail.com
+2025-11-16 16:51:23 [http-nio-8080-exec-6] INFO  c.Z.p.controller.UsuarioController - GET /api/usuarios - Obteniendo todos los usuarios
+2025-11-16 16:51:23 [http-nio-8080-exec-6] DEBUG c.Z.proyecto.service.UsuarioService - Obteniendo todos los usuarios
+2025-11-16 16:51:25 [http-nio-8080-exec-5] DEBUG c.Z.p.s.JwtAuthenticationFilter - Usuario autenticado: dave@gmail.com
+2025-11-16 16:51:25 [http-nio-8080-exec-5] INFO  c.Z.p.controller.PedidoController - 🚴 GET /api/pedidos/repartidor/9 - Obteniendo pedidos del repartidor
+2025-11-16 16:51:25 [http-nio-8080-exec-5] DEBUG c.Z.proyecto.service.PedidoService - Obteniendo pedidos del repartidor: 9
+2025-11-16 16:51:27 [http-nio-8080-exec-2] DEBUG c.Z.p.s.JwtAuthenticationFilter - Usuario autenticado: dave@gmail.com
+2025-11-16 16:51:27 [http-nio-8080-exec-2] INFO  c.Z.p.controller.UsuarioController - GET /api/usuarios - Obteniendo todos los usuarios
+2025-11-16 16:51:27 [http-nio-8080-exec-2] DEBUG c.Z.proyecto.service.UsuarioService - Obteniendo todos los usuarios
+2025-11-16 16:51:28 [http-nio-8080-exec-4] DEBUG c.Z.p.s.JwtAuthenticationFilter - Usuario autenticado: dave@gmail.com
+2025-11-16 16:51:28 [http-nio-8080-exec-8] DEBUG c.Z.p.s.JwtAuthenticationFilter - Usuario autenticado: dave@gmail.com
+2025-11-16 16:51:28 [http-nio-8080-exec-4] INFO  c.Z.p.controller.UsuarioController - GET /api/usuarios - Obteniendo todos los usuarios
+2025-11-16 16:51:28 [http-nio-8080-exec-8] INFO  c.Z.p.controller.PedidoController - 📋 GET /api/pedidos - Obteniendo todos los pedidos
+2025-11-16 16:51:28 [http-nio-8080-exec-8] DEBUG c.Z.proyecto.service.PedidoService - Obteniendo todos los pedidos
+2025-11-16 16:51:28 [http-nio-8080-exec-4] DEBUG c.Z.proyecto.service.UsuarioService - Obteniendo todos los usuarios
+2025-11-16 16:51:28 [http-nio-8080-exec-8] INFO  c.Z.p.controller.PedidoController - ✅ Retornando 8 pedidos
+2025-11-16 16:51:30 [http-nio-8080-exec-7] DEBUG c.Z.p.s.JwtAuthenticationFilter - Usuario autenticado: dave@gmail.com
+2025-11-16 16:51:30 [http-nio-8080-exec-7] INFO  c.Z.p.controller.UsuarioController - GET /api/usuarios - Obteniendo todos los usuarios
+2025-11-16 16:51:30 [http-nio-8080-exec-7] DEBUG c.Z.proyecto.service.UsuarioService - Obteniendo todos los usuarios
+2025-11-16 16:51:35 [http-nio-8080-exec-9] DEBUG c.Z.p.s.JwtAuthenticationFilter - Usuario autenticado: dave@gmail.com
+2025-11-16 16:51:35 [http-nio-8080-exec-9] INFO  c.Z.p.controller.PedidoController - 🚴 GET /api/pedidos/repartidor/9 - Obteniendo pedidos del repartidor
+2025-11-16 16:51:35 [http-nio-8080-exec-9] DEBUG c.Z.proyecto.service.PedidoService - Obteniendo pedidos del repartidor: 9
+2025-11-16 16:51:36 [http-nio-8080-exec-6] DEBUG c.Z.p.s.JwtAuthenticationFilter - Usuario autenticado: dave@gmail.com
+2025-11-16 16:51:36 [http-nio-8080-exec-6] INFO  c.Z.p.controller.UsuarioController - GET /api/usuarios - Obteniendo todos los usuarios
+2025-11-16 16:51:36 [http-nio-8080-exec-6] DEBUG c.Z.proyecto.service.UsuarioService - Obteniendo todos los usuarios
+2025-11-16 16:51:37 [http-nio-8080-exec-1] DEBUG c.Z.p.s.JwtAuthenticationFilter - Usuario autenticado: dave@gmail.com
+2025-11-16 16:51:37 [http-nio-8080-exec-5] DEBUG c.Z.p.s.JwtAuthenticationFilter - Usuario autenticado: dave@gmail.com
+2025-11-16 16:51:37 [http-nio-8080-exec-5] INFO  c.Z.p.controller.UsuarioController - GET /api/usuarios - Obteniendo todos los usuarios
+2025-11-16 16:51:37 [http-nio-8080-exec-1] INFO  c.Z.p.controller.PedidoController - 📋 GET /api/pedidos - Obteniendo todos los pedidos
+2025-11-16 16:51:37 [http-nio-8080-exec-5] DEBUG c.Z.proyecto.service.UsuarioService - Obteniendo todos los usuarios
+2025-11-16 16:51:37 [http-nio-8080-exec-1] DEBUG c.Z.proyecto.service.PedidoService - Obteniendo todos los pedidos
+2025-11-16 16:51:37 [http-nio-8080-exec-1] INFO  c.Z.p.controller.PedidoController - ✅ Retornando 8 pedidos
+2025-11-16 16:51:45 [http-nio-8080-exec-7] DEBUG c.Z.p.s.JwtAuthenticationFilter - Usuario autenticado: dave@gmail.com
+2025-11-16 16:51:45 [http-nio-8080-exec-8] DEBUG c.Z.p.s.JwtAuthenticationFilter - Usuario autenticado: dave@gmail.com
+2025-11-16 16:51:45 [http-nio-8080-exec-7] INFO  c.Z.p.controller.UsuarioController - GET /api/usuarios - Obteniendo todos los usuarios
+2025-11-16 16:51:45 [http-nio-8080-exec-8] INFO  c.Z.p.controller.PedidoController - 📋 GET /api/pedidos - Obteniendo todos los pedidos
+2025-11-16 16:51:45 [http-nio-8080-exec-7] DEBUG c.Z.proyecto.service.UsuarioService - Obteniendo todos los usuarios
+2025-11-16 16:51:45 [http-nio-8080-exec-8] DEBUG c.Z.proyecto.service.PedidoService - Obteniendo todos los pedidos
+2025-11-16 16:51:45 [http-nio-8080-exec-8] INFO  c.Z.p.controller.PedidoController - ✅ Retornando 8 pedidos
+2025-11-16 16:51:48 [http-nio-8080-exec-3] DEBUG c.Z.p.s.JwtAuthenticationFilter - Usuario autenticado: dave@gmail.com
+2025-11-16 16:51:48 [http-nio-8080-exec-3] INFO  c.Z.p.controller.UsuarioController - GET /api/usuarios - Obteniendo todos los usuarios
+2025-11-16 16:51:48 [http-nio-8080-exec-3] DEBUG c.Z.proyecto.service.UsuarioService - Obteniendo todos los usuarios
+2025-11-16 16:51:49 [http-nio-8080-exec-10] DEBUG c.Z.p.s.JwtAuthenticationFilter - Usuario autenticado: dave@gmail.com
+2025-11-16 16:51:49 [http-nio-8080-exec-10] INFO  c.Z.p.controller.UsuarioController - GET /api/usuarios - Obteniendo todos los usuarios
+2025-11-16 16:51:49 [http-nio-8080-exec-10] DEBUG c.Z.proyecto.service.UsuarioService - Obteniendo todos los usuarios
+2025-11-16 16:54:22 [http-nio-8080-exec-5] DEBUG c.Z.p.s.JwtAuthenticationFilter - Usuario autenticado: dave@gmail.com
+2025-11-16 16:54:22 [http-nio-8080-exec-5] INFO  c.Z.p.controller.UsuarioController - GET /api/usuarios - Obteniendo todos los usuarios
+2025-11-16 16:54:22 [http-nio-8080-exec-5] DEBUG c.Z.proyecto.service.UsuarioService - Obteniendo todos los usuarios
+2025-11-16 16:57:10 [http-nio-8080-exec-2] DEBUG c.Z.p.s.JwtAuthenticationFilter - Usuario autenticado: dave@gmail.com
+2025-11-16 16:57:10 [http-nio-8080-exec-2] INFO  c.Z.p.controller.UsuarioController - GET /api/usuarios - Obteniendo todos los usuarios
+2025-11-16 16:57:10 [http-nio-8080-exec-2] DEBUG c.Z.proyecto.service.UsuarioService - Obteniendo todos los usuarios
+2025-11-16 16:58:40 [http-nio-8080-exec-7] DEBUG c.Z.p.s.JwtAuthenticationFilter - Usuario autenticado: dave@gmail.com
+2025-11-16 16:58:40 [http-nio-8080-exec-7] INFO  c.Z.p.controller.UsuarioController - GET /api/usuarios - Obteniendo todos los usuarios
+2025-11-16 16:58:40 [http-nio-8080-exec-7] DEBUG c.Z.proyecto.service.UsuarioService - Obteniendo todos los usuarios
+2025-11-16 16:59:00 [http-nio-8080-exec-3] DEBUG c.Z.p.s.JwtAuthenticationFilter - Usuario autenticado: dave@gmail.com
+2025-11-16 16:59:00 [http-nio-8080-exec-3] INFO  c.Z.p.controller.UsuarioController - GET /api/usuarios - Obteniendo todos los usuarios
+2025-11-16 16:59:00 [http-nio-8080-exec-3] DEBUG c.Z.proyecto.service.UsuarioService - Obteniendo todos los usuarios
+2025-11-16 16:59:10 [http-nio-8080-exec-9] DEBUG c.Z.p.s.JwtAuthenticationFilter - Usuario autenticado: dave@gmail.com
+2025-11-16 16:59:10 [http-nio-8080-exec-9] INFO  c.Z.p.controller.UsuarioController - GET /api/usuarios - Obteniendo todos los usuarios
+2025-11-16 16:59:10 [http-nio-8080-exec-9] DEBUG c.Z.proyecto.service.UsuarioService - Obteniendo todos los usuarios
+2025-11-16 16:59:12 [http-nio-8080-exec-6] DEBUG c.Z.p.s.JwtAuthenticationFilter - Usuario autenticado: dave@gmail.com
+2025-11-16 16:59:12 [http-nio-8080-exec-6] INFO  c.Z.p.controller.UsuarioController - GET /api/usuarios - Obteniendo todos los usuarios
+2025-11-16 16:59:12 [http-nio-8080-exec-6] DEBUG c.Z.proyecto.service.UsuarioService - Obteniendo todos los usuarios
+2025-11-16 16:59:30 [http-nio-8080-exec-1] DEBUG c.Z.p.s.JwtAuthenticationFilter - Usuario autenticado: dave@gmail.com
+2025-11-16 16:59:30 [http-nio-8080-exec-1] INFO  c.Z.p.controller.UsuarioController - GET /api/usuarios - Obteniendo todos los usuarios
+2025-11-16 16:59:30 [http-nio-8080-exec-1] DEBUG c.Z.proyecto.service.UsuarioService - Obteniendo todos los usuarios
+2025-11-16 16:59:51 [http-nio-8080-exec-4] DEBUG c.Z.p.s.JwtAuthenticationFilter - Usuario autenticado: dave@gmail.com
+2025-11-16 16:59:51 [http-nio-8080-exec-4] INFO  c.Z.p.controller.UsuarioController - GET /api/usuarios - Obteniendo todos los usuarios
+2025-11-16 16:59:51 [http-nio-8080-exec-4] DEBUG c.Z.proyecto.service.UsuarioService - Obteniendo todos los usuarios
+2025-11-16 17:00:03 [http-nio-8080-exec-8] DEBUG c.Z.p.s.JwtAuthenticationFilter - Usuario autenticado: dave@gmail.com
+2025-11-16 17:00:03 [http-nio-8080-exec-8] INFO  c.Z.p.controller.UsuarioController - GET /api/usuarios - Obteniendo todos los usuarios
+2025-11-16 17:00:03 [http-nio-8080-exec-8] DEBUG c.Z.proyecto.service.UsuarioService - Obteniendo todos los usuarios
+2025-11-16 17:00:57 [http-nio-8080-exec-10] DEBUG c.Z.p.s.JwtAuthenticationFilter - Usuario autenticado: dave@gmail.com
+2025-11-16 17:00:57 [http-nio-8080-exec-10] INFO  c.Z.p.controller.UsuarioController - GET /api/usuarios - Obteniendo todos los usuarios
+2025-11-16 17:00:57 [http-nio-8080-exec-10] DEBUG c.Z.proyecto.service.UsuarioService - Obteniendo todos los usuarios
+2025-11-16 17:01:04 [http-nio-8080-exec-6] DEBUG c.Z.p.s.JwtAuthenticationFilter - Usuario autenticado: dave@gmail.com
+2025-11-16 17:01:04 [http-nio-8080-exec-6] INFO  c.Z.p.controller.UsuarioController - GET /api/usuarios - Obteniendo todos los usuarios
+2025-11-16 17:01:04 [http-nio-8080-exec-6] DEBUG c.Z.proyecto.service.UsuarioService - Obteniendo todos los usuarios
+2025-11-16 17:01:18 [http-nio-8080-exec-1] DEBUG c.Z.p.s.JwtAuthenticationFilter - Usuario autenticado: dave@gmail.com
+2025-11-16 17:01:18 [http-nio-8080-exec-1] INFO  c.Z.p.controller.UsuarioController - GET /api/usuarios - Obteniendo todos los usuarios
+2025-11-16 17:01:18 [http-nio-8080-exec-1] DEBUG c.Z.proyecto.service.UsuarioService - Obteniendo todos los usuarios
+2025-11-16 17:01:23 [http-nio-8080-exec-2] DEBUG c.Z.p.s.JwtAuthenticationFilter - Usuario autenticado: dave@gmail.com
+2025-11-16 17:01:23 [http-nio-8080-exec-2] INFO  c.Z.p.controller.UsuarioController - GET /api/usuarios - Obteniendo todos los usuarios
+2025-11-16 17:01:23 [http-nio-8080-exec-2] DEBUG c.Z.proyecto.service.UsuarioService - Obteniendo todos los usuarios
+2025-11-16 17:01:33 [http-nio-8080-exec-7] DEBUG c.Z.p.s.JwtAuthenticationFilter - Usuario autenticado: dave@gmail.com
+2025-11-16 17:01:33 [http-nio-8080-exec-7] INFO  c.Z.p.controller.UsuarioController - GET /api/usuarios - Obteniendo todos los usuarios
+2025-11-16 17:01:33 [http-nio-8080-exec-7] DEBUG c.Z.proyecto.service.UsuarioService - Obteniendo todos los usuarios
+2025-11-16 17:01:41 [http-nio-8080-exec-3] DEBUG c.Z.p.s.JwtAuthenticationFilter - Usuario autenticado: dave@gmail.com
+2025-11-16 17:01:41 [http-nio-8080-exec-3] INFO  c.Z.p.controller.UsuarioController - GET /api/usuarios - Obteniendo todos los usuarios
+2025-11-16 17:01:41 [http-nio-8080-exec-3] DEBUG c.Z.proyecto.service.UsuarioService - Obteniendo todos los usuarios
+2025-11-16 17:02:58 [http-nio-8080-exec-9] DEBUG c.Z.p.s.JwtAuthenticationFilter - Usuario autenticado: dave@gmail.com
+2025-11-16 17:02:58 [http-nio-8080-exec-9] INFO  c.Z.p.controller.UsuarioController - GET /api/usuarios - Obteniendo todos los usuarios
+2025-11-16 17:02:58 [http-nio-8080-exec-9] DEBUG c.Z.proyecto.service.UsuarioService - Obteniendo todos los usuarios
+2025-11-16 17:03:06 [http-nio-8080-exec-6] DEBUG c.Z.p.s.JwtAuthenticationFilter - Usuario autenticado: dave@gmail.com
+2025-11-16 17:03:07 [http-nio-8080-exec-6] INFO  c.Z.p.controller.UsuarioController - GET /api/usuarios - Obteniendo todos los usuarios
+2025-11-16 17:03:07 [http-nio-8080-exec-6] DEBUG c.Z.proyecto.service.UsuarioService - Obteniendo todos los usuarios
+2025-11-16 17:03:23 [http-nio-8080-exec-2] DEBUG c.Z.p.s.JwtAuthenticationFilter - Usuario autenticado: dave@gmail.com
+2025-11-16 17:03:23 [http-nio-8080-exec-2] INFO  c.Z.p.controller.LugarController - 📍 Calculando ruta por coordenadas
+2025-11-16 17:03:23 [http-nio-8080-exec-2] INFO  c.Zygo.proyecto.service.LugarService - Buscando nodo más cercano a 5.712159306705978, -72.93386623108101
+2025-11-16 17:03:23 [http-nio-8080-exec-2] INFO  c.Zygo.proyecto.service.LugarService - Buscando nodo más cercano a 5.716109250913192, -72.93268533954137
+2025-11-16 17:03:23 [http-nio-8080-exec-2] INFO  c.Zygo.proyecto.service.LugarService - Calculando ruta de 'Nodo_5.712171_-72.933881' a 'Nodo_5.716009_-72.932703'
+2025-11-16 17:03:23 [http-nio-8080-exec-2] INFO  c.Z.proyecto.service.DijkstraService - Calculando ruta óptima de nodo 32260 a nodo 34216 (considerando tráfico: true)
+2025-11-16 17:03:25 [http-nio-8080-exec-4] DEBUG c.Z.p.s.JwtAuthenticationFilter - Usuario autenticado: dave@gmail.com
+2025-11-16 17:03:25 [http-nio-8080-exec-4] INFO  c.Z.p.controller.LugarController - 📍 Calculando ruta por coordenadas
+2025-11-16 17:03:25 [http-nio-8080-exec-4] INFO  c.Zygo.proyecto.service.LugarService - Buscando nodo más cercano a 5.712159306705978, -72.93386623108101
+2025-11-16 17:03:26 [http-nio-8080-exec-4] INFO  c.Zygo.proyecto.service.LugarService - Buscando nodo más cercano a 5.716109250913192, -72.93268533954137
+2025-11-16 17:03:26 [http-nio-8080-exec-4] INFO  c.Zygo.proyecto.service.LugarService - Calculando ruta de 'Nodo_5.712171_-72.933881' a 'Nodo_5.716009_-72.932703'
+2025-11-16 17:03:26 [http-nio-8080-exec-4] INFO  c.Z.proyecto.service.DijkstraService - Calculando ruta óptima de nodo 32260 a nodo 34216 (considerando tráfico: true)
+2025-11-16 17:04:26 [http-nio-8080-exec-7] DEBUG c.Z.p.s.JwtAuthenticationFilter - Usuario autenticado: dave@gmail.com
+2025-11-16 17:04:26 [http-nio-8080-exec-7] INFO  c.Z.p.controller.UsuarioController - GET /api/usuarios - Obteniendo todos los usuarios
+2025-11-16 17:04:26 [http-nio-8080-exec-7] DEBUG c.Z.proyecto.service.UsuarioService - Obteniendo todos los usuarios
+2025-11-16 17:04:38 [http-nio-8080-exec-10] DEBUG c.Z.p.s.JwtAuthenticationFilter - Usuario autenticado: dave@gmail.com
+2025-11-16 17:04:38 [http-nio-8080-exec-10] INFO  c.Z.p.controller.LugarController - 📍 Calculando ruta por coordenadas
+2025-11-16 17:04:38 [http-nio-8080-exec-10] INFO  c.Zygo.proyecto.service.LugarService - Buscando nodo más cercano a 5.716728428885701, -72.94036848139159
+2025-11-16 17:04:38 [http-nio-8080-exec-10] INFO  c.Zygo.proyecto.service.LugarService - Buscando nodo más cercano a 5.718457853467238, -72.93783493227014
+2025-11-16 17:04:38 [http-nio-8080-exec-10] INFO  c.Zygo.proyecto.service.LugarService - Calculando ruta de 'Nodo_5.716749_-72.940374' a 'Nodo_5.718475_-72.937964'
+2025-11-16 17:04:38 [http-nio-8080-exec-10] INFO  c.Z.proyecto.service.DijkstraService - Calculando ruta óptima de nodo 31919 a nodo 34812 (considerando tráfico: true)
+2025-11-16 17:04:40 [http-nio-8080-exec-9] DEBUG c.Z.p.s.JwtAuthenticationFilter - Usuario autenticado: dave@gmail.com
+2025-11-16 17:04:40 [http-nio-8080-exec-9] INFO  c.Z.p.controller.LugarController - 📍 Calculando ruta por coordenadas
+2025-11-16 17:04:40 [http-nio-8080-exec-9] INFO  c.Zygo.proyecto.service.LugarService - Buscando nodo más cercano a 5.716728428885701, -72.94036848139159
+2025-11-16 17:04:40 [http-nio-8080-exec-9] INFO  c.Zygo.proyecto.service.LugarService - Buscando nodo más cercano a 5.718457853467238, -72.93783493227014
+2025-11-16 17:04:40 [http-nio-8080-exec-9] INFO  c.Zygo.proyecto.service.LugarService - Calculando ruta de 'Nodo_5.716749_-72.940374' a 'Nodo_5.718475_-72.937964'
+2025-11-16 17:04:40 [http-nio-8080-exec-9] INFO  c.Z.proyecto.service.DijkstraService - Calculando ruta óptima de nodo 31919 a nodo 34812 (considerando tráfico: true)
+2025-11-16 17:06:14 [http-nio-8080-exec-1] INFO  c.Z.p.controller.AuthController - Intento de login para: dave@gmail.com
+2025-11-16 17:06:14 [http-nio-8080-exec-1] INFO  c.Z.p.controller.AuthController - Login exitoso para: dave@gmail.com
+2025-11-16 17:06:14 [http-nio-8080-exec-2] DEBUG c.Z.p.s.JwtAuthenticationFilter - Usuario autenticado: dave@gmail.com
+2025-11-16 17:06:14 [http-nio-8080-exec-4] DEBUG c.Z.p.s.JwtAuthenticationFilter - Usuario autenticado: dave@gmail.com
+2025-11-16 17:06:14 [http-nio-8080-exec-2] INFO  c.Z.p.controller.PedidoController - 📋 GET /api/pedidos - Obteniendo todos los pedidos
+2025-11-16 17:06:14 [http-nio-8080-exec-4] INFO  c.Z.p.controller.UsuarioController - GET /api/usuarios - Obteniendo todos los usuarios
+2025-11-16 17:06:14 [http-nio-8080-exec-4] DEBUG c.Z.proyecto.service.UsuarioService - Obteniendo todos los usuarios
+2025-11-16 17:06:14 [http-nio-8080-exec-2] DEBUG c.Z.proyecto.service.PedidoService - Obteniendo todos los pedidos
+2025-11-16 17:06:14 [http-nio-8080-exec-2] INFO  c.Z.p.controller.PedidoController - ✅ Retornando 8 pedidos
+2025-11-16 17:08:15 [http-nio-8080-exec-10] DEBUG c.Z.p.s.JwtAuthenticationFilter - Usuario autenticado: dave@gmail.com
+2025-11-16 17:08:15 [http-nio-8080-exec-10] INFO  c.Z.p.controller.UsuarioController - GET /api/usuarios - Obteniendo todos los usuarios
+2025-11-16 17:08:15 [http-nio-8080-exec-3] DEBUG c.Z.p.s.JwtAuthenticationFilter - Usuario autenticado: dave@gmail.com
+2025-11-16 17:08:15 [http-nio-8080-exec-10] DEBUG c.Z.proyecto.service.UsuarioService - Obteniendo todos los usuarios
+2025-11-16 17:08:15 [http-nio-8080-exec-3] INFO  c.Z.p.controller.PedidoController - 📋 GET /api/pedidos - Obteniendo todos los pedidos
+2025-11-16 17:08:15 [http-nio-8080-exec-3] DEBUG c.Z.proyecto.service.PedidoService - Obteniendo todos los pedidos
+2025-11-16 17:08:15 [http-nio-8080-exec-3] INFO  c.Z.p.controller.PedidoController - ✅ Retornando 8 pedidos
+2025-11-16 17:08:24 [http-nio-8080-exec-1] DEBUG c.Z.p.s.JwtAuthenticationFilter - Usuario autenticado: dave@gmail.com
+2025-11-16 17:08:24 [http-nio-8080-exec-5] DEBUG c.Z.p.s.JwtAuthenticationFilter - Usuario autenticado: dave@gmail.com
+2025-11-16 17:08:24 [http-nio-8080-exec-1] INFO  c.Z.p.controller.UsuarioController - GET /api/usuarios - Obteniendo todos los usuarios
+2025-11-16 17:08:24 [http-nio-8080-exec-5] INFO  c.Z.p.controller.PedidoController - 📋 GET /api/pedidos - Obteniendo todos los pedidos
+2025-11-16 17:08:24 [http-nio-8080-exec-1] DEBUG c.Z.proyecto.service.UsuarioService - Obteniendo todos los usuarios
+2025-11-16 17:08:24 [http-nio-8080-exec-5] DEBUG c.Z.proyecto.service.PedidoService - Obteniendo todos los pedidos
+2025-11-16 17:08:24 [http-nio-8080-exec-5] INFO  c.Z.p.controller.PedidoController - ✅ Retornando 8 pedidos
+2025-11-16 17:08:25 [http-nio-8080-exec-4] DEBUG c.Z.p.s.JwtAuthenticationFilter - Usuario autenticado: dave@gmail.com
+2025-11-16 17:08:25 [http-nio-8080-exec-2] DEBUG c.Z.p.s.JwtAuthenticationFilter - Usuario autenticado: dave@gmail.com
+2025-11-16 17:08:25 [http-nio-8080-exec-2] INFO  c.Z.p.controller.UsuarioController - GET /api/usuarios - Obteniendo todos los usuarios
+2025-11-16 17:08:25 [http-nio-8080-exec-4] INFO  c.Z.p.controller.PedidoController - 📋 GET /api/pedidos - Obteniendo todos los pedidos
+2025-11-16 17:08:25 [http-nio-8080-exec-2] DEBUG c.Z.proyecto.service.UsuarioService - Obteniendo todos los usuarios
+2025-11-16 17:08:25 [http-nio-8080-exec-4] DEBUG c.Z.proyecto.service.PedidoService - Obteniendo todos los pedidos
+2025-11-16 17:08:25 [http-nio-8080-exec-4] INFO  c.Z.p.controller.PedidoController - ✅ Retornando 8 pedidos
+2025-11-16 17:08:27 [http-nio-8080-exec-8] DEBUG c.Z.p.s.JwtAuthenticationFilter - Usuario autenticado: dave@gmail.com
+2025-11-16 17:08:27 [http-nio-8080-exec-8] INFO  c.Z.p.controller.UsuarioController - GET /api/usuarios - Obteniendo todos los usuarios
+2025-11-16 17:08:27 [http-nio-8080-exec-8] DEBUG c.Z.proyecto.service.UsuarioService - Obteniendo todos los usuarios
+2025-11-16 17:08:29 [http-nio-8080-exec-7] DEBUG c.Z.p.s.JwtAuthenticationFilter - Usuario autenticado: dave@gmail.com
+2025-11-16 17:08:29 [http-nio-8080-exec-7] INFO  c.Z.p.controller.UsuarioController - GET /api/usuarios - Obteniendo todos los usuarios
+2025-11-16 17:08:29 [http-nio-8080-exec-7] DEBUG c.Z.proyecto.service.UsuarioService - Obteniendo todos los usuarios
+2025-11-16 17:08:30 [http-nio-8080-exec-3] DEBUG c.Z.p.s.JwtAuthenticationFilter - Usuario autenticado: dave@gmail.com
+2025-11-16 17:08:30 [http-nio-8080-exec-10] DEBUG c.Z.p.s.JwtAuthenticationFilter - Usuario autenticado: dave@gmail.com
+2025-11-16 17:08:30 [http-nio-8080-exec-10] INFO  c.Z.p.controller.PedidoController - 📋 GET /api/pedidos - Obteniendo todos los pedidos
+2025-11-16 17:08:30 [http-nio-8080-exec-3] INFO  c.Z.p.controller.UsuarioController - GET /api/usuarios - Obteniendo todos los usuarios
+2025-11-16 17:08:30 [http-nio-8080-exec-10] DEBUG c.Z.proyecto.service.PedidoService - Obteniendo todos los pedidos
+2025-11-16 17:08:30 [http-nio-8080-exec-3] DEBUG c.Z.proyecto.service.UsuarioService - Obteniendo todos los usuarios
+2025-11-16 17:08:30 [http-nio-8080-exec-10] INFO  c.Z.p.controller.PedidoController - ✅ Retornando 8 pedidos
+2025-11-16 17:08:34 [http-nio-8080-exec-5] DEBUG c.Z.p.s.JwtAuthenticationFilter - Usuario autenticado: dave@gmail.com
+2025-11-16 17:08:34 [http-nio-8080-exec-5] INFO  c.Z.p.controller.UsuarioController - GET /api/usuarios - Obteniendo todos los usuarios
+2025-11-16 17:08:34 [http-nio-8080-exec-1] DEBUG c.Z.p.s.JwtAuthenticationFilter - Usuario autenticado: dave@gmail.com
+2025-11-16 17:08:34 [http-nio-8080-exec-5] DEBUG c.Z.proyecto.service.UsuarioService - Obteniendo todos los usuarios
+2025-11-16 17:08:34 [http-nio-8080-exec-1] INFO  c.Z.p.controller.PedidoController - 📋 GET /api/pedidos - Obteniendo todos los pedidos
+2025-11-16 17:08:34 [http-nio-8080-exec-1] DEBUG c.Z.proyecto.service.PedidoService - Obteniendo todos los pedidos
+2025-11-16 17:08:34 [http-nio-8080-exec-1] INFO  c.Z.p.controller.PedidoController - ✅ Retornando 8 pedidos
+2025-11-16 17:11:10 [http-nio-8080-exec-8] DEBUG c.Z.p.s.JwtAuthenticationFilter - Usuario autenticado: dave@gmail.com
+2025-11-16 17:11:10 [http-nio-8080-exec-7] DEBUG c.Z.p.s.JwtAuthenticationFilter - Usuario autenticado: dave@gmail.com
+2025-11-16 17:11:10 [http-nio-8080-exec-7] INFO  c.Z.p.controller.UsuarioController - GET /api/usuarios - Obteniendo todos los usuarios
+2025-11-16 17:11:10 [http-nio-8080-exec-8] INFO  c.Z.p.controller.PedidoController - 📋 GET /api/pedidos - Obteniendo todos los pedidos
+2025-11-16 17:11:10 [http-nio-8080-exec-7] DEBUG c.Z.proyecto.service.UsuarioService - Obteniendo todos los usuarios
+2025-11-16 17:11:10 [http-nio-8080-exec-8] DEBUG c.Z.proyecto.service.PedidoService - Obteniendo todos los pedidos
+2025-11-16 17:11:10 [http-nio-8080-exec-8] INFO  c.Z.p.controller.PedidoController - ✅ Retornando 8 pedidos
+2025-11-16 17:11:11 [http-nio-8080-exec-3] DEBUG c.Z.p.s.JwtAuthenticationFilter - Usuario autenticado: dave@gmail.com
+2025-11-16 17:11:11 [http-nio-8080-exec-3] INFO  c.Z.p.controller.UsuarioController - GET /api/usuarios - Obteniendo todos los usuarios
+2025-11-16 17:11:11 [http-nio-8080-exec-3] DEBUG c.Z.proyecto.service.UsuarioService - Obteniendo todos los usuarios
+2025-11-16 17:11:13 [http-nio-8080-exec-9] DEBUG c.Z.p.s.JwtAuthenticationFilter - Usuario autenticado: dave@gmail.com
+2025-11-16 17:11:13 [http-nio-8080-exec-9] INFO  c.Z.p.controller.UsuarioController - GET /api/usuarios - Obteniendo todos los usuarios
+2025-11-16 17:11:13 [http-nio-8080-exec-9] DEBUG c.Z.proyecto.service.UsuarioService - Obteniendo todos los usuarios
+2025-11-16 17:11:20 [http-nio-8080-exec-5] DEBUG c.Z.p.s.JwtAuthenticationFilter - Usuario autenticado: dave@gmail.com
+2025-11-16 17:11:20 [http-nio-8080-exec-5] INFO  c.Z.p.controller.UsuarioController - GET /api/usuarios - Obteniendo todos los usuarios
+2025-11-16 17:11:20 [http-nio-8080-exec-5] DEBUG c.Z.proyecto.service.UsuarioService - Obteniendo todos los usuarios
+2025-11-16 17:16:35 [http-nio-8080-exec-4] DEBUG c.Z.p.s.JwtAuthenticationFilter - Usuario autenticado: dave@gmail.com
+2025-11-16 17:16:35 [http-nio-8080-exec-4] INFO  c.Z.p.controller.UsuarioController - GET /api/usuarios - Obteniendo todos los usuarios
+2025-11-16 17:16:35 [http-nio-8080-exec-4] DEBUG c.Z.proyecto.service.UsuarioService - Obteniendo todos los usuarios
+2025-11-16 17:16:37 [http-nio-8080-exec-2] DEBUG c.Z.p.s.JwtAuthenticationFilter - Usuario autenticado: dave@gmail.com
+2025-11-16 17:16:37 [http-nio-8080-exec-2] INFO  c.Z.p.controller.UsuarioController - GET /api/usuarios - Obteniendo todos los usuarios
+2025-11-16 17:16:37 [http-nio-8080-exec-2] DEBUG c.Z.proyecto.service.UsuarioService - Obteniendo todos los usuarios
+2025-11-16 17:16:41 [http-nio-8080-exec-7] DEBUG c.Z.p.s.JwtAuthenticationFilter - Usuario autenticado: dave@gmail.com
+2025-11-16 17:16:41 [http-nio-8080-exec-8] DEBUG c.Z.p.s.JwtAuthenticationFilter - Usuario autenticado: dave@gmail.com
+2025-11-16 17:16:41 [http-nio-8080-exec-7] INFO  c.Z.p.controller.PedidoController - 📋 GET /api/pedidos - Obteniendo todos los pedidos
+2025-11-16 17:16:41 [http-nio-8080-exec-8] INFO  c.Z.p.controller.UsuarioController - GET /api/usuarios - Obteniendo todos los usuarios
+2025-11-16 17:16:41 [http-nio-8080-exec-7] DEBUG c.Z.proyecto.service.PedidoService - Obteniendo todos los pedidos
+2025-11-16 17:16:41 [http-nio-8080-exec-8] DEBUG c.Z.proyecto.service.UsuarioService - Obteniendo todos los usuarios
+2025-11-16 17:16:41 [http-nio-8080-exec-7] INFO  c.Z.p.controller.PedidoController - ✅ Retornando 8 pedidos
+2025-11-16 17:16:48 [http-nio-8080-exec-10] DEBUG c.Z.p.s.JwtAuthenticationFilter - Usuario autenticado: dave@gmail.com
+2025-11-16 17:16:48 [http-nio-8080-exec-10] INFO  c.Z.p.controller.UsuarioController - GET /api/usuarios - Obteniendo todos los usuarios
+2025-11-16 17:16:48 [http-nio-8080-exec-10] DEBUG c.Z.proyecto.service.UsuarioService - Obteniendo todos los usuarios
+2025-11-16 17:16:50 [http-nio-8080-exec-9] DEBUG c.Z.p.s.JwtAuthenticationFilter - Usuario autenticado: dave@gmail.com
+2025-11-16 17:16:50 [http-nio-8080-exec-9] INFO  c.Z.p.controller.UsuarioController - GET /api/usuarios - Obteniendo todos los usuarios
+2025-11-16 17:16:50 [http-nio-8080-exec-9] DEBUG c.Z.proyecto.service.UsuarioService - Obteniendo todos los usuarios
+2025-11-16 17:16:55 [http-nio-8080-exec-4] DEBUG c.Z.p.s.JwtAuthenticationFilter - Usuario autenticado: dave@gmail.com
+2025-11-16 17:16:55 [http-nio-8080-exec-1] DEBUG c.Z.p.s.JwtAuthenticationFilter - Usuario autenticado: dave@gmail.com
+2025-11-16 17:16:55 [http-nio-8080-exec-4] INFO  c.Z.p.controller.UsuarioController - GET /api/usuarios - Obteniendo todos los usuarios
+2025-11-16 17:16:55 [http-nio-8080-exec-1] INFO  c.Z.p.controller.PedidoController - 📋 GET /api/pedidos - Obteniendo todos los pedidos
+2025-11-16 17:16:55 [http-nio-8080-exec-1] DEBUG c.Z.proyecto.service.PedidoService - Obteniendo todos los pedidos
+2025-11-16 17:16:55 [http-nio-8080-exec-4] DEBUG c.Z.proyecto.service.UsuarioService - Obteniendo todos los usuarios
+2025-11-16 17:16:55 [http-nio-8080-exec-1] INFO  c.Z.p.controller.PedidoController - ✅ Retornando 8 pedidos
+2025-11-16 17:19:06 [http-nio-8080-exec-7] DEBUG c.Z.p.s.JwtAuthenticationFilter - Usuario autenticado: dave@gmail.com
+2025-11-16 17:19:06 [http-nio-8080-exec-6] DEBUG c.Z.p.s.JwtAuthenticationFilter - Usuario autenticado: dave@gmail.com
+2025-11-16 17:19:06 [http-nio-8080-exec-6] INFO  c.Z.p.controller.UsuarioController - GET /api/usuarios - Obteniendo todos los usuarios
+2025-11-16 17:19:06 [http-nio-8080-exec-7] INFO  c.Z.p.controller.PedidoController - 📋 GET /api/pedidos - Obteniendo todos los pedidos
+2025-11-16 17:19:06 [http-nio-8080-exec-6] DEBUG c.Z.proyecto.service.UsuarioService - Obteniendo todos los usuarios
+2025-11-16 17:19:06 [http-nio-8080-exec-7] DEBUG c.Z.proyecto.service.PedidoService - Obteniendo todos los pedidos
+2025-11-16 17:19:06 [http-nio-8080-exec-7] INFO  c.Z.p.controller.PedidoController - ✅ Retornando 8 pedidos
+2025-11-16 17:19:18 [http-nio-8080-exec-5] DEBUG c.Z.p.s.JwtAuthenticationFilter - Usuario autenticado: dave@gmail.com
+2025-11-16 17:19:18 [http-nio-8080-exec-9] DEBUG c.Z.p.s.JwtAuthenticationFilter - Usuario autenticado: dave@gmail.com
+2025-11-16 17:19:18 [http-nio-8080-exec-5] INFO  c.Z.p.controller.UsuarioController - GET /api/usuarios - Obteniendo todos los usuarios
+2025-11-16 17:19:18 [http-nio-8080-exec-9] INFO  c.Z.p.controller.PedidoController - 📋 GET /api/pedidos - Obteniendo todos los pedidos
+2025-11-16 17:19:18 [http-nio-8080-exec-5] DEBUG c.Z.proyecto.service.UsuarioService - Obteniendo todos los usuarios
+2025-11-16 17:19:18 [http-nio-8080-exec-9] DEBUG c.Z.proyecto.service.PedidoService - Obteniendo todos los pedidos
+2025-11-16 17:19:18 [http-nio-8080-exec-9] INFO  c.Z.p.controller.PedidoController - ✅ Retornando 8 pedidos
+2025-11-16 17:19:21 [http-nio-8080-exec-2] DEBUG c.Z.p.s.JwtAuthenticationFilter - Usuario autenticado: dave@gmail.com
+2025-11-16 17:19:21 [http-nio-8080-exec-2] INFO  c.Z.p.controller.UsuarioController - GET /api/usuarios - Obteniendo todos los usuarios
+2025-11-16 17:19:21 [http-nio-8080-exec-2] DEBUG c.Z.proyecto.service.UsuarioService - Obteniendo todos los usuarios
+2025-11-16 17:19:23 [http-nio-8080-exec-8] DEBUG c.Z.p.s.JwtAuthenticationFilter - Usuario autenticado: dave@gmail.com
+2025-11-16 17:19:23 [http-nio-8080-exec-8] INFO  c.Z.p.controller.PedidoController - 📋 GET /api/pedidos - Obteniendo todos los pedidos
+2025-11-16 17:19:23 [http-nio-8080-exec-6] DEBUG c.Z.p.s.JwtAuthenticationFilter - Usuario autenticado: dave@gmail.com
+2025-11-16 17:19:23 [http-nio-8080-exec-8] DEBUG c.Z.proyecto.service.PedidoService - Obteniendo todos los pedidos
+2025-11-16 17:19:23 [http-nio-8080-exec-6] INFO  c.Z.p.controller.UsuarioController - GET /api/usuarios - Obteniendo todos los usuarios
+2025-11-16 17:19:23 [http-nio-8080-exec-6] DEBUG c.Z.proyecto.service.UsuarioService - Obteniendo todos los usuarios
+2025-11-16 17:19:23 [http-nio-8080-exec-8] INFO  c.Z.p.controller.PedidoController - ✅ Retornando 8 pedidos
+2025-11-16 17:19:24 [http-nio-8080-exec-7] DEBUG c.Z.p.s.JwtAuthenticationFilter - Usuario autenticado: dave@gmail.com
+2025-11-16 17:19:24 [http-nio-8080-exec-7] INFO  c.Z.p.controller.PedidoController - 🚴 GET /api/pedidos/repartidor/9 - Obteniendo pedidos del repartidor
+2025-11-16 17:19:24 [http-nio-8080-exec-7] DEBUG c.Z.proyecto.service.PedidoService - Obteniendo pedidos del repartidor: 9
+2025-11-16 17:19:26 [http-nio-8080-exec-10] DEBUG c.Z.p.s.JwtAuthenticationFilter - Usuario autenticado: dave@gmail.com
+2025-11-16 17:19:26 [http-nio-8080-exec-3] DEBUG c.Z.p.s.JwtAuthenticationFilter - Usuario autenticado: dave@gmail.com
+2025-11-16 17:19:26 [http-nio-8080-exec-10] INFO  c.Z.p.controller.UsuarioController - GET /api/usuarios - Obteniendo todos los usuarios
+2025-11-16 17:19:26 [http-nio-8080-exec-3] INFO  c.Z.p.controller.PedidoController - 📋 GET /api/pedidos - Obteniendo todos los pedidos
+2025-11-16 17:19:26 [http-nio-8080-exec-10] DEBUG c.Z.proyecto.service.UsuarioService - Obteniendo todos los usuarios
+2025-11-16 17:19:26 [http-nio-8080-exec-3] DEBUG c.Z.proyecto.service.PedidoService - Obteniendo todos los pedidos
+2025-11-16 17:19:26 [http-nio-8080-exec-3] INFO  c.Z.p.controller.PedidoController - ✅ Retornando 8 pedidos
+2025-11-16 17:19:28 [http-nio-8080-exec-5] DEBUG c.Z.p.s.JwtAuthenticationFilter - Usuario autenticado: dave@gmail.com
+2025-11-16 17:19:28 [http-nio-8080-exec-9] DEBUG c.Z.p.s.JwtAuthenticationFilter - Usuario autenticado: dave@gmail.com
+2025-11-16 17:19:28 [http-nio-8080-exec-9] INFO  c.Z.p.controller.UsuarioController - GET /api/usuarios - Obteniendo todos los usuarios
+2025-11-16 17:19:28 [http-nio-8080-exec-5] INFO  c.Z.p.controller.PedidoController - 📋 GET /api/pedidos - Obteniendo todos los pedidos
+2025-11-16 17:19:28 [http-nio-8080-exec-9] DEBUG c.Z.proyecto.service.UsuarioService - Obteniendo todos los usuarios
+2025-11-16 17:19:28 [http-nio-8080-exec-5] DEBUG c.Z.proyecto.service.PedidoService - Obteniendo todos los pedidos
+2025-11-16 17:19:28 [http-nio-8080-exec-5] INFO  c.Z.p.controller.PedidoController - ✅ Retornando 8 pedidos
+2025-11-16 17:19:42 [http-nio-8080-exec-2] DEBUG c.Z.p.s.JwtAuthenticationFilter - Usuario autenticado: dave@gmail.com
+2025-11-16 17:19:42 [http-nio-8080-exec-6] DEBUG c.Z.p.s.JwtAuthenticationFilter - Usuario autenticado: dave@gmail.com
+2025-11-16 17:19:42 [http-nio-8080-exec-6] INFO  c.Z.p.controller.UsuarioController - GET /api/usuarios - Obteniendo todos los usuarios
+2025-11-16 17:19:42 [http-nio-8080-exec-2] INFO  c.Z.p.controller.PedidoController - 📋 GET /api/pedidos - Obteniendo todos los pedidos
+2025-11-16 17:19:42 [http-nio-8080-exec-6] DEBUG c.Z.proyecto.service.UsuarioService - Obteniendo todos los usuarios
+2025-11-16 17:19:42 [http-nio-8080-exec-2] DEBUG c.Z.proyecto.service.PedidoService - Obteniendo todos los pedidos
+2025-11-16 17:19:42 [http-nio-8080-exec-2] INFO  c.Z.p.controller.PedidoController - ✅ Retornando 8 pedidos
+2025-11-16 17:20:40 [http-nio-8080-exec-10] DEBUG c.Z.p.s.JwtAuthenticationFilter - Usuario autenticado: dave@gmail.com
+2025-11-16 17:20:40 [http-nio-8080-exec-10] INFO  c.Z.p.controller.UsuarioController - GET /api/usuarios - Obteniendo todos los usuarios
+2025-11-16 17:20:40 [http-nio-8080-exec-10] DEBUG c.Z.proyecto.service.UsuarioService - Obteniendo todos los usuarios
+2025-11-16 17:20:43 [http-nio-8080-exec-3] DEBUG c.Z.p.s.JwtAuthenticationFilter - Usuario autenticado: dave@gmail.com
+2025-11-16 17:20:43 [http-nio-8080-exec-3] INFO  c.Z.p.controller.PedidoController - 🚴 GET /api/pedidos/repartidor/9 - Obteniendo pedidos del repartidor
+2025-11-16 17:20:43 [http-nio-8080-exec-3] DEBUG c.Z.proyecto.service.PedidoService - Obteniendo pedidos del repartidor: 9
+2025-11-16 17:20:53 [http-nio-8080-exec-5] DEBUG c.Z.p.s.JwtAuthenticationFilter - Usuario autenticado: dave@gmail.com
+2025-11-16 17:20:53 [http-nio-8080-exec-5] INFO  c.Z.p.controller.PedidoController - 🚴 GET /api/pedidos/repartidor/9 - Obteniendo pedidos del repartidor
+2025-11-16 17:20:53 [http-nio-8080-exec-5] DEBUG c.Z.proyecto.service.PedidoService - Obteniendo pedidos del repartidor: 9
+2025-11-16 17:20:58 [http-nio-8080-exec-1] DEBUG c.Z.p.s.JwtAuthenticationFilter - Usuario autenticado: dave@gmail.com
+2025-11-16 17:20:58 [http-nio-8080-exec-1] INFO  c.Z.p.controller.UsuarioController - GET /api/usuarios - Obteniendo todos los usuarios
+2025-11-16 17:20:58 [http-nio-8080-exec-1] DEBUG c.Z.proyecto.service.UsuarioService - Obteniendo todos los usuarios
+2025-11-16 17:21:07 [http-nio-8080-exec-2] DEBUG c.Z.p.s.JwtAuthenticationFilter - Usuario autenticado: dave@gmail.com
+2025-11-16 17:21:07 [http-nio-8080-exec-6] DEBUG c.Z.p.s.JwtAuthenticationFilter - Usuario autenticado: dave@gmail.com
+2025-11-16 17:21:07 [http-nio-8080-exec-2] INFO  c.Z.p.controller.UsuarioController - GET /api/usuarios - Obteniendo todos los usuarios
+2025-11-16 17:21:07 [http-nio-8080-exec-6] INFO  c.Z.p.controller.PedidoController - 📋 GET /api/pedidos - Obteniendo todos los pedidos
+2025-11-16 17:21:07 [http-nio-8080-exec-2] DEBUG c.Z.proyecto.service.UsuarioService - Obteniendo todos los usuarios
+2025-11-16 17:21:07 [http-nio-8080-exec-6] DEBUG c.Z.proyecto.service.PedidoService - Obteniendo todos los pedidos
+2025-11-16 17:21:07 [http-nio-8080-exec-6] INFO  c.Z.p.controller.PedidoController - ✅ Retornando 8 pedidos
+2025-11-16 17:21:10 [http-nio-8080-exec-10] DEBUG c.Z.p.s.JwtAuthenticationFilter - Usuario autenticado: dave@gmail.com
+2025-11-16 17:21:10 [http-nio-8080-exec-10] INFO  c.Z.p.controller.UsuarioController - GET /api/usuarios - Obteniendo todos los usuarios
+2025-11-16 17:21:10 [http-nio-8080-exec-10] DEBUG c.Z.proyecto.service.UsuarioService - Obteniendo todos los usuarios
+2025-11-16 17:21:12 [http-nio-8080-exec-3] DEBUG c.Z.p.s.JwtAuthenticationFilter - Usuario autenticado: dave@gmail.com
+2025-11-16 17:21:12 [http-nio-8080-exec-9] DEBUG c.Z.p.s.JwtAuthenticationFilter - Usuario autenticado: dave@gmail.com
+2025-11-16 17:21:12 [http-nio-8080-exec-9] INFO  c.Z.p.controller.UsuarioController - GET /api/usuarios - Obteniendo todos los usuarios
+2025-11-16 17:21:12 [http-nio-8080-exec-3] INFO  c.Z.p.controller.PedidoController - 📋 GET /api/pedidos - Obteniendo todos los pedidos
+2025-11-16 17:21:12 [http-nio-8080-exec-9] DEBUG c.Z.proyecto.service.UsuarioService - Obteniendo todos los usuarios
+2025-11-16 17:21:12 [http-nio-8080-exec-3] DEBUG c.Z.proyecto.service.PedidoService - Obteniendo todos los pedidos
+2025-11-16 17:21:12 [http-nio-8080-exec-3] INFO  c.Z.p.controller.PedidoController - ✅ Retornando 8 pedidos
+2025-11-16 17:22:02 [http-nio-8080-exec-2] INFO  c.Z.p.controller.AuthController - Intento de registro para: prueba44@gmail.com
+2025-11-16 17:22:02 [http-nio-8080-exec-2] INFO  c.Z.p.controller.AuthController - Registro exitoso para: prueba44@gmail.com
+2025-11-16 17:22:03 [http-nio-8080-exec-6] DEBUG c.Z.p.s.JwtAuthenticationFilter - Usuario autenticado: prueba44@gmail.com
+2025-11-16 17:22:03 [http-nio-8080-exec-6] INFO  c.Z.p.controller.PedidoController - 📋 GET /api/pedidos - Obteniendo todos los pedidos
+2025-11-16 17:22:03 [http-nio-8080-exec-6] DEBUG c.Z.proyecto.service.PedidoService - Obteniendo todos los pedidos
+2025-11-16 17:22:03 [http-nio-8080-exec-8] DEBUG c.Z.p.s.JwtAuthenticationFilter - Usuario autenticado: prueba44@gmail.com
+2025-11-16 17:22:03 [http-nio-8080-exec-8] INFO  c.Z.p.controller.UsuarioController - GET /api/usuarios - Obteniendo todos los usuarios
+2025-11-16 17:22:03 [http-nio-8080-exec-8] DEBUG c.Z.proyecto.service.UsuarioService - Obteniendo todos los usuarios
+2025-11-16 17:22:03 [http-nio-8080-exec-6] INFO  c.Z.p.controller.PedidoController - ✅ Retornando 8 pedidos
+2025-11-16 17:22:20 [http-nio-8080-exec-9] INFO  c.Z.p.controller.AuthController - Intento de login para: dave@gmail.com
+2025-11-16 17:22:20 [http-nio-8080-exec-9] INFO  c.Z.p.controller.AuthController - Login exitoso para: dave@gmail.com
+2025-11-16 17:22:20 [http-nio-8080-exec-3] DEBUG c.Z.p.s.JwtAuthenticationFilter - Usuario autenticado: dave@gmail.com
+2025-11-16 17:22:20 [http-nio-8080-exec-1] DEBUG c.Z.p.s.JwtAuthenticationFilter - Usuario autenticado: dave@gmail.com
+2025-11-16 17:22:20 [http-nio-8080-exec-3] INFO  c.Z.p.controller.PedidoController - 📋 GET /api/pedidos - Obteniendo todos los pedidos
+2025-11-16 17:22:20 [http-nio-8080-exec-1] INFO  c.Z.p.controller.UsuarioController - GET /api/usuarios - Obteniendo todos los usuarios
+2025-11-16 17:22:20 [http-nio-8080-exec-3] DEBUG c.Z.proyecto.service.PedidoService - Obteniendo todos los pedidos
+2025-11-16 17:22:20 [http-nio-8080-exec-1] DEBUG c.Z.proyecto.service.UsuarioService - Obteniendo todos los usuarios
+2025-11-16 17:22:20 [http-nio-8080-exec-3] INFO  c.Z.p.controller.PedidoController - ✅ Retornando 8 pedidos
+2025-11-16 17:22:24 [http-nio-8080-exec-5] DEBUG c.Z.p.s.JwtAuthenticationFilter - Usuario autenticado: dave@gmail.com
+2025-11-16 17:22:24 [http-nio-8080-exec-5] INFO  c.Z.p.controller.UsuarioController - GET /api/usuarios - Obteniendo todos los usuarios
+2025-11-16 17:22:24 [http-nio-8080-exec-5] DEBUG c.Z.proyecto.service.UsuarioService - Obteniendo todos los usuarios
+2025-11-16 17:22:25 [http-nio-8080-exec-4] DEBUG c.Z.p.s.JwtAuthenticationFilter - Usuario autenticado: dave@gmail.com
+2025-11-16 17:22:25 [http-nio-8080-exec-2] DEBUG c.Z.p.s.JwtAuthenticationFilter - Usuario autenticado: dave@gmail.com
+2025-11-16 17:22:25 [http-nio-8080-exec-4] INFO  c.Z.p.controller.PedidoController - 📋 GET /api/pedidos - Obteniendo todos los pedidos
+2025-11-16 17:22:25 [http-nio-8080-exec-2] INFO  c.Z.p.controller.UsuarioController - GET /api/usuarios - Obteniendo todos los usuarios
+2025-11-16 17:22:25 [http-nio-8080-exec-4] DEBUG c.Z.proyecto.service.PedidoService - Obteniendo todos los pedidos
+2025-11-16 17:22:25 [http-nio-8080-exec-2] DEBUG c.Z.proyecto.service.UsuarioService - Obteniendo todos los usuarios
+2025-11-16 17:22:25 [http-nio-8080-exec-4] INFO  c.Z.p.controller.PedidoController - ✅ Retornando 8 pedidos
+2025-11-16 17:22:26 [http-nio-8080-exec-8] DEBUG c.Z.p.s.JwtAuthenticationFilter - Usuario autenticado: dave@gmail.com
+2025-11-16 17:22:26 [http-nio-8080-exec-8] INFO  c.Z.p.controller.PedidoController - 🚴 GET /api/pedidos/repartidor/9 - Obteniendo pedidos del repartidor
+2025-11-16 17:22:26 [http-nio-8080-exec-8] DEBUG c.Z.proyecto.service.PedidoService - Obteniendo pedidos del repartidor: 9
+2025-11-16 17:22:30 [http-nio-8080-exec-9] DEBUG c.Z.p.s.JwtAuthenticationFilter - Usuario autenticado: dave@gmail.com
+2025-11-16 17:22:30 [http-nio-8080-exec-9] INFO  c.Z.p.controller.UsuarioController - GET /api/usuarios - Obteniendo todos los usuarios
+2025-11-16 17:22:30 [http-nio-8080-exec-10] DEBUG c.Z.p.s.JwtAuthenticationFilter - Usuario autenticado: dave@gmail.com
+2025-11-16 17:22:30 [http-nio-8080-exec-10] INFO  c.Z.p.controller.PedidoController - 📋 GET /api/pedidos - Obteniendo todos los pedidos
+2025-11-16 17:22:30 [http-nio-8080-exec-9] DEBUG c.Z.proyecto.service.UsuarioService - Obteniendo todos los usuarios
+2025-11-16 17:22:30 [http-nio-8080-exec-10] DEBUG c.Z.proyecto.service.PedidoService - Obteniendo todos los pedidos
+2025-11-16 17:22:30 [http-nio-8080-exec-10] INFO  c.Z.p.controller.PedidoController - ✅ Retornando 8 pedidos
+2025-11-16 17:22:32 [http-nio-8080-exec-1] DEBUG c.Z.p.s.JwtAuthenticationFilter - Usuario autenticado: dave@gmail.com
+2025-11-16 17:22:32 [http-nio-8080-exec-1] INFO  c.Z.p.controller.UsuarioController - GET /api/usuarios - Obteniendo todos los usuarios
+2025-11-16 17:22:32 [http-nio-8080-exec-1] DEBUG c.Z.proyecto.service.UsuarioService - Obteniendo todos los usuarios
+2025-11-16 17:22:40 [http-nio-8080-exec-2] DEBUG c.Z.p.s.JwtAuthenticationFilter - Usuario autenticado: dave@gmail.com
+2025-11-16 17:22:40 [http-nio-8080-exec-2] INFO  c.Z.p.controller.LugarController - 📍 Calculando ruta por coordenadas
+2025-11-16 17:22:40 [http-nio-8080-exec-2] INFO  c.Zygo.proyecto.service.LugarService - Buscando nodo más cercano a 5.712171023433167, -72.93395694590794
+2025-11-16 17:22:40 [http-nio-8080-exec-2] INFO  c.Zygo.proyecto.service.LugarService - Buscando nodo más cercano a 5.715054565860967, -72.929237320823
+2025-11-16 17:22:40 [http-nio-8080-exec-2] INFO  c.Zygo.proyecto.service.LugarService - Calculando ruta de 'Nodo_5.712209_-72.933942' a 'Nodo_5.715079_-72.929255'
+2025-11-16 17:22:40 [http-nio-8080-exec-2] INFO  c.Z.proyecto.service.DijkstraService - Calculando ruta óptima de nodo 34799 a nodo 32956 (considerando tráfico: true)
+2025-11-16 17:22:42 [http-nio-8080-exec-4] DEBUG c.Z.p.s.JwtAuthenticationFilter - Usuario autenticado: dave@gmail.com
+2025-11-16 17:22:42 [http-nio-8080-exec-4] INFO  c.Z.p.controller.LugarController - 📍 Calculando ruta por coordenadas
+2025-11-16 17:22:42 [http-nio-8080-exec-4] INFO  c.Zygo.proyecto.service.LugarService - Buscando nodo más cercano a 5.712171023433167, -72.93395694590794
+2025-11-16 17:22:42 [http-nio-8080-exec-4] INFO  c.Zygo.proyecto.service.LugarService - Buscando nodo más cercano a 5.715054565860967, -72.929237320823
+2025-11-16 17:22:42 [http-nio-8080-exec-4] INFO  c.Zygo.proyecto.service.LugarService - Calculando ruta de 'Nodo_5.712209_-72.933942' a 'Nodo_5.715079_-72.929255'
+2025-11-16 17:22:42 [http-nio-8080-exec-4] INFO  c.Z.proyecto.service.DijkstraService - Calculando ruta óptima de nodo 34799 a nodo 32956 (considerando tráfico: true)
+2025-11-16 17:28:13 [http-nio-8080-exec-9] DEBUG c.Z.p.s.JwtAuthenticationFilter - Usuario autenticado: dave@gmail.com
+2025-11-16 17:28:13 [http-nio-8080-exec-10] DEBUG c.Z.p.s.JwtAuthenticationFilter - Usuario autenticado: dave@gmail.com
+2025-11-16 17:28:13 [http-nio-8080-exec-9] INFO  c.Z.p.controller.PedidoController - 📋 GET /api/pedidos - Obteniendo todos los pedidos
+2025-11-16 17:28:13 [http-nio-8080-exec-10] INFO  c.Z.p.controller.UsuarioController - GET /api/usuarios - Obteniendo todos los usuarios
+2025-11-16 17:28:13 [http-nio-8080-exec-9] DEBUG c.Z.proyecto.service.PedidoService - Obteniendo todos los pedidos
+2025-11-16 17:28:13 [http-nio-8080-exec-10] DEBUG c.Z.proyecto.service.UsuarioService - Obteniendo todos los usuarios
+2025-11-16 17:28:13 [http-nio-8080-exec-9] INFO  c.Z.p.controller.PedidoController - ✅ Retornando 8 pedidos
+2025-11-16 17:28:14 [http-nio-8080-exec-1] DEBUG c.Z.p.s.JwtAuthenticationFilter - Usuario autenticado: dave@gmail.com
+2025-11-16 17:28:14 [http-nio-8080-exec-1] INFO  c.Z.p.controller.UsuarioController - GET /api/usuarios - Obteniendo todos los usuarios
+2025-11-16 17:28:14 [http-nio-8080-exec-1] DEBUG c.Z.proyecto.service.UsuarioService - Obteniendo todos los usuarios
+2025-11-16 17:37:26 [http-nio-8080-exec-2] DEBUG c.Z.p.s.JwtAuthenticationFilter - Usuario autenticado: dave@gmail.com
+2025-11-16 17:37:26 [http-nio-8080-exec-2] INFO  c.Z.p.controller.UsuarioController - GET /api/usuarios - Obteniendo todos los usuarios
+2025-11-16 17:37:26 [http-nio-8080-exec-2] DEBUG c.Z.proyecto.service.UsuarioService - Obteniendo todos los usuarios
+2025-11-16 17:37:33 [http-nio-8080-exec-4] DEBUG c.Z.p.s.JwtAuthenticationFilter - Usuario autenticado: dave@gmail.com
+2025-11-16 17:37:33 [http-nio-8080-exec-4] INFO  c.Z.p.controller.LugarController - 📍 Calculando ruta por coordenadas
+2025-11-16 17:37:33 [http-nio-8080-exec-4] INFO  c.Zygo.proyecto.service.LugarService - Buscando nodo más cercano a 5.7157150419042315, -72.93993550816893
+2025-11-16 17:37:33 [http-nio-8080-exec-4] INFO  c.Zygo.proyecto.service.LugarService - Buscando nodo más cercano a 5.717327681513663, -72.93781167688068
+2025-11-16 17:37:33 [http-nio-8080-exec-4] INFO  c.Zygo.proyecto.service.LugarService - Calculando ruta de 'Nodo_5.715727_-72.940024' a 'Nodo_5.717331_-72.937831'
+2025-11-16 17:37:33 [http-nio-8080-exec-4] INFO  c.Z.proyecto.service.DijkstraService - Calculando ruta óptima de nodo 32848 a nodo 35218 (considerando tráfico: true)
+2025-11-16 17:37:34 [http-nio-8080-exec-6] DEBUG c.Z.p.s.JwtAuthenticationFilter - Usuario autenticado: dave@gmail.com
+2025-11-16 17:37:34 [http-nio-8080-exec-6] INFO  c.Z.p.controller.LugarController - 📍 Calculando ruta por coordenadas
+2025-11-16 17:37:34 [http-nio-8080-exec-6] INFO  c.Zygo.proyecto.service.LugarService - Buscando nodo más cercano a 5.7157150419042315, -72.93993550816893
+2025-11-16 17:37:34 [http-nio-8080-exec-6] INFO  c.Zygo.proyecto.service.LugarService - Buscando nodo más cercano a 5.717327681513663, -72.93781167688068
+2025-11-16 17:37:34 [http-nio-8080-exec-6] INFO  c.Zygo.proyecto.service.LugarService - Calculando ruta de 'Nodo_5.715727_-72.940024' a 'Nodo_5.717331_-72.937831'
+2025-11-16 17:37:34 [http-nio-8080-exec-6] INFO  c.Z.proyecto.service.DijkstraService - Calculando ruta óptima de nodo 32848 a nodo 35218 (considerando tráfico: true)
