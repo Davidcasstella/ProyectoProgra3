@@ -1,17 +1,25 @@
 /* src/app/modules/gestion-pedidos/crear-pedidos/crear-pedidos.css */
 
 /* ===== CONTENEDOR PRINCIPAL ===== */
-.crear-pedidos-container {
-  max-width: 1200px;
-  margin: 0 auto;
-  padding: 2rem;
+.crear-pedidos-wrapper {
+  padding: 1.5rem;
   background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
   min-height: 100vh;
 }
 
 /* ===== HEADER ===== */
 .page-header {
-  margin-bottom: 2rem;
+  margin-bottom: 1.5rem;
+}
+
+.header-content {
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+}
+
+.header-text {
+  flex: 1;
   text-align: center;
 }
 
@@ -27,13 +35,45 @@
   font-size: 1rem;
 }
 
+/* Botón de volver */
+.btn-volver {
+  padding: 0.75rem 1.5rem;
+  background: rgba(139, 92, 246, 0.2);
+  border: 1px solid rgba(139, 92, 246, 0.5);
+  color: #a78bfa;
+  border-radius: 0.5rem;
+  cursor: pointer;
+  font-weight: 600;
+  font-size: 1rem;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  white-space: nowrap;
+}
+
+.btn-volver:hover {
+  background: rgba(139, 92, 246, 0.3);
+  border-color: #8b5cf6;
+  color: #ffffff;
+  transform: translateX(-5px);
+}
+
+.btn-volver:active {
+  transform: translateX(-5px) scale(0.95);
+}
+
 /* ===== ALERTAS ===== */
 .alert {
   padding: 1rem;
   border-radius: 0.5rem;
-  margin-bottom: 1.5rem;
+  margin-bottom: 1rem;
   font-weight: 500;
   animation: slideDown 0.3s ease;
+  text-align: center;
+  max-width: 1400px;
+  margin-left: auto;
+  margin-right: auto;
 }
 
 .alert-error {
@@ -69,27 +109,38 @@
   }
 }
 
-/* ===== FORMULARIO ===== */
-.pedido-form {
-  background: rgba(255, 255, 255, 0.05);
-  backdrop-filter: blur(10px);
-  border-radius: 1rem;
-  padding: 2rem;
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
-  border: 1px solid rgba(255, 255, 255, 0.1);
+/* ===== LAYOUT PRINCIPAL (2 COLUMNAS) ===== */
+.main-layout {
+  display: grid;
+  grid-template-columns: 250px 1fr; /* Formulario más pequeño, mapa más grande */
+  gap: 1.5rem;
+  max-width: 1800px;
+  margin: 0 auto;
+  height: calc(150vh - 50px);
 }
 
-/* ===== GRID DE FORMULARIO ===== */
-.form-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-  gap: 1.5rem;
-  margin-bottom: 1.5rem;
+/* ===== PANEL DE FORMULARIO ===== */
+.form-panel {
+  background: rgba(30, 30, 50, 0.95);
+  backdrop-filter: blur(10px);
+  border-radius: 1rem;
+  padding: 1.5rem;
+  overflow-y: auto;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+  border: 1px solid rgba(139, 92, 246, 0.3);
+  height: 100%;
+}
+
+.section-title {
+  color: #ffffff;
+  font-size: 1.25rem;
+  margin-bottom: 1rem;
+  font-weight: 700;
 }
 
 /* ===== GRUPOS DE FORMULARIO ===== */
 .form-group {
-  margin-bottom: 1.5rem;
+  margin-bottom: 1.25rem;
 }
 
 .form-group label {
@@ -97,7 +148,7 @@
   color: #e5e7eb;
   font-weight: 600;
   margin-bottom: 0.5rem;
-  font-size: 0.95rem;
+  font-size: 0.9rem;
 }
 
 .required {
@@ -107,12 +158,12 @@
 
 .form-control {
   width: 100%;
-  padding: 0.75rem 1rem;
+  padding: 0.75rem;
   background: rgba(255, 255, 255, 0.1);
   border: 1px solid rgba(255, 255, 255, 0.2);
   border-radius: 0.5rem;
   color: #ffffff;
-  font-size: 1rem;
+  font-size: 0.95rem;
   transition: all 0.3s ease;
 }
 
@@ -131,12 +182,12 @@
 .form-control[readonly] {
   background: rgba(255, 255, 255, 0.05);
   cursor: not-allowed;
-  opacity: 0.7;
+  opacity: 0.8;
 }
 
 textarea.form-control {
   resize: vertical;
-  min-height: 100px;
+  min-height: 80px;
 }
 
 select.form-control {
@@ -150,75 +201,84 @@ select.form-control {
 
 .error-text {
   color: #fca5a5;
-  font-size: 0.875rem;
+  font-size: 0.8rem;
   margin-top: 0.25rem;
   display: block;
 }
 
 .help-text {
   color: #9ca3af;
-  font-size: 0.875rem;
+  font-size: 0.8rem;
   margin-top: 0.25rem;
   display: block;
 }
 
-/* ===== INPUT CON BOTÓN ===== */
-.input-with-button {
-  display: flex;
-  gap: 0.5rem;
+/* ===== DIVIDER ===== */
+.divider {
+  border: none;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  margin: 1.5rem 0;
 }
 
-.input-with-button .form-control {
+/* ===== INFORMACIÓN DE RUTA ===== */
+.ruta-info {
+  background: rgba(34, 197, 94, 0.1);
+  border: 1px solid rgba(34, 197, 94, 0.3);
+  border-radius: 0.75rem;
+  padding: 1rem;
+  margin-bottom: 1rem;
+}
+
+.ruta-info h3 {
+  color: #ffffff;
+  font-size: 1rem;
+  margin-bottom: 0.75rem;
+  text-align: center;
+}
+
+.ruta-stats {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.stat-item {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  background: rgba(255, 255, 255, 0.1);
+  padding: 0.75rem;
+  border-radius: 0.5rem;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.stat-icon {
+  font-size: 1.5rem;
+}
+
+.stat-content {
+  display: flex;
+  flex-direction: column;
   flex: 1;
 }
 
-.btn-map {
-  padding: 0.75rem 1.5rem;
-  background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%);
-  color: white;
-  border: none;
-  border-radius: 0.5rem;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all 0.3s ease;
-  white-space: nowrap;
+.stat-label {
+  color: #9ca3af;
+  font-size: 0.8rem;
+  margin-bottom: 0.125rem;
 }
 
-.btn-map:hover:not(:disabled) {
-  transform: translateY(-2px);
-  box-shadow: 0 8px 16px rgba(139, 92, 246, 0.4);
-}
-
-.btn-map:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
-}
-
-/* ===== SECCIÓN DE UBICACIONES ===== */
-.ubicaciones-section {
-  background: rgba(139, 92, 246, 0.1);
-  border-radius: 0.75rem;
-  padding: 1.5rem;
-  margin-bottom: 1.5rem;
-  border: 1px solid rgba(139, 92, 246, 0.3);
-}
-
-.ubicaciones-section h2 {
+.stat-value {
   color: #ffffff;
-  font-size: 1.5rem;
-  margin-bottom: 0.5rem;
+  font-size: 1rem;
+  font-weight: 700;
 }
 
-.section-subtitle {
-  color: #a0aec0;
-  font-size: 0.9rem;
-  margin-bottom: 1.5rem;
-}
-
+/* ===== BOTÓN LIMPIAR ===== */
 .limpiar-container {
   display: flex;
   justify-content: flex-end;
-  margin-top: 1rem;
+  margin-bottom: 1rem;
 }
 
 .btn-limpiar {
@@ -229,6 +289,7 @@ select.form-control {
   border-radius: 0.5rem;
   cursor: pointer;
   font-weight: 600;
+  font-size: 0.9rem;
   transition: all 0.3s ease;
 }
 
@@ -237,76 +298,22 @@ select.form-control {
   transform: translateY(-2px);
 }
 
-/* ===== INFORMACIÓN DE RUTA ===== */
-.ruta-info {
-  background: rgba(34, 197, 94, 0.1);
-  border: 1px solid rgba(34, 197, 94, 0.3);
-  border-radius: 0.75rem;
-  padding: 1.5rem;
-  margin-bottom: 1.5rem;
-}
-
-.ruta-info h3 {
-  color: #ffffff;
-  font-size: 1.25rem;
-  margin-bottom: 1rem;
-}
-
-.ruta-stats {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-  gap: 1rem;
-}
-
-.stat-card {
-  display: flex;
-  align-items: center;
-  gap: 1rem;
-  background: rgba(255, 255, 255, 0.1);
-  padding: 1rem;
-  border-radius: 0.5rem;
-  border: 1px solid rgba(255, 255, 255, 0.2);
-}
-
-.stat-icon {
-  font-size: 2rem;
-}
-
-.stat-content {
-  display: flex;
-  flex-direction: column;
-}
-
-.stat-label {
-  color: #9ca3af;
-  font-size: 0.875rem;
-  margin-bottom: 0.25rem;
-}
-
-.stat-value {
-  color: #ffffff;
-  font-size: 1.25rem;
-  font-weight: 700;
-}
-
 /* ===== BOTONES DE ACCIÓN ===== */
 .form-actions {
   display: flex;
-  gap: 1rem;
-  justify-content: flex-end;
-  margin-top: 2rem;
-  padding-top: 1.5rem;
-  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  gap: 0.75rem;
+  justify-content: stretch;
 }
 
 .btn {
-  padding: 0.75rem 2rem;
+  flex: 1;
+  padding: 0.75rem;
   border: none;
   border-radius: 0.5rem;
   font-weight: 600;
   cursor: pointer;
   transition: all 0.3s ease;
-  font-size: 1rem;
+  font-size: 0.95rem;
 }
 
 .btn-primary {
@@ -334,47 +341,52 @@ select.form-control {
   cursor: not-allowed;
 }
 
-/* ===== MODAL ===== */
-.modal-overlay {
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: rgba(0, 0, 0, 0.8);
-  backdrop-filter: blur(5px);
+/* ===== PANEL DE MAPA ===== */
+.map-panel {
+  border-radius: 1rem;
+  overflow: hidden;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+  border: 1px solid rgba(139, 92, 246, 0.3);
+  height: 100%;
   display: flex;
+}
+
+.map-panel app-selector-ubicacion {
+  display: block;
+  height: 100%;
+  width: 100%;
+}
+
+/* ===== PANEL DE INSTRUCCIONES DE NAVEGACIÓN ===== */
+.instrucciones-navegacion {
+  grid-column: 1 / -1;
+  grid-row: 2;
+  background: rgba(30, 30, 50, 0.95);
+  backdrop-filter: blur(10px);
+  border-radius: 1rem;
+  padding: 1.5rem;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+  border: 1px solid rgba(59, 130, 246, 0.3);
+  height: 250px;
+  max-height: 250px;
+  overflow-y: auto;
+  animation: slideUp 0.5s ease;
+  position: relative;
+  margin-top: 0;
+}
+
+.instrucciones-navegacion .no-instrucciones {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
   align-items: center;
   justify-content: center;
-  z-index: 1000;
-  animation: fadeIn 0.3s ease;
-}
-
-@keyframes fadeIn {
-  from {
-    opacity: 0;
-  }
-  to {
-    opacity: 1;
-  }
-}
-
-.modal-content {
-  background: #1a1a2e;
-  border-radius: 1rem;
-  width: 90%;
-  max-width: 900px;
-  max-height: 90vh;
-  overflow: hidden;
-  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  animation: slideUp 0.3s ease;
 }
 
 @keyframes slideUp {
   from {
     opacity: 0;
-    transform: translateY(30px);
+    transform: translateY(20px);
   }
   to {
     opacity: 1;
@@ -382,106 +394,201 @@ select.form-control {
   }
 }
 
-.modal-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 1.5rem;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-}
-
-.modal-header h2 {
+.instrucciones-navegacion h3 {
   color: #ffffff;
-  font-size: 1.5rem;
-  margin: 0;
+  font-size: 1.25rem;
+  margin-bottom: 1rem;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
 }
 
-.btn-close {
-  background: rgba(239, 68, 68, 0.2);
-  border: 1px solid #ef4444;
-  color: #fca5a5;
-  width: 2.5rem;
-  height: 2.5rem;
+.instrucciones-navegacion h3 .icon {
+  font-size: 1.5rem;
+}
+
+.pasos-navegacion {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.paso-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 1rem;
+  padding: 1rem;
+  background: rgba(59, 130, 246, 0.1);
+  border-left: 3px solid #3b82f6;
   border-radius: 0.5rem;
-  cursor: pointer;
-  font-size: 1.25rem;
   transition: all 0.3s ease;
 }
 
-.btn-close:hover {
-  background: rgba(239, 68, 68, 0.3);
-  transform: rotate(90deg);
+.paso-item:hover {
+  background: rgba(59, 130, 246, 0.15);
+  transform: translateX(5px);
 }
 
-.modal-body {
-  padding: 1.5rem;
-  max-height: 70vh;
-  overflow-y: auto;
-}
-
-.modal-instruction {
-  color: #a0aec0;
-  margin-bottom: 1rem;
-  text-align: center;
-}
-
-.modal-instruction strong {
-  color: #ffffff;
-  font-weight: 700;
-}
-
-.map-container {
-  height: 500px;
-  border-radius: 0.5rem;
-  overflow: hidden;
-  border: 1px solid rgba(255, 255, 255, 0.1);
-}
-
-.map-container app-selector-ubicacion {
-  display: block;
-  height: 100%;
-  width: 100%;
-}
-
-.modal-footer {
-  padding: 1.5rem;
-  border-top: 1px solid rgba(255, 255, 255, 0.1);
+.paso-numero {
+  min-width: 32px;
+  height: 32px;
+  background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+  color: white;
+  border-radius: 50%;
   display: flex;
-  justify-content: flex-end;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 0.9rem;
+  box-shadow: 0 4px 8px rgba(59, 130, 246, 0.3);
+}
+
+.paso-contenido {
+  flex: 1;
+}
+
+.paso-direccion {
+  color: #60a5fa;
+  font-weight: 600;
+  margin-bottom: 0.25rem;
+}
+
+.paso-instruccion {
+  color: #e5e7eb;
+  font-size: 0.95rem;
+  line-height: 1.5;
+}
+
+.paso-distancia {
+  color: #9ca3af;
+  font-size: 0.85rem;
+  margin-top: 0.25rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.paso-distancia .badge {
+  background: rgba(59, 130, 246, 0.2);
+  padding: 0.25rem 0.5rem;
+  border-radius: 0.25rem;
+  font-weight: 600;
+  color: #93c5fd;
+}
+
+.no-instrucciones {
+  text-align: center;
+  color: #9ca3af;
+  padding: 2rem;
+  font-style: italic;
+}
+
+.no-instrucciones .icon {
+  font-size: 3rem;
+  margin-bottom: 1rem;
+  opacity: 0.5;
+}
+
+/* ===== SCROLLBAR PERSONALIZADO ===== */
+.form-panel::-webkit-scrollbar,
+.instrucciones-navegacion::-webkit-scrollbar {
+  width: 8px;
+}
+
+.form-panel::-webkit-scrollbar-track,
+.instrucciones-navegacion::-webkit-scrollbar-track {
+  background: rgba(0, 0, 0, 0.2);
+}
+
+.form-panel::-webkit-scrollbar-thumb,
+.instrucciones-navegacion::-webkit-scrollbar-thumb {
+  background: rgba(139, 92, 246, 0.5);
+  border-radius: 4px;
+}
+
+.form-panel::-webkit-scrollbar-thumb:hover,
+.instrucciones-navegacion::-webkit-scrollbar-thumb:hover {
+  background: rgba(139, 92, 246, 0.8);
 }
 
 /* ===== RESPONSIVE ===== */
+@media (max-width: 1200px) {
+  .main-layout {
+    grid-template-columns: 340px 1fr;
+  }
+
+  .form-panel {
+    padding: 1.25rem;
+  }
+}
+
+@media (max-width: 992px) {
+  .main-layout {
+    grid-template-columns: 1fr;
+    grid-template-rows: auto 1fr auto;
+    height: auto;
+  }
+
+  .form-panel {
+    max-height: none;
+  }
+
+  .map-panel {
+    height: 600px;
+  }
+
+  .instrucciones-navegacion {
+    height: 200px;
+    max-height: 200px;
+  }
+}
+
 @media (max-width: 768px) {
-  .crear-pedidos-container {
+  .crear-pedidos-wrapper {
     padding: 1rem;
   }
 
-  .pedido-form {
-    padding: 1.5rem;
+  .header-content {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 1rem;
   }
 
-  .form-grid {
-    grid-template-columns: 1fr;
+  .header-text {
+    text-align: left;
+  }
+
+  .page-header h1 {
+    font-size: 1.5rem;
+  }
+
+  .subtitle {
+    font-size: 0.9rem;
+  }
+
+  .main-layout {
+    gap: 1rem;
+  }
+
+  .form-panel {
+    padding: 1rem;
   }
 
   .form-actions {
-    flex-direction: column-reverse;
+    flex-direction: column;
   }
 
   .btn {
     width: 100%;
   }
 
-  .ruta-stats {
-    grid-template-columns: 1fr;
+  .map-panel {
+    height: 500px;
   }
 
-  .modal-content {
-    width: 95%;
-    max-height: 95vh;
-  }
-
-  .map-placeholder {
-    height: 400px;
+  .btn-volver {
+    width: 100%;
+    justify-content: center;
   }
 }

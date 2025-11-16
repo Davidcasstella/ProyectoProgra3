@@ -1,6 +1,6 @@
 // src/app/modules/gestion-pedidos/crear-pedidos/crear-pedidos.ts
 
-import { Component, OnInit, ViewChild } from '@angular/core';
+import { Component, OnInit, ViewChild, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
@@ -25,12 +25,7 @@ export class CrearPedidos implements OnInit {
   clientes: Usuario[] = [];
   repartidores: Usuario[] = [];
   
-  // Estado del mapa y modal
-  mostrarModalMapa = false;
-  seleccionandoOrigen = false;
-  seleccionandoDestino = false;
-  
-  // Coordenadas seleccionadas
+  // Coordenadas seleccionadas desde el mapa
   origenCoordenadas: Coordenadas | null = null;
   destinoCoordenadas: Coordenadas | null = null;
   
@@ -38,6 +33,7 @@ export class CrearPedidos implements OnInit {
   distanciaCalculada: number | null = null;
   costoCalculado: number | null = null;
   tiempoEstimado: number | null = null;
+  instruccionesRuta: Array<{texto: string, distancia?: string, tiempo?: string}> | null = null;
   
   // Estados
   cargando = false;
@@ -50,7 +46,8 @@ export class CrearPedidos implements OnInit {
     private pedidoService: PedidoService,
     private usuarioService: UsuarioService,
     private lugarService: LugarService,
-    private router: Router
+    private router: Router,
+    private cdr: ChangeDetectorRef
   ) {}
 
   ngOnInit(): void {
@@ -66,8 +63,8 @@ export class CrearPedidos implements OnInit {
       clienteId: ['', Validators.required],
       repartidorId: [''],
       descripcion: ['', [Validators.required, Validators.minLength(10)]],
-      direccionOrigen: ['', Validators.required],
-      direccionDestino: ['', Validators.required],
+      direccionOrigen: [{ value: '', disabled: true }],
+      direccionDestino: [{ value: '', disabled: true }],
       distanciaKm: [{ value: '', disabled: true }],
       costo: [{ value: '', disabled: true }]
     });
@@ -90,59 +87,35 @@ export class CrearPedidos implements OnInit {
   }
 
   /**
-   * Abre modal del mapa para seleccionar origen
+   * Maneja la selección de origen desde el componente de mapa
    */
-  seleccionarOrigen(): void {
-    console.log('🟢 Abriendo modal para seleccionar ORIGEN');
-    this.seleccionandoOrigen = true;
-    this.seleccionandoDestino = false;
-    this.mostrarModalMapa = true;
-  }
+  onOrigenSeleccionado(coords: Coordenadas): void {
+    console.log('🟢 Origen seleccionado:', coords);
+    this.origenCoordenadas = { ...coords };
+    
+    this.pedidoForm.patchValue({
+      direccionOrigen: `Lat: ${coords.lat.toFixed(6)}, Lng: ${coords.lng.toFixed(6)}`
+    });
 
-  /**
-   * Abre modal del mapa para seleccionar destino
-   */
-  seleccionarDestino(): void {
-    console.log('🔴 Abriendo modal para seleccionar DESTINO');
-    this.seleccionandoOrigen = false;
-    this.seleccionandoDestino = true;
-    this.mostrarModalMapa = true;
-  }
-
-  /**
-   * Maneja la selección de ubicación desde el mapa
-   */
-  onUbicacionSeleccionada(coords: Coordenadas): void {
-    console.log('📍 Ubicación recibida del mapa:', coords);
-    console.log('Estado actual - Origen:', this.seleccionandoOrigen, 'Destino:', this.seleccionandoDestino);
-
-    if (this.seleccionandoOrigen) {
-      this.origenCoordenadas = { ...coords };
-      this.pedidoForm.patchValue({
-        direccionOrigen: `Lat: ${coords.lat.toFixed(6)}, Lng: ${coords.lng.toFixed(6)}`
-      });
-      console.log('✅ Origen guardado:', this.origenCoordenadas);
-      this.mostrarExito('Origen seleccionado correctamente');
-      
-      setTimeout(() => {
-        this.cerrarModalMapa();
-      }, 500);
-    } 
-    else if (this.seleccionandoDestino) {
-      this.destinoCoordenadas = { ...coords };
-      this.pedidoForm.patchValue({
-        direccionDestino: `Lat: ${coords.lat.toFixed(6)}, Lng: ${coords.lng.toFixed(6)}`
-      });
-      console.log('✅ Destino guardado:', this.destinoCoordenadas);
-      this.mostrarExito('Destino seleccionado correctamente');
-      
-      setTimeout(() => {
-        this.cerrarModalMapa();
-      }, 500);
+    // Si ya hay destino, calcular ruta automáticamente
+    if (this.destinoCoordenadas) {
+      this.calcularRutaAutomatica();
     }
+  }
 
-    if (this.origenCoordenadas && this.destinoCoordenadas) {
-      console.log('🧭 Ambos puntos seleccionados, calculando ruta...');
+  /**
+   * Maneja la selección de destino desde el componente de mapa
+   */
+  onDestinoSeleccionado(coords: Coordenadas): void {
+    console.log('🔴 Destino seleccionado:', coords);
+    this.destinoCoordenadas = { ...coords };
+    
+    this.pedidoForm.patchValue({
+      direccionDestino: `Lat: ${coords.lat.toFixed(6)}, Lng: ${coords.lng.toFixed(6)}`
+    });
+
+    // Si ya hay origen, calcular ruta automáticamente
+    if (this.origenCoordenadas) {
       this.calcularRutaAutomatica();
     }
   }
@@ -158,8 +131,6 @@ export class CrearPedidos implements OnInit {
 
     this.calculandoRuta = true;
     console.log('🚀 Calculando ruta automáticamente...');
-    console.log('Origen:', this.origenCoordenadas);
-    console.log('Destino:', this.destinoCoordenadas);
 
     const request = {
       latOrigen: this.origenCoordenadas.lat,
@@ -173,20 +144,32 @@ export class CrearPedidos implements OnInit {
         next: (response: any) => {
           console.log('✅ Ruta calculada:', response);
           
-          // ✅ Proteger contra valores undefined
           const ruta = response.ruta || response;
           
           this.distanciaCalculada = ruta.distanciaTotal || ruta.distanciaTotalKm || 0;
           this.tiempoEstimado = ruta.tiempoEstimadoMinutos || 0;
-          this.costoCalculado = (this.distanciaCalculada || 0) * 2000;
+          this.costoCalculado = ruta.costoEstimado || ((this.distanciaCalculada || 0) * 2000);
 
-          this.pedidoForm.patchValue({
-            distanciaKm: (this.distanciaCalculada || 0).toFixed(2),
-            costo: (this.costoCalculado || 0).toFixed(2)
-          });
+          // Procesar instrucciones de navegación
+          this.procesarInstruccionesRuta(ruta);
 
-          this.calculandoRuta = false;
-          this.mostrarExito(`Ruta calculada: ${(this.distanciaCalculada || 0).toFixed(2)} km`);
+          // Usar setTimeout para evitar el error ExpressionChangedAfterItHasBeenCheckedError
+          setTimeout(() => {
+            this.pedidoForm.patchValue({
+              distanciaKm: (this.distanciaCalculada || 0).toFixed(2),
+              costo: (this.costoCalculado || 0).toFixed(2)
+            });
+
+            this.calculandoRuta = false;
+            this.mostrarExito(`Ruta calculada: ${(this.distanciaCalculada || 0).toFixed(2)} km`);
+            
+            // Dibujar la ruta en el mapa
+            if (this.mapaComponent && ruta) {
+              this.mapaComponent.dibujarRuta(ruta);
+            }
+
+            this.cdr.detectChanges();
+          }, 0);
         },
         error: (err: any) => {
           console.error('❌ Error al calcular ruta:', err);
@@ -197,13 +180,93 @@ export class CrearPedidos implements OnInit {
   }
 
   /**
-   * Cierra el modal del mapa
+   * Procesa las instrucciones de ruta del backend
    */
-  cerrarModalMapa(): void {
-    console.log('🚪 Cerrando modal del mapa');
-    this.mostrarModalMapa = false;
-    this.seleccionandoOrigen = false;
-    this.seleccionandoDestino = false;
+  procesarInstruccionesRuta(ruta: any): void {
+    this.instruccionesRuta = [];
+
+    // PRIORIDAD 1: Si el backend envía instrucciones directamente, usarlas
+    if (ruta.instrucciones && ruta.instrucciones.length > 0) {
+      console.log('✅ Usando instrucciones del backend:', ruta.instrucciones.length);
+      
+      ruta.instrucciones.forEach((instruccion: string, index: number) => {
+        // Agregar icono según el tipo de instrucción
+        let icono = '➡️';
+        if (index === 0) icono = '🚀';
+        else if (index === ruta.instrucciones.length - 1) icono = '🎯';
+        else if (instruccion.toLowerCase().includes('izquierda')) icono = '⬅️';
+        else if (instruccion.toLowerCase().includes('derecha')) icono = '➡️';
+        else if (instruccion.toLowerCase().includes('continúa') || instruccion.toLowerCase().includes('sigue')) icono = '⬆️';
+        
+        this.instruccionesRuta!.push({
+          texto: `${icono} ${instruccion}`
+        });
+      });
+      
+      console.log('📋 Instrucciones procesadas:', this.instruccionesRuta.length);
+      return;
+    }
+
+    // PRIORIDAD 2: Si hay segmentos detallados con nombres de calles
+    if (ruta.segmentos && ruta.segmentos.length > 0) {
+      console.log('✅ Usando segmentos de ruta:', ruta.segmentos.length);
+      
+      if (ruta.nodos && ruta.nodos.length > 0) {
+        this.instruccionesRuta.push({
+          texto: `🚀 Inicia en: ${ruta.nodos[0].nombre || 'Punto de origen'}`
+        });
+      }
+
+      ruta.segmentos.forEach((segmento: any) => {
+        const distanciaTexto = segmento.distanciaKm 
+          ? `${segmento.distanciaKm.toFixed(2)} km` 
+          : undefined;
+        const tiempoTexto = segmento.tiempoEstimadoMinutos 
+          ? `${segmento.tiempoEstimadoMinutos} min` 
+          : undefined;
+
+        this.instruccionesRuta!.push({
+          texto: `➡️ Continúa por ${segmento.nombreCalle || 'la calle'}`,
+          distancia: distanciaTexto,
+          tiempo: tiempoTexto
+        });
+      });
+
+      if (ruta.nodos && ruta.nodos.length > 0) {
+        this.instruccionesRuta.push({
+          texto: `🎯 Llegarás a: ${ruta.nodos[ruta.nodos.length - 1].nombre || 'Punto de destino'}`
+        });
+      }
+      
+      console.log('📋 Instrucciones procesadas:', this.instruccionesRuta.length);
+      return;
+    }
+
+    // PRIORIDAD 3: Generar instrucciones básicas desde nodos
+    if (ruta.nodos && ruta.nodos.length > 0) {
+      console.log('⚠️ Generando instrucciones básicas desde nodos:', ruta.nodos.length);
+      
+      this.instruccionesRuta.push({
+        texto: `🚀 Inicia en: ${ruta.nodos[0].nombre || 'Punto de origen'}`
+      });
+
+      for (let i = 1; i < ruta.nodos.length - 1; i++) {
+        this.instruccionesRuta.push({
+          texto: `➡️ Pasa por: ${ruta.nodos[i].nombre || `Punto ${i}`}`
+        });
+      }
+
+      this.instruccionesRuta.push({
+        texto: `🎯 Llegarás a: ${ruta.nodos[ruta.nodos.length - 1].nombre || 'Punto de destino'}`
+      });
+      
+      console.log('📋 Instrucciones procesadas:', this.instruccionesRuta.length);
+      return;
+    }
+
+    // Si llegamos aquí, no hay datos para generar instrucciones
+    console.warn('❌ No se pudieron generar instrucciones de navegación');
+    this.instruccionesRuta = null;
   }
 
   /**
@@ -216,6 +279,7 @@ export class CrearPedidos implements OnInit {
     this.distanciaCalculada = null;
     this.costoCalculado = null;
     this.tiempoEstimado = null;
+    this.instruccionesRuta = null;
     
     this.pedidoForm.patchValue({
       direccionOrigen: '',
@@ -223,6 +287,11 @@ export class CrearPedidos implements OnInit {
       distanciaKm: '',
       costo: ''
     });
+
+    // Limpiar el mapa
+    if (this.mapaComponent) {
+      this.mapaComponent.limpiarMapa();
+    }
   }
 
   /**
@@ -230,12 +299,15 @@ export class CrearPedidos implements OnInit {
    */
   onSubmit(): void {
     console.log('📤 Intentando enviar formulario...');
-    console.log('Formulario válido:', this.pedidoForm.valid);
-    console.log('Origen:', this.origenCoordenadas);
-    console.log('Destino:', this.destinoCoordenadas);
 
     if (this.pedidoForm.invalid) {
       this.mostrarError('Por favor completa todos los campos requeridos');
+      Object.keys(this.pedidoForm.controls).forEach(key => {
+        const control = this.pedidoForm.get(key);
+        if (control?.invalid) {
+          control.markAsTouched();
+        }
+      });
       return;
     }
 
@@ -244,11 +316,20 @@ export class CrearPedidos implements OnInit {
       return;
     }
 
+    if (!this.distanciaCalculada || !this.costoCalculado) {
+      this.mostrarError('Por favor espera a que se calcule la ruta');
+      return;
+    }
+
     this.cargando = true;
     this.error = null;
 
     const pedidoData = {
-      ...this.pedidoForm.getRawValue(),
+      clienteId: this.pedidoForm.get('clienteId')?.value,
+      repartidorId: this.pedidoForm.get('repartidorId')?.value || null,
+      descripcion: this.pedidoForm.get('descripcion')?.value,
+      direccionOrigen: this.pedidoForm.get('direccionOrigen')?.value,
+      direccionDestino: this.pedidoForm.get('direccionDestino')?.value,
       distanciaKm: this.distanciaCalculada,
       costo: this.costoCalculado,
       latOrigen: this.origenCoordenadas.lat,
@@ -257,7 +338,7 @@ export class CrearPedidos implements OnInit {
       lonDestino: this.destinoCoordenadas.lng
     };
 
-    console.log('📦 Enviando pedido con coordenadas:', pedidoData);
+    console.log('📦 Enviando pedido:', pedidoData);
 
     this.pedidoService.crear(pedidoData).subscribe({
       next: (response: any) => {
@@ -279,6 +360,27 @@ export class CrearPedidos implements OnInit {
    * Cancelar y volver
    */
   cancelar(): void {
+    this.router.navigate(['/pedidos/listar-pedidos']);
+  }
+
+  /**
+   * Volver atrás (al dashboard)
+   */
+  volverAtras(): void {
+    this.router.navigate(['/dashboard']);
+  }
+
+  /**
+   * Ir al Dashboard
+   */
+  irADashboard(): void {
+    this.router.navigate(['/dashboard']);
+  }
+
+  /**
+   * Ir a Lista de Pedidos
+   */
+  irAListaPedidos(): void {
     this.router.navigate(['/pedidos/listar-pedidos']);
   }
 

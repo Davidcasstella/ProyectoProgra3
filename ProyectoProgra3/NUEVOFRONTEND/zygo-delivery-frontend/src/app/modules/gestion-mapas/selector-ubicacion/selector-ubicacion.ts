@@ -133,7 +133,7 @@ export class SelectorUbicacionComponent implements OnInit, OnDestroy {
     // MODO NORMAL (origen y destino para calcular rutas)
     // Si no hay origen, colocarlo
     if (!this.origenSeleccionado) {
-      console.log('📍 Estableciendo origen...');
+      console.log('🟢 Estableciendo origen...');
       this.establecerOrigen(coords);
     } 
     // Si hay origen pero no destino, colocar destino
@@ -162,7 +162,7 @@ export class SelectorUbicacionComponent implements OnInit, OnDestroy {
    */
   private establecerOrigen(coords: Coordenadas): void {
     console.log('✅ Guardando origen:', coords);
-    this.origenSeleccionado = { ...coords }; // Clonar objeto para forzar cambio
+    this.origenSeleccionado = { ...coords };
     
     if (this.marcadorOrigen) {
       this.marcadorOrigen.remove();
@@ -173,7 +173,7 @@ export class SelectorUbicacionComponent implements OnInit, OnDestroy {
       draggable: true
     })
       .addTo(this.map)
-      .bindPopup('📍 <b>Origen</b>')
+      .bindPopup('🟢 <b>Origen</b>')
       .openPopup();
 
     // Permitir arrastrar el marcador
@@ -182,9 +182,19 @@ export class SelectorUbicacionComponent implements OnInit, OnDestroy {
       this.origenSeleccionado = { lat: newPos.lat, lng: newPos.lng };
       this.limpiarRuta();
       this.cdr.detectChanges();
+      
+      // Emitir evento también al arrastrar
+      if (!this.modoSeleccionSimple) {
+        this.ubicacionSeleccionada.emit(this.origenSeleccionado);
+      }
     });
     
     console.log('✅ Origen establecido:', this.origenSeleccionado);
+    
+    // Emitir evento de origen seleccionado
+    if (!this.modoSeleccionSimple) {
+      this.ubicacionSeleccionada.emit(this.origenSeleccionado);
+    }
   }
 
   /**
@@ -192,7 +202,7 @@ export class SelectorUbicacionComponent implements OnInit, OnDestroy {
    */
   private establecerDestino(coords: Coordenadas): void {
     console.log('✅ Guardando destino:', coords);
-    this.destinoSeleccionado = { ...coords }; // Clonar objeto para forzar cambio
+    this.destinoSeleccionado = { ...coords };
     
     if (this.marcadorDestino) {
       this.marcadorDestino.remove();
@@ -212,9 +222,19 @@ export class SelectorUbicacionComponent implements OnInit, OnDestroy {
       this.destinoSeleccionado = { lat: newPos.lat, lng: newPos.lng };
       this.limpiarRuta();
       this.cdr.detectChanges();
+      
+      // Emitir evento también al arrastrar
+      if (!this.modoSeleccionSimple) {
+        this.ubicacionSeleccionada.emit(this.destinoSeleccionado);
+      }
     });
     
     console.log('✅ Destino establecido:', this.destinoSeleccionado);
+    
+    // Emitir evento de destino seleccionado
+    if (!this.modoSeleccionSimple) {
+      this.ubicacionSeleccionada.emit(this.destinoSeleccionado);
+    }
   }
 
   /**
@@ -222,7 +242,7 @@ export class SelectorUbicacionComponent implements OnInit, OnDestroy {
    */
   calcularRuta(): void {
     console.log('🔍 Botón calcular ruta presionado');
-    console.log('📍 Origen:', this.origenSeleccionado);
+    console.log('🟢 Origen:', this.origenSeleccionado);
     console.log('🎯 Destino:', this.destinoSeleccionado);
 
     if (!this.origenSeleccionado || !this.destinoSeleccionado) {

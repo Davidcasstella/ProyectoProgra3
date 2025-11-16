@@ -2,13 +2,13 @@
 
 import { Component, OnInit, signal, inject, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { RouterModule } from '@angular/router'; // ✅ IMPORTANTE: Importar RouterModule
 import { NavbarComponent } from '../../../components/navbar/navbar';
 import { PedidoService } from '../../../services/pedido.service';
 import { UsuarioService } from '../../../services/usuario.service';
 import { AuthService } from '../../../services/auth.service';
 import { Pedido } from '../../../models/pedido.model';
 import { Usuario, UsuarioDTO } from '../../../models/usuario.model';
-import { LugarService } from '../../../services/lugar.service';
 
 interface StatCard {
   title: string;
@@ -20,11 +20,14 @@ interface StatCard {
   color: string;
 }
 
-
 @Component({
   selector: 'app-home',
   standalone: true,
-  imports: [CommonModule, NavbarComponent],
+  imports: [
+    CommonModule, 
+    RouterModule,      // ✅ IMPORTANTE: Agregar RouterModule aquí
+    NavbarComponent
+  ],
   templateUrl: './home.html',
   styleUrls: ['./home.css']
 })
@@ -166,7 +169,6 @@ export class HomeComponent implements OnInit {
     };
     return classes[estado] || 'status-badge';
   }
-  
 
   formatearFecha(fecha: Date | string | undefined): string {
     if (!fecha) return 'N/A';
