@@ -46,6 +46,19 @@ public class Pedido {
     
     @Column(name = "fecha_entrega")
     private LocalDateTime fechaEntrega;
+
+        // Agregar a Pedido.java
+    @Column(name = "lat_origen")
+    private Double latOrigen;
+
+    @Column(name = "lon_origen")
+    private Double lonOrigen;
+
+    @Column(name = "lat_destino")
+    private Double latDestino;
+
+    @Column(name = "lon_destino")
+    private Double lonDestino;
     
     @PrePersist
     protected void onCreate() {
@@ -177,5 +190,37 @@ public class Pedido {
     
     public void setFechaEntrega(LocalDateTime fechaEntrega) {
         this.fechaEntrega = fechaEntrega;
+    }
+    // Getters y Setters para coordenadas
+    public Double getLatOrigen() {
+        return latOrigen;
+    }
+
+    public void setLatOrigen(Double latOrigen) {
+        this.latOrigen = latOrigen;
+    }
+
+    public Double getLonOrigen() {
+        return lonOrigen;
+    }
+
+    public void setLonOrigen(Double lonOrigen) {
+        this.lonOrigen = lonOrigen;
+    }
+
+    public Double getLatDestino() {
+        return latDestino;
+    }
+
+    public void setLatDestino(Double latDestino) {
+        this.latDestino = latDestino;
+    }
+
+    public Double getLonDestino() {
+        return lonDestino;
+    }
+
+    public void setLonDestino(Double lonDestino) {
+        this.lonDestino = lonDestino;
     }
 }

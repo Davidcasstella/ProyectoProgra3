@@ -42,7 +42,12 @@ public class PedidoDTO {
     // Información adicional para respuestas
     private String nombreCliente;
     private String nombreRepartidor;
-    
+    // Coordenadas para el mapa (opcionales)
+    private Double latOrigen;
+    private Double lonOrigen;
+    private Double latDestino;
+    private Double lonDestino;
+        
     // Constructores
     public PedidoDTO() {}
     
@@ -178,5 +183,37 @@ public class PedidoDTO {
     
     public void setNombreRepartidor(String nombreRepartidor) {
         this.nombreRepartidor = nombreRepartidor;
+    }
+    // Getters y Setters para coordenadas
+    public Double getLatOrigen() {
+        return latOrigen;
+    }
+
+    public void setLatOrigen(Double latOrigen) {
+        this.latOrigen = latOrigen;
+    }
+
+    public Double getLonOrigen() {
+        return lonOrigen;
+    }
+
+    public void setLonOrigen(Double lonOrigen) {
+        this.lonOrigen = lonOrigen;
+    }
+
+    public Double getLatDestino() {
+        return latDestino;
+    }
+
+    public void setLatDestino(Double latDestino) {
+        this.latDestino = latDestino;
+    }
+
+    public Double getLonDestino() {
+        return lonDestino;
+    }
+
+    public void setLonDestino(Double lonDestino) {
+        this.lonDestino = lonDestino;
     }
 }

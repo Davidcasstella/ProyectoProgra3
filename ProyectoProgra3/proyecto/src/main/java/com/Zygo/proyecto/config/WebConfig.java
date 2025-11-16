@@ -1,32 +1,12 @@
 package com.Zygo.proyecto.config;
 
-import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.web.client.RestTemplate;
-import org.springframework.web.servlet.config.annotation.CorsRegistry;
-import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
+/**
+ * Configuración general de Spring MVC
+ * CORS se maneja completamente en SecurityConfig.java
+ */
 @Configuration
 public class WebConfig {
-
-    @Bean
-    public WebMvcConfigurer corsConfigurer() {
-        return new WebMvcConfigurer() {
-            @Override
-            public void addCorsMappings(CorsRegistry registry) {
-                registry.addMapping("/api/**")
-                        .allowedOrigins("http://localhost:4200")
-                        .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS")
-                        .allowedHeaders("*")
-                        .allowCredentials(true)
-                        .maxAge(3600);
-            }
-        };
-    }
-    
-    // ✨ NUEVO: Bean para hacer requests HTTP
-    @Bean
-    public RestTemplate restTemplate() {
-        return new RestTemplate();
-    }
+    // Vacío intencionalmente - CORS en SecurityConfig
 }

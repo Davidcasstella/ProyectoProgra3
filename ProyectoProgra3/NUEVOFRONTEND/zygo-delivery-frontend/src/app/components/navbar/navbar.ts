@@ -1,14 +1,16 @@
 // src/app/components/navbar/navbar.ts
 
-import { Component, signal, inject, computed } from '@angular/core';
+import { Component, signal, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router, RouterModule } from '@angular/router';
 import { AuthService } from '../../services/auth.service';
 
 interface MenuItem {
   label: string;
-  route: string;
+  route?: string;
   svg: string;
+  children?: MenuItem[];
+  expanded?: boolean;
 }
 
 @Component({
@@ -40,13 +42,36 @@ export class NavbarComponent {
     },
     {
       label: 'Pedidos',
-      route: '/pedidos',
-      svg: '<path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 0 1-8 0"/>'
+      svg: '<path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 0 1-8 0"/>',
+      expanded: false,
+      children: [
+        {
+          label: 'Listar Pedidos',
+          route: '/pedidos/listar-pedidos',
+          svg: '<rect x="3" y="3" width="18" height="18" rx="2"/><path d="M9 9h6M9 13h6"/>'
+        },
+        {
+          label: 'Crear Pedido',
+          route: '/pedidos/crear-pedidos',
+          svg: '<circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/>'
+        }
+      ]
+    },
+    {
+      label: 'Mapa',
+      route: '/mapas/selector-ubicacion',
+      svg: '<circle cx="12" cy="10" r="3"/><path d="M12 21.7C17.3 17 20 13 20 10a8 8 0 1 0-16 0c0 3 2.7 6.9 8 11.7z"/>'
     }
   ];
 
   toggleMenu(): void {
     this.menuExpanded.update(v => !v);
+  }
+
+  toggleSubmenu(item: MenuItem): void {
+    if (item.children) {
+      item.expanded = !item.expanded;
+    }
   }
 
   getInitials(nombre: string): string {

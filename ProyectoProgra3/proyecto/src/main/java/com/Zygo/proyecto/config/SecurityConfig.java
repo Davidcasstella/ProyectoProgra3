@@ -16,6 +16,12 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.web.cors.CorsConfiguration;
+import org.springframework.web.cors.CorsConfigurationSource;
+import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
+
+import java.util.Arrays;
+import java.util.List;
 
 @Configuration
 @EnableWebSecurity
@@ -45,27 +51,67 @@ public class SecurityConfig {
     public AuthenticationManager authenticationManager(AuthenticationConfiguration authConfig) throws Exception {
         return authConfig.getAuthenticationManager();
     }
-    // En tu SecurityConfig.java, modifica la sección de autorización:
-
-@Bean
-public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
-    http
-        .csrf(csrf -> csrf.disable())
-        .cors(cors -> cors.configure(http))
-        .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-        .authorizeHttpRequests(auth -> auth
-            .requestMatchers("/api/auth/**").permitAll()
-            .requestMatchers("/api/admin/osm/**").hasRole("ADMIN")  // ✨ NUEVO
-            .requestMatchers("/api/usuarios/**").hasAnyRole("ADMIN", "CLIENTE", "REPARTIDOR")
-            .requestMatchers("/api/pedidos/**").hasAnyRole("ADMIN", "CLIENTE", "REPARTIDOR")
-            .requestMatchers("/api/rutas/**").hasAnyRole("ADMIN", "CLIENTE", "REPARTIDOR")  // ✨ NUEVO
-            .anyRequest().authenticated()
-        );
     
-    http.authenticationProvider(authenticationProvider());
-    http.addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
+    /**
+     * ✅ CONFIGURACIÓN CORS CORREGIDA
+     */
+    @Bean
+    public CorsConfigurationSource corsConfigurationSource() {
+        CorsConfiguration configuration = new CorsConfiguration();
+        
+        configuration.setAllowedOriginPatterns(List.of(
+            "http://localhost:4200",
+            "http://localhost:*",
+            "http://127.0.0.1:4200"
+        ));
+        
+        configuration.setAllowedMethods(Arrays.asList(
+            "GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"
+        ));
+        
+        configuration.setAllowedHeaders(List.of("*"));
+        configuration.setAllowCredentials(true);
+        
+        configuration.setExposedHeaders(Arrays.asList(
+            "Authorization", 
+            "Content-Type",
+            "Access-Control-Allow-Origin"
+        ));
+        
+        configuration.setMaxAge(3600L);
+        
+        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+        source.registerCorsConfiguration("/**", configuration);
+        
+        return source;
+    }
     
-    return http.build();
-}
-    
+    @Bean
+    public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+        http
+            .cors(cors -> cors.configurationSource(corsConfigurationSource()))
+            .csrf(csrf -> csrf.disable())
+            .sessionManagement(session -> 
+                session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+            
+            .authorizeHttpRequests(auth -> auth
+                // ✅ Acceso público
+                .requestMatchers("/api/auth/**").permitAll()
+                .requestMatchers("/", "/index.html", "/mapa.html", "/static/**", "/*.html").permitAll()
+                
+                // ✅ SOLUCIÓN: Usar hasAuthority en lugar de hasRole
+                .requestMatchers("/api/admin/osm/**").hasAuthority("ROLE_ADMIN")
+                .requestMatchers("/api/usuarios/**").hasAnyAuthority("ROLE_ADMIN", "ROLE_CLIENTE", "ROLE_REPARTIDOR")
+                .requestMatchers("/api/pedidos/**").hasAnyAuthority("ROLE_ADMIN", "ROLE_CLIENTE", "ROLE_REPARTIDOR")
+                .requestMatchers("/api/rutas/**").hasAnyAuthority("ROLE_ADMIN", "ROLE_CLIENTE", "ROLE_REPARTIDOR")
+                .requestMatchers("/api/lugares/**").hasAnyAuthority("ROLE_ADMIN", "ROLE_CLIENTE", "ROLE_REPARTIDOR")
+                
+                .anyRequest().authenticated()
+            );
+        
+        http.authenticationProvider(authenticationProvider());
+        http.addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
+        
+        return http.build();
+    }
 }

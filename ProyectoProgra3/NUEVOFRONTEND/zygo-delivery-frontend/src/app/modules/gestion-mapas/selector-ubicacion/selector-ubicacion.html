@@ -1,0 +1,113 @@
+<!-- src/app/modules/gestion-mapas/selector-ubicacion/selector-ubicacion.html -->
+
+<div class="mapa-container">
+  
+  <!-- Panel de Control -->
+  <div class="panel-control">
+    <h2 class="titulo">🗺️ Selector de Ubicaciones</h2>
+    
+    <!-- Instrucciones -->
+    <div class="instrucciones">
+      <p><strong>Instrucciones:</strong></p>
+      <ol>
+        <li>Click en el mapa para seleccionar <span class="origen">origen</span></li>
+        <li>Click nuevamente para seleccionar <span class="destino">destino</span></li>
+        <li>Presiona "Calcular Ruta" para ver la ruta óptima</li>
+      </ol>
+    </div>
+
+    <!-- Estado de selección -->
+    <div class="estado-seleccion">
+      <div class="punto">
+        <span class="icono-origen">📍</span>
+        <span>Origen: </span>
+        <span *ngIf="origenSeleccionado" class="coordenadas">
+          {{ origenSeleccionado.lat.toFixed(6) }}, {{ origenSeleccionado.lng.toFixed(6) }}
+        </span>
+        <span *ngIf="!origenSeleccionado" class="pendiente">No seleccionado (Click en el mapa)</span>
+      </div>
+      
+      <div class="punto">
+        <span class="icono-destino">🎯</span>
+        <span>Destino: </span>
+        <span *ngIf="destinoSeleccionado" class="coordenadas">
+          {{ destinoSeleccionado.lat.toFixed(6) }}, {{ destinoSeleccionado.lng.toFixed(6) }}
+        </span>
+        <span *ngIf="!destinoSeleccionado" class="pendiente">No seleccionado (Click en el mapa)</span>
+      </div>
+    </div>
+
+    <!-- 🔍 DEBUG: Mostrar estado del botón -->
+    <div *ngIf="origenSeleccionado && destinoSeleccionado" style="background: rgba(16, 185, 129, 0.2); padding: 10px; border-radius: 8px; margin-bottom: 10px; color: #10b981;">
+      ✅ Ambos puntos seleccionados - Botón habilitado
+    </div>
+    <div *ngIf="!origenSeleccionado || !destinoSeleccionado" style="background: rgba(239, 68, 68, 0.2); padding: 10px; border-radius: 8px; margin-bottom: 10px; color: #ef4444;">
+      ⚠️ Selecciona ambos puntos en el mapa para habilitar el botón
+    </div>
+
+    <!-- Botones de acción -->
+    <div class="botones">
+      <button 
+        class="btn btn-calcular"
+        [disabled]="!origenSeleccionado || !destinoSeleccionado || calculandoRuta"
+        (click)="calcularRuta()">
+        <span *ngIf="!calculandoRuta">🧭 Calcular Ruta</span>
+        <span *ngIf="calculandoRuta">⏳ Calculando...</span>
+      </button>
+      
+      <button 
+        class="btn btn-limpiar"
+        (click)="limpiarMapa()">
+        🗑️ Limpiar Mapa
+      </button>
+    </div>
+
+    <!-- Mensaje de error -->
+    <div *ngIf="errorMensaje" class="error-mensaje">
+      {{ errorMensaje }}
+    </div>
+
+    <!-- Información de la ruta -->
+    <div *ngIf="rutaCalculada" class="info-ruta">
+      <h3>📊 Detalles de la Ruta</h3>
+      
+      <div class="detalles">
+        <div class="detalle-item">
+          <span class="label">📏 Distancia:</span>
+          <span class="valor">{{ formatearDistancia(rutaCalculada.distanciaTotalKm) }}</span>
+        </div>
+        
+        <div class="detalle-item">
+          <span class="label">⏱️ Tiempo estimado:</span>
+          <span class="valor">{{ rutaCalculada.tiempoEstimadoMinutos }} min</span>
+        </div>
+        
+        <div class="detalle-item">
+          <span class="label">💰 Costo estimado:</span>
+          <span class="valor">{{ formatearCosto(rutaCalculada.costoEstimado) }}</span>
+        </div>
+        
+        <div class="detalle-item">
+          <span class="label">🚦 Puntos de ruta:</span>
+          <span class="valor">{{ rutaCalculada.nodos.length }}</span>
+        </div>
+      </div>
+
+      <!-- Instrucciones paso a paso -->
+      <div *ngIf="rutaCalculada.instrucciones && rutaCalculada.instrucciones.length > 0" class="instrucciones-ruta">
+        <h4>📍 Instrucciones:</h4>
+        <ol>
+          <li *ngFor="let instruccion of rutaCalculada.instrucciones">
+            {{ instruccion }}
+          </li>
+        </ol>
+      </div>
+    </div>
+  </div>
+
+  <!-- Mapa -->
+  <div class="mapa-wrapper">
+    <div id="map"></div>
+  </div>
+  
+</div>

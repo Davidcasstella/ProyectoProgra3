@@ -1,1 +1,252 @@
-<p>crear-pedidos works!</p>
+<!-- src/app/modules/gestion-pedidos/crear-pedidos/crear-pedidos.html -->
+
+<div class="crear-pedidos-container">
+  <!-- Header -->
+  <div class="page-header">
+    <h1>📦 Crear Nuevo Pedido</h1>
+    <p class="subtitle">Completa el formulario y selecciona las ubicaciones en el mapa</p>
+  </div>
+
+  <!-- Alertas -->
+  <div *ngIf="error" class="alert alert-error">
+    ❌ {{ error }}
+  </div>
+  
+  <div *ngIf="exito" class="alert alert-success">
+    ✅ {{ exito }}
+  </div>
+
+  <!-- Formulario -->
+  <form [formGroup]="pedidoForm" (ngSubmit)="onSubmit()" class="pedido-form">
+    
+    <!-- Grid de 2 columnas -->
+    <div class="form-grid">
+      
+      <!-- Cliente -->
+      <div class="form-group">
+        <label for="clienteId">
+          👤 Cliente <span class="required">*</span>
+        </label>
+        <select 
+          id="clienteId" 
+          formControlName="clienteId" 
+          class="form-control"
+          [class.invalid]="clienteId?.invalid && clienteId?.touched">
+          <option value="">Seleccionar cliente...</option>
+          <option *ngFor="let cliente of clientes" [value]="cliente.id">
+            {{ cliente.nombre }}
+          </option>
+        </select>
+        <small *ngIf="clienteId?.invalid && clienteId?.touched" class="error-text">
+          Cliente es requerido
+        </small>
+      </div>
+
+      <!-- Repartidor -->
+      <div class="form-group">
+        <label for="repartidorId">
+          🚴 Repartidor (opcional)
+        </label>
+        <select 
+          id="repartidorId" 
+          formControlName="repartidorId" 
+          class="form-control">
+          <option value="">Sin asignar</option>
+          <option *ngFor="let repartidor of repartidores" [value]="repartidor.id">
+            {{ repartidor.nombre }}
+          </option>
+        </select>
+      </div>
+
+    </div>
+
+    <!-- Descripción (ancho completo) -->
+    <div class="form-group">
+      <label for="descripcion">
+        📝 Descripción del Pedido <span class="required">*</span>
+      </label>
+      <textarea 
+        id="descripcion" 
+        formControlName="descripcion" 
+        class="form-control"
+        rows="3"
+        placeholder="Ej: 2 pizzas medianas, bebidas y postre..."
+        [class.invalid]="descripcion?.invalid && descripcion?.touched">
+      </textarea>
+      <small *ngIf="descripcion?.invalid && descripcion?.touched" class="error-text">
+        La descripción debe tener al menos 10 caracteres
+      </small>
+    </div>
+
+    <!-- Sección de Ubicaciones -->
+    <div class="ubicaciones-section">
+      <h2>📍 Ubicaciones</h2>
+      <p class="section-subtitle">Selecciona origen y destino en el mapa</p>
+
+      <div class="form-grid">
+        
+        <!-- Dirección Origen -->
+        <div class="form-group">
+          <label for="direccionOrigen">
+            🟢 Dirección de Origen <span class="required">*</span>
+          </label>
+          <div class="input-with-button">
+            <input 
+              type="text" 
+              id="direccionOrigen" 
+              formControlName="direccionOrigen" 
+              class="form-control"
+              placeholder="Selecciona en el mapa..."
+              readonly
+              [class.invalid]="direccionOrigen?.invalid && direccionOrigen?.touched">
+            <button 
+              type="button" 
+              class="btn-map" 
+              (click)="seleccionarOrigen()"
+              [disabled]="cargando">
+              🗺️ Mapa
+            </button>
+          </div>
+          <small class="help-text" *ngIf="origenCoordenadas">
+            📍 Lat: {{ origenCoordenadas.lat.toFixed(6) }}, 
+            Lon: {{ origenCoordenadas.lng.toFixed(6) }}
+          </small>
+        </div>
+
+        <!-- Dirección Destino -->
+        <div class="form-group">
+          <label for="direccionDestino">
+            🔴 Dirección de Destino <span class="required">*</span>
+          </label>
+          <div class="input-with-button">
+            <input 
+              type="text" 
+              id="direccionDestino" 
+              formControlName="direccionDestino" 
+              class="form-control"
+              placeholder="Selecciona en el mapa..."
+              readonly
+              [class.invalid]="direccionDestino?.invalid && direccionDestino?.touched">
+            <button 
+              type="button" 
+              class="btn-map" 
+              (click)="seleccionarDestino()"
+              [disabled]="cargando">
+              🗺️ Mapa
+            </button>
+          </div>
+          <small class="help-text" *ngIf="destinoCoordenadas">
+            🎯 Lat: {{ destinoCoordenadas.lat.toFixed(6) }}, 
+            Lon: {{ destinoCoordenadas.lng.toFixed(6) }}
+          </small>
+        </div>
+
+      </div>
+
+      <!-- Botón Limpiar Ubicaciones -->
+      <div class="limpiar-container" *ngIf="origenCoordenadas || destinoCoordenadas">
+        <button 
+          type="button" 
+          class="btn-limpiar" 
+          (click)="limpiarUbicaciones()">
+          🗑️ Limpiar Ubicaciones
+        </button>
+      </div>
+    </div>
+
+    <!-- Información de Ruta Calculada -->
+    <div class="ruta-info" *ngIf="distanciaCalculada && costoCalculado">
+      <h3>🧭 Información de la Ruta</h3>
+      
+      <div class="ruta-stats">
+        <div class="stat-card">
+          <span class="stat-icon">📏</span>
+          <div class="stat-content">
+            <span class="stat-label">Distancia</span>
+            <span class="stat-value">{{ distanciaCalculada.toFixed(2) }} km</span>
+          </div>
+        </div>
+
+        <div class="stat-card">
+          <span class="stat-icon">⏱️</span>
+          <div class="stat-content">
+            <span class="stat-label">Tiempo Estimado</span>
+            <span class="stat-value">{{ tiempoEstimado?.toFixed(0) }} min</span>
+          </div>
+        </div>
+
+        <div class="stat-card">
+          <span class="stat-icon">💰</span>
+          <div class="stat-content">
+            <span class="stat-label">Costo</span>
+            <span class="stat-value">${{ costoCalculado.toFixed(2) }}</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="alert-info" *ngIf="calculandoRuta">
+        ⏳ Calculando ruta óptima...
+      </div>
+    </div>
+
+    <!-- Campos de Distancia y Costo (ocultos) -->
+    <input type="hidden" formControlName="distanciaKm">
+    <input type="hidden" formControlName="costo">
+
+    <!-- Botones de Acción -->
+    <div class="form-actions">
+      <button 
+        type="button" 
+        class="btn btn-secondary" 
+        (click)="cancelar()"
+        [disabled]="cargando">
+        ❌ Cancelar
+      </button>
+      
+      <button 
+        type="submit" 
+        class="btn btn-primary" 
+        [disabled]="pedidoForm.invalid || cargando || !origenCoordenadas || !destinoCoordenadas">
+        <span *ngIf="!cargando">✅ Crear Pedido</span>
+        <span *ngIf="cargando">⏳ Creando...</span>
+      </button>
+    </div>
+
+  </form>
+</div>
+
+<!-- Modal del Mapa -->
+<div class="modal-overlay" *ngIf="mostrarModalMapa" (click)="cerrarModalMapa()">
+  <div class="modal-content" (click)="$event.stopPropagation()">
+    
+    <div class="modal-header">
+      <h2>
+        <span *ngIf="seleccionandoOrigen">🟢 Seleccionar Origen</span>
+        <span *ngIf="seleccionandoDestino">🔴 Seleccionar Destino</span>
+      </h2>
+      <button class="btn-close" (click)="cerrarModalMapa()">✖</button>
+    </div>
+
+    <div class="modal-body">
+      <p class="modal-instruction">
+        <span *ngIf="seleccionandoOrigen">Haz click en el mapa para seleccionar el <strong>punto de origen</strong> 🟢</span>
+        <span *ngIf="seleccionandoDestino">Haz click en el mapa para seleccionar el <strong>punto de destino</strong> 🔴</span>
+      </p>
+      
+      <!-- 🗺️ MAPA REAL INTEGRADO -->
+      <div class="map-container">
+        <app-selector-ubicacion
+          [modoSeleccionSimple]="true"
+          (ubicacionSeleccionada)="onUbicacionSeleccionada($any($event))">
+        </app-selector-ubicacion>
+      </div>
+    </div>
+
+    <div class="modal-footer">
+      <button class="btn btn-secondary" (click)="cerrarModalMapa()">
+        Cerrar
+      </button>
+    </div>
+
+  </div>
+</div>

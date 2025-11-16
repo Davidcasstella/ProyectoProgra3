@@ -1,1 +1,238 @@
-<p>listar-pedidos works!</p>
+<!-- src/app/modules/gestion-pedidos/listar-pedidos/listar-pedidos.html -->
+
+<div class="pedidos-container">
+  <!-- 🎯 HEADER -->
+  <div class="header">
+    <div class="header-content">
+      <h1>🚴 Mis Pedidos</h1>
+      <p class="subtitle">Gestiona tus entregas asignadas</p>
+    </div>
+  </div>
+
+  <!-- 🔍 FILTROS -->
+  <div class="filtros-container">
+    <div class="filtros">
+      <button 
+        *ngFor="let estado of estadosDisponibles"
+        class="filtro-btn"
+        [class.active]="filtroEstado === estado"
+        (click)="cambiarFiltro(estado)">
+        {{ estado }}
+      </button>
+    </div>
+    <div class="total-pedidos">
+      Total: <strong>{{ pedidosFiltrados.length }}</strong> pedidos
+    </div>
+  </div>
+
+  <!-- ⏳ LOADING -->
+  <div *ngIf="cargando" class="loading-container">
+    <div class="spinner"></div>
+    <p>Cargando pedidos...</p>
+  </div>
+
+  <!-- ❌ ERROR -->
+  <div *ngIf="error && !cargando" class="error-container">
+    <p>{{ error }}</p>
+    <button class="btn-retry" (click)="cargarPedidos()">🔄 Reintentar</button>
+  </div>
+
+  <!-- 📦 LISTA DE PEDIDOS -->
+  <div *ngIf="!cargando && !error" class="pedidos-grid">
+    <!-- 🎨 SIN PEDIDOS -->
+    <div *ngIf="pedidosFiltrados.length === 0" class="empty-state">
+      <div class="empty-icon">📭</div>
+      <h3>No hay pedidos</h3>
+      <p>No tienes pedidos {{ filtroEstado !== 'TODOS' ? 'con estado ' + filtroEstado : '' }}</p>
+    </div>
+
+    <!-- 🎨 TARJETA DE PEDIDO -->
+    <div *ngFor="let pedido of pedidosFiltrados" class="pedido-card">
+      <!-- HEADER DE LA TARJETA -->
+      <div class="card-header">
+        <div class="pedido-id">
+          <span class="id-label">Pedido #{{ pedido.id }}</span>
+          <span class="badge" [ngClass]="getEstadoColor(pedido.estado)">
+            {{ getEstadoIcono(pedido.estado) }} {{ pedido.estado }}
+          </span>
+        </div>
+        <div class="fecha">
+          {{ pedido.fechaCreacion | date:'dd/MM/yyyy HH:mm' }}
+        </div>
+      </div>
+
+      <!-- INFORMACIÓN DEL PEDIDO -->
+      <div class="card-body">
+        <div class="info-row">
+          <span class="label">👤 Cliente:</span>
+          <span class="value">{{ pedido.nombreCliente || 'No asignado' }}</span>
+        </div>
+
+        <div class="info-row">
+          <span class="label">📝 Descripción:</span>
+          <span class="value">{{ pedido.descripcion }}</span>
+        </div>
+
+        <div class="ruta-info">
+          <div class="ubicacion">
+            <span class="ubicacion-icon">🟢</span>
+            <div class="ubicacion-text">
+              <span class="ubicacion-label">Origen</span>
+              <span class="ubicacion-direccion">{{ pedido.direccionOrigen }}</span>
+            </div>
+          </div>
+
+          <div class="ruta-linea"></div>
+
+          <div class="ubicacion">
+            <span class="ubicacion-icon">🔴</span>
+            <div class="ubicacion-text">
+              <span class="ubicacion-label">Destino</span>
+              <span class="ubicacion-direccion">{{ pedido.direccionDestino }}</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="estadisticas">
+          <div class="stat">
+            <span class="stat-icon">📏</span>
+            <span class="stat-value">{{ pedido.distanciaKm | number:'1.2-2' }} km</span>
+          </div>
+          <div class="stat">
+            <span class="stat-icon">💰</span>
+            <span class="stat-value">${{ pedido.costo | number:'1.0-0' }}</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- ACCIONES -->
+      <div class="card-actions">
+        <!-- BOTÓN VER RUTA -->
+        <button class="btn-action btn-ruta" (click)="verRuta(pedido)">
+          🗺️ Ver Ruta
+        </button>
+
+        <!-- BOTÓN MARCAR EN CAMINO -->
+        <button 
+          *ngIf="puedeMarcarEnCamino(pedido)"
+          class="btn-action btn-en-camino"
+          (click)="cambiarEstado(pedido, 'EN_CAMINO')">
+          🚴 Marcar en Camino
+        </button>
+
+        <!-- BOTÓN MARCAR ENTREGADO -->
+        <button 
+          *ngIf="puedeMarcarEntregado(pedido)"
+          class="btn-action btn-entregado"
+          (click)="cambiarEstado(pedido, 'ENTREGADO')">
+          ✅ Marcar Entregado
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- 🗺️ MODAL DE RUTA -->
+<div *ngIf="mostrarModalRuta" class="modal-overlay" (click)="cerrarModalRuta()">
+  <div class="modal-content modal-ruta" (click)="$event.stopPropagation()">
+    <!-- HEADER DEL MODAL -->
+    <div class="modal-header">
+      <h2>🗺️ Ruta del Pedido #{{ pedidoSeleccionado?.id }}</h2>
+      <button class="btn-close" (click)="cerrarModalRuta()">✕</button>
+    </div>
+
+    <!-- INFORMACIÓN DEL PEDIDO -->
+    <div class="modal-pedido-info">
+      <div class="info-chip">
+        <span class="badge" [ngClass]="getEstadoColor(pedidoSeleccionado?.estado)">
+          {{ getEstadoIcono(pedidoSeleccionado?.estado) }} {{ pedidoSeleccionado?.estado }}
+        </span>
+      </div>
+      <div class="info-chip">
+        👤 {{ pedidoSeleccionado?.nombreCliente }}
+      </div>
+      <div class="info-chip">
+        📏 {{ pedidoSeleccionado?.distanciaKm | number:'1.2-2' }} km
+      </div>
+      <div class="info-chip">
+        💰 ${{ pedidoSeleccionado?.costo | number:'1.0-0' }}
+      </div>
+    </div>
+
+    <!-- MAPA -->
+    <div class="modal-body">
+      <div *ngIf="calculandoRuta" class="loading-ruta">
+        <div class="spinner"></div>
+        <p>Calculando ruta óptima...</p>
+      </div>
+
+      <div *ngIf="!pedidoSeleccionado?.latOrigen && !calculandoRuta" class="sin-coordenadas">
+        <p>⚠️ Este pedido no tiene coordenadas guardadas</p>
+        <p class="help-text">Las coordenadas se guardan cuando se crea el pedido usando el mapa</p>
+      </div>
+
+      <div class="map-container" *ngIf="pedidoSeleccionado?.latOrigen">
+        <app-selector-ubicacion></app-selector-ubicacion>
+      </div>
+
+      <!-- INSTRUCCIONES DE LA RUTA -->
+      <div *ngIf="rutaCalculada && rutaCalculada.instrucciones" class="instrucciones-container">
+        <h3>📍 Instrucciones de la Ruta</h3>
+        <div class="instrucciones-list">
+          <div 
+            *ngFor="let instruccion of rutaCalculada.instrucciones; let i = index"
+            class="instruccion-item">
+            <div class="instruccion-numero">{{ i + 1 }}</div>
+            <div class="instruccion-texto">{{ instruccion }}</div>
+          </div>
+        </div>
+
+        <!-- RESUMEN DE LA RUTA -->
+        <div class="ruta-resumen">
+          <div class="resumen-item">
+            <span class="resumen-icon">📏</span>
+            <div class="resumen-info">
+              <span class="resumen-label">Distancia Total</span>
+              <span class="resumen-value">{{ rutaCalculada.distanciaTotalKm | number:'1.2-2' }} km</span>
+            </div>
+          </div>
+          <div class="resumen-item">
+            <span class="resumen-icon">⏱️</span>
+            <div class="resumen-info">
+              <span class="resumen-label">Tiempo Estimado</span>
+              <span class="resumen-value">{{ rutaCalculada.tiempoEstimadoMinutos | number:'1.0-0' }} min</span>
+            </div>
+          </div>
+          <div class="resumen-item">
+            <span class="resumen-icon">💰</span>
+            <div class="resumen-info">
+              <span class="resumen-label">Costo</span>
+              <span class="resumen-value">${{ rutaCalculada.costoEstimado | number:'1.0-0' }}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ACCIONES DEL MODAL -->
+    <div class="modal-footer">
+      <button 
+        *ngIf="puedeMarcarEnCamino(pedidoSeleccionado!)"
+        class="btn-modal btn-en-camino"
+        (click)="cambiarEstado(pedidoSeleccionado!, 'EN_CAMINO')">
+        🚴 Marcar en Camino
+      </button>
+
+      <button 
+        *ngIf="puedeMarcarEntregado(pedidoSeleccionado!)"
+        class="btn-modal btn-entregado"
+        (click)="cambiarEstado(pedidoSeleccionado!, 'ENTREGADO')">
+        ✅ Marcar Entregado
+      </button>
+
+      <button class="btn-modal btn-cerrar" (click)="cerrarModalRuta()">
+        Cerrar
+      </button>
+    </div>
+  </div>
+</div>

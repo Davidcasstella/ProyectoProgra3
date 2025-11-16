@@ -1,0 +1,720 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Zygo Delivery - Mapa Interactivo Sogamoso</title>
+    
+    <!-- Leaflet CSS -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #f5f5f5;
+        }
+        
+        #container {
+            display: flex;
+            height: 100vh;
+        }
+        
+        #sidebar {
+            width: 400px;
+            background: white;
+            padding: 20px;
+            box-shadow: 2px 0 10px rgba(0,0,0,0.1);
+            overflow-y: auto;
+            z-index: 1000;
+        }
+        
+        #map {
+            flex: 1;
+            height: 100vh;
+            cursor: crosshair;
+        }
+        
+        h1 {
+            color: #2c3e50;
+            margin-bottom: 10px;
+            font-size: 24px;
+        }
+        
+        h2 {
+            color: #34495e;
+            font-size: 18px;
+            margin-top: 20px;
+            margin-bottom: 10px;
+        }
+        
+        .instruccion-uso {
+            background: #e8f5e9;
+            border-left: 4px solid #4caf50;
+            padding: 12px;
+            margin-bottom: 20px;
+            border-radius: 5px;
+            font-size: 13px;
+        }
+        
+        .instruccion-uso strong {
+            color: #2e7d32;
+        }
+        
+        .punto-seleccionado {
+            background: #fff3e0;
+            border: 2px solid #ff9800;
+            border-radius: 5px;
+            padding: 10px;
+            margin: 10px 0;
+            font-size: 13px;
+        }
+        
+        .punto-seleccionado.origen {
+            border-color: #4caf50;
+            background: #e8f5e9;
+        }
+        
+        .punto-seleccionado.destino {
+            border-color: #f44336;
+            background: #ffebee;
+        }
+        
+        .punto-label {
+            font-weight: 600;
+            display: block;
+            margin-bottom: 5px;
+        }
+        
+        .punto-coords {
+            color: #666;
+            font-size: 12px;
+        }
+        
+        button {
+            width: 100%;
+            padding: 12px;
+            background: #3498db;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            margin: 5px 0;
+        }
+        
+        button:hover {
+            background: #2980b9;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+        }
+        
+        button:disabled {
+            background: #95a5a6;
+            cursor: not-allowed;
+            transform: none;
+        }
+        
+        button.btn-secondary {
+            background: #95a5a6;
+        }
+        
+        button.btn-secondary:hover {
+            background: #7f8c8d;
+        }
+        
+        button.btn-danger {
+            background: #e74c3c;
+        }
+        
+        button.btn-danger:hover {
+            background: #c0392b;
+        }
+        
+        #resultado {
+            margin-top: 20px;
+            padding: 15px;
+            background: #ecf0f1;
+            border-radius: 5px;
+            display: none;
+        }
+        
+        #resultado.visible {
+            display: block;
+            animation: slideDown 0.3s ease;
+        }
+        
+        @keyframes slideDown {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        .stat {
+            display: flex;
+            justify-content: space-between;
+            margin: 8px 0;
+            padding: 8px;
+            background: white;
+            border-radius: 3px;
+        }
+        
+        .stat-label {
+            font-weight: 600;
+            color: #555;
+        }
+        
+        .stat-value {
+            color: #2c3e50;
+            font-weight: bold;
+        }
+        
+        .stat-value.destacado {
+            color: #e74c3c;
+            font-size: 18px;
+        }
+        
+        #instrucciones {
+            max-height: 250px;
+            overflow-y: auto;
+            margin-top: 10px;
+        }
+        
+        .instruccion {
+            padding: 8px;
+            margin: 5px 0;
+            background: white;
+            border-left: 3px solid #3498db;
+            border-radius: 3px;
+            font-size: 13px;
+        }
+        
+        .loading {
+            text-align: center;
+            color: #3498db;
+            padding: 15px;
+            background: #e3f2fd;
+            border-radius: 5px;
+            margin: 10px 0;
+        }
+        
+        .loading::before {
+            content: "⏳ ";
+            animation: pulse 1.5s infinite;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+        
+        .error {
+            background: #e74c3c;
+            color: white;
+            padding: 12px;
+            border-radius: 5px;
+            margin-top: 10px;
+            animation: shake 0.5s;
+        }
+        
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-5px); }
+            75% { transform: translateX(5px); }
+        }
+        
+        .checkbox-group {
+            margin: 15px 0;
+            padding: 10px;
+            background: #f8f9fa;
+            border-radius: 5px;
+        }
+        
+        .checkbox-group label {
+            display: inline;
+            font-weight: normal;
+            margin-left: 5px;
+        }
+        
+        .modo-seleccion {
+            display: flex;
+            gap: 10px;
+            margin: 15px 0;
+        }
+        
+        .modo-btn {
+            flex: 1;
+            padding: 8px;
+            border: 2px solid #ddd;
+            background: white;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-size: 13px;
+        }
+        
+        .modo-btn.active {
+            border-color: #3498db;
+            background: #e3f2fd;
+            font-weight: bold;
+        }
+        
+        .modo-btn:hover {
+            border-color: #3498db;
+        }
+        
+        /* Estilos para los marcadores personalizados */
+        .leaflet-popup-content {
+            font-size: 13px;
+        }
+        
+        .popup-coords {
+            color: #666;
+            font-size: 11px;
+            margin-top: 5px;
+        }
+    </style>
+</head>
+<body>
+    <div id="container">
+        <div id="sidebar">
+            <h1>🚚 Zygo Delivery</h1>
+            <p style="color: #7f8c8d; margin-bottom: 15px;">
+                Sistema de rutas óptimas en Sogamoso
+            </p>
+            
+            <div class="instruccion-uso">
+                <strong>📍 Modo de uso:</strong><br>
+                1. Haz <strong>click en el mapa</strong> para seleccionar origen (verde)<br>
+                2. Haz <strong>otro click</strong> para seleccionar destino (rojo)<br>
+                3. Click en <strong>"Calcular Ruta"</strong> para ver el camino óptimo
+            </div>
+            
+            <div class="modo-seleccion">
+                <div class="modo-btn active" id="modoOrigen">
+                    📍 Seleccionar Origen
+                </div>
+                <div class="modo-btn" id="modoDestino">
+                    🎯 Seleccionar Destino
+                </div>
+            </div>
+            
+            <div id="puntoOrigen" class="punto-seleccionado origen" style="display: none;">
+                <span class="punto-label">📍 Punto de Partida</span>
+                <span class="punto-coords" id="coordsOrigen">-</span>
+            </div>
+            
+            <div id="puntoDestino" class="punto-seleccionado destino" style="display: none;">
+                <span class="punto-label">🎯 Punto de Llegada</span>
+                <span class="punto-coords" id="coordsDestino">-</span>
+            </div>
+            
+            <div class="checkbox-group">
+                <input type="checkbox" id="trafico" checked>
+                <label for="trafico">🚦 Considerar tráfico actual</label>
+            </div>
+            
+            <button id="calcular" disabled>Calcular Ruta Óptima</button>
+            <button id="limpiar" class="btn-secondary">🗑️ Limpiar Selección</button>
+            
+            <div id="loading" class="loading" style="display: none;">
+                Calculando ruta óptima...
+            </div>
+            
+            <div id="error" class="error" style="display: none;"></div>
+            
+            <div id="resultado">
+                <h2>📊 Resultado de la Ruta</h2>
+                <div class="stat">
+                    <span class="stat-label">📏 Distancia Total:</span>
+                    <span class="stat-value destacado" id="distancia">-</span>
+                </div>
+                <div class="stat">
+                    <span class="stat-label">⏱️ Tiempo Estimado:</span>
+                    <span class="stat-value" id="tiempo">-</span>
+                </div>
+                <div class="stat">
+                    <span class="stat-label">💰 Costo Estimado:</span>
+                    <span class="stat-value" id="costo">-</span>
+                </div>
+                <div class="stat">
+                    <span class="stat-label">🔄 Paradas:</span>
+                    <span class="stat-value" id="paradas">-</span>
+                </div>
+                
+                <h2>🗺️ Instrucciones Paso a Paso</h2>
+                <div id="instrucciones"></div>
+            </div>
+        </div>
+        
+        <div id="map"></div>
+    </div>
+    
+    <!-- Leaflet JS -->
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    
+    <script>
+        // ============================================
+        // CONFIGURACIÓN INICIAL
+        // ============================================
+        
+        const API_BASE = 'http://localhost:8080/api';
+        let token = '';
+        
+        // Estado de la aplicación
+        let modoActual = 'origen'; // 'origen' o 'destino'
+        let puntoOrigen = null;
+        let puntoDestino = null;
+        
+        // Inicializar mapa centrado en Sogamoso
+        const map = L.map('map').setView([5.715, -72.935], 14);
+        
+        // Capa base de OpenStreetMap
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '© OpenStreetMap contributors | Zygo Delivery'
+        }).addTo(map);
+        
+        // Marcadores
+        let markerOrigen = null;
+        let markerDestino = null;
+        let rutaLayer = null;
+        
+        // ============================================
+        // AUTENTICACIÓN
+        // ============================================
+        
+        async function obtenerToken() {
+            try {
+                const response = await fetch(`${API_BASE}/auth/login`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        email: 'juan@gmail.com',
+                        password: 'cliente123'
+                    })
+                });
+                const data = await response.json();
+                token = data.token;
+                console.log('✅ Token obtenido correctamente');
+            } catch (error) {
+                console.error('❌ Error obteniendo token:', error);
+                mostrarError('Error de autenticación. Verifica que el servidor esté activo.');
+            }
+        }
+        
+        // ============================================
+        // MANEJO DE CLICKS EN EL MAPA
+        // ============================================
+        
+        map.on('click', function(e) {
+            const lat = e.latlng.lat;
+            const lon = e.latlng.lng;
+            
+            if (modoActual === 'origen') {
+                seleccionarOrigen(lat, lon);
+                // Cambiar automáticamente a modo destino
+                cambiarModo('destino');
+            } else {
+                seleccionarDestino(lat, lon);
+            }
+            
+            // Habilitar botón si ambos puntos están seleccionados
+            if (puntoOrigen && puntoDestino) {
+                document.getElementById('calcular').disabled = false;
+            }
+        });
+        
+        // ============================================
+        // SELECCIÓN DE PUNTOS
+        // ============================================
+        
+        function seleccionarOrigen(lat, lon) {
+            puntoOrigen = { lat, lon };
+            
+            // Actualizar UI
+            document.getElementById('puntoOrigen').style.display = 'block';
+            document.getElementById('coordsOrigen').textContent = 
+                `Lat: ${lat.toFixed(6)}, Lon: ${lon.toFixed(6)}`;
+            
+            // Eliminar marcador anterior si existe
+            if (markerOrigen) {
+                map.removeLayer(markerOrigen);
+            }
+            
+            // Crear nuevo marcador verde
+            markerOrigen = L.marker([lat, lon], {
+                icon: L.icon({
+                    iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-green.png',
+                    shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/images/marker-shadow.png',
+                    iconSize: [25, 41],
+                    iconAnchor: [12, 41],
+                    popupAnchor: [1, -34],
+                    shadowSize: [41, 41]
+                })
+            }).addTo(map);
+            
+            markerOrigen.bindPopup(`
+                <b>📍 Punto de Partida</b><br>
+                <div class="popup-coords">
+                    Lat: ${lat.toFixed(6)}<br>
+                    Lon: ${lon.toFixed(6)}
+                </div>
+            `).openPopup();
+            
+            console.log('✅ Origen seleccionado:', { lat, lon });
+        }
+        
+        function seleccionarDestino(lat, lon) {
+            puntoDestino = { lat, lon };
+            
+            // Actualizar UI
+            document.getElementById('puntoDestino').style.display = 'block';
+            document.getElementById('coordsDestino').textContent = 
+                `Lat: ${lat.toFixed(6)}, Lon: ${lon.toFixed(6)}`;
+            
+            // Eliminar marcador anterior si existe
+            if (markerDestino) {
+                map.removeLayer(markerDestino);
+            }
+            
+            // Crear nuevo marcador rojo
+            markerDestino = L.marker([lat, lon], {
+                icon: L.icon({
+                    iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-red.png',
+                    shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/images/marker-shadow.png',
+                    iconSize: [25, 41],
+                    iconAnchor: [12, 41],
+                    popupAnchor: [1, -34],
+                    shadowSize: [41, 41]
+                })
+            }).addTo(map);
+            
+            markerDestino.bindPopup(`
+                <b>🎯 Punto de Llegada</b><br>
+                <div class="popup-coords">
+                    Lat: ${lat.toFixed(6)}<br>
+                    Lon: ${lon.toFixed(6)}
+                </div>
+            `).openPopup();
+            
+            console.log('✅ Destino seleccionado:', { lat, lon });
+        }
+        
+        // ============================================
+        // CAMBIO DE MODO
+        // ============================================
+        
+        function cambiarModo(modo) {
+            modoActual = modo;
+            
+            const btnOrigen = document.getElementById('modoOrigen');
+            const btnDestino = document.getElementById('modoDestino');
+            
+            if (modo === 'origen') {
+                btnOrigen.classList.add('active');
+                btnDestino.classList.remove('active');
+                map.getContainer().style.cursor = 'crosshair';
+            } else {
+                btnOrigen.classList.remove('active');
+                btnDestino.classList.add('active');
+                map.getContainer().style.cursor = 'crosshair';
+            }
+        }
+        
+        document.getElementById('modoOrigen').addEventListener('click', () => cambiarModo('origen'));
+        document.getElementById('modoDestino').addEventListener('click', () => cambiarModo('destino'));
+        
+        // ============================================
+        // CALCULAR RUTA
+        // ============================================
+        
+        async function calcularRuta() {
+            if (!puntoOrigen || !puntoDestino) {
+                mostrarError('Por favor, selecciona origen y destino en el mapa');
+                return;
+            }
+            
+            const considerarTrafico = document.getElementById('trafico').checked;
+            
+            document.getElementById('loading').style.display = 'block';
+            document.getElementById('error').style.display = 'none';
+            document.getElementById('resultado').classList.remove('visible');
+            document.getElementById('calcular').disabled = true;
+            
+            try {
+                const response = await fetch(`${API_BASE}/lugares/calcular-ruta-coordenadas`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: JSON.stringify({
+                        latOrigen: puntoOrigen.lat,
+                        lonOrigen: puntoOrigen.lon,
+                        latDestino: puntoDestino.lat,
+                        lonDestino: puntoDestino.lon
+                    })
+                });
+                
+                if (!response.ok) {
+                    const errorData = await response.json();
+                    throw new Error(errorData.error || 'Error calculando ruta');
+                }
+                
+                const data = await response.json();
+                mostrarResultado(data);
+                dibujarRutaEnMapa(data);
+                
+            } catch (error) {
+                mostrarError(error.message);
+            } finally {
+                document.getElementById('loading').style.display = 'none';
+                document.getElementById('calcular').disabled = false;
+            }
+        }
+        
+        // ============================================
+        // MOSTRAR RESULTADO
+        // ============================================
+        
+        function mostrarResultado(data) {
+            const ruta = data.ruta;
+            
+            document.getElementById('distancia').textContent = 
+                `${ruta.distanciaTotalKm.toFixed(2)} km`;
+            document.getElementById('tiempo').textContent = 
+                `${ruta.tiempoEstimadoMinutos} min`;
+            document.getElementById('costo').textContent = 
+                `$${ruta.costoEstimado.toLocaleString('es-CO')}`;
+            document.getElementById('paradas').textContent = 
+                `${ruta.nodos.length} intersecciones`;
+            
+            // Mostrar instrucciones
+            const instruccionesDiv = document.getElementById('instrucciones');
+            instruccionesDiv.innerHTML = '';
+            
+            ruta.instrucciones.forEach((inst, i) => {
+                const div = document.createElement('div');
+                div.className = 'instruccion';
+                div.textContent = `${i + 1}. ${inst}`;
+                instruccionesDiv.appendChild(div);
+            });
+            
+            document.getElementById('resultado').classList.add('visible');
+            
+            console.log('📊 Ruta calculada:', ruta);
+        }
+        
+        // ============================================
+        // DIBUJAR RUTA EN EL MAPA
+        // ============================================
+        
+        function dibujarRutaEnMapa(data) {
+            // Limpiar ruta anterior
+            if (rutaLayer) {
+                map.removeLayer(rutaLayer);
+            }
+            
+            const ruta = data.ruta;
+            
+            // Dibujar la ruta
+            const coordenadas = ruta.nodos.map(nodo => [nodo.latitud, nodo.longitud]);
+            rutaLayer = L.polyline(coordenadas, {
+                color: '#3498db',
+                weight: 5,
+                opacity: 0.8,
+                smoothFactor: 1
+            }).addTo(map);
+            
+            // Agregar tooltip con info
+            rutaLayer.bindTooltip(
+                `Ruta: ${ruta.distanciaTotalKm.toFixed(2)} km | ${ruta.tiempoEstimadoMinutos} min`,
+                { permanent: false, direction: 'center' }
+            );
+            
+            // Ajustar vista para mostrar toda la ruta
+            const bounds = L.latLngBounds([
+                [puntoOrigen.lat, puntoOrigen.lon],
+                [puntoDestino.lat, puntoDestino.lon]
+            ]);
+            map.fitBounds(bounds, { padding: [50, 50] });
+            
+            console.log('🗺️ Ruta dibujada en el mapa');
+        }
+        
+        // ============================================
+        // LIMPIAR SELECCIÓN
+        // ============================================
+        
+        function limpiarSeleccion() {
+            // Limpiar estado
+            puntoOrigen = null;
+            puntoDestino = null;
+            
+            // Limpiar marcadores
+            if (markerOrigen) map.removeLayer(markerOrigen);
+            if (markerDestino) map.removeLayer(markerDestino);
+            if (rutaLayer) map.removeLayer(rutaLayer);
+            
+            markerOrigen = null;
+            markerDestino = null;
+            rutaLayer = null;
+            
+            // Limpiar UI
+            document.getElementById('puntoOrigen').style.display = 'none';
+            document.getElementById('puntoDestino').style.display = 'none';
+            document.getElementById('resultado').classList.remove('visible');
+            document.getElementById('error').style.display = 'none';
+            document.getElementById('calcular').disabled = true;
+            
+            // Volver a modo origen
+            cambiarModo('origen');
+            
+            console.log('🗑️ Selección limpiada');
+        }
+        
+        document.getElementById('limpiar').addEventListener('click', limpiarSeleccion);
+        
+        // ============================================
+        // MOSTRAR ERROR
+        // ============================================
+        
+        function mostrarError(mensaje) {
+            const errorDiv = document.getElementById('error');
+            errorDiv.textContent = '❌ ' + mensaje;
+            errorDiv.style.display = 'block';
+            
+            setTimeout(() => {
+                errorDiv.style.display = 'none';
+            }, 5000);
+        }
+        
+        // ============================================
+        // EVENT LISTENERS
+        // ============================================
+        
+        document.getElementById('calcular').addEventListener('click', calcularRuta);
+        
+        // ============================================
+        // INICIALIZACIÓN
+        // ============================================
+        
+        obtenerToken();
+        
+        console.log('🗺️ Mapa de Sogamoso cargado');
+        console.log('📍 Haz click en el mapa para seleccionar origen y destino');
+    </script>
+</body>
+</html>

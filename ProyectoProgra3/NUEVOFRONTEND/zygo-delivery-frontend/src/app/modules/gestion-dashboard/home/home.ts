@@ -8,6 +8,7 @@ import { UsuarioService } from '../../../services/usuario.service';
 import { AuthService } from '../../../services/auth.service';
 import { Pedido } from '../../../models/pedido.model';
 import { Usuario, UsuarioDTO } from '../../../models/usuario.model';
+import { LugarService } from '../../../services/lugar.service';
 
 interface StatCard {
   title: string;
@@ -18,6 +19,7 @@ interface StatCard {
   svg: string;
   color: string;
 }
+
 
 @Component({
   selector: 'app-home',
@@ -164,6 +166,7 @@ export class HomeComponent implements OnInit {
     };
     return classes[estado] || 'status-badge';
   }
+  
 
   formatearFecha(fecha: Date | string | undefined): string {
     if (!fecha) return 'N/A';

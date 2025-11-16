@@ -37,6 +37,20 @@ export const routes: Routes = [
     canActivate: [authGuard],
     loadComponent: () => import('./modules/gestion-usuarios/editar-usuarios/editar-usuarios').then(m => m.EditarUsuariosComponent)
   },
+  // ✨ PEDIDOS - Ahora con Standalone Components
+  {
+    path: 'pedidos',
+    canActivate: [authGuard],
+    loadChildren: () => import('./modules/gestion-pedidos/gestion-pedidos-routing-module')
+      .then(m => m.PEDIDOS_ROUTES)
+  },
+  // ✨ MAPAS
+  {
+    path: 'mapas',
+    canActivate: [authGuard],
+    loadChildren: () => import('./modules/gestion-mapas/gestion-mapas-routing-module')
+      .then(m => m.MAPAS_ROUTES)
+  },
   {
     path: '**',
     redirectTo: '/login'

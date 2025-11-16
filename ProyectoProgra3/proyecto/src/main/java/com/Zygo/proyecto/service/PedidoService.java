@@ -45,6 +45,17 @@ public class PedidoService {
         pedido.setCosto(calcularCosto(dto.getDistanciaKm()));
         pedido.setEstado(EstadoPedido.PENDIENTE);
         
+        // ✅ NUEVO: Guardar coordenadas si están presentes
+        if (dto.getLatOrigen() != null) {
+            pedido.setLatOrigen(dto.getLatOrigen());
+            pedido.setLonOrigen(dto.getLonOrigen());
+            pedido.setLatDestino(dto.getLatDestino());
+            pedido.setLonDestino(dto.getLonDestino());
+            log.info("Coordenadas guardadas - Origen: ({}, {}), Destino: ({}, {})",
+                    dto.getLatOrigen(), dto.getLonOrigen(), 
+                    dto.getLatDestino(), dto.getLonDestino());
+        }
+        
         Pedido guardado = pedidoRepository.save(pedido);
         log.info("Pedido creado con ID: {}", guardado.getId());
         
@@ -52,6 +63,66 @@ public class PedidoService {
         asignarRepartidorAsync(guardado.getId());
         
         return convertirEntidadADto(guardado);
+    }
+    // ✅ AGREGA ESTE MÉTODO A TU PedidoService.java (después del método crearPedido)
+
+    /**
+     * ✅ NUEVO: Actualizar pedido completo
+     */
+    @Transactional
+    public PedidoDTO actualizarPedido(Long id, PedidoDTO dto) {
+        log.info("Actualizando pedido ID: {}", id);
+        
+        Pedido pedido = pedidoRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Pedido no encontrado"));
+        
+        // Actualizar cliente si cambió
+        if (dto.getClienteId() != null && !dto.getClienteId().equals(pedido.getCliente().getId())) {
+            Usuario cliente = usuarioRepository.findById(dto.getClienteId())
+                    .orElseThrow(() -> new RuntimeException("Cliente no encontrado"));
+            pedido.setCliente(cliente);
+        }
+        
+        // Actualizar repartidor si cambió
+        if (dto.getRepartidorId() != null) {
+            Usuario repartidor = usuarioRepository.findById(dto.getRepartidorId())
+                    .orElseThrow(() -> new RuntimeException("Repartidor no encontrado"));
+            pedido.setRepartidor(repartidor);
+        }
+        
+        // Actualizar campos básicos
+        if (dto.getDescripcion() != null) {
+            pedido.setDescripcion(dto.getDescripcion());
+        }
+        
+        if (dto.getDireccionOrigen() != null) {
+            pedido.setDireccionOrigen(dto.getDireccionOrigen());
+        }
+        
+        if (dto.getDireccionDestino() != null) {
+            pedido.setDireccionDestino(dto.getDireccionDestino());
+        }
+        
+        if (dto.getDistanciaKm() != null) {
+            pedido.setDistanciaKm(dto.getDistanciaKm());
+            pedido.setCosto(calcularCosto(dto.getDistanciaKm()));
+        }
+        
+        // ✅ Actualizar coordenadas
+        if (dto.getLatOrigen() != null) {
+            pedido.setLatOrigen(dto.getLatOrigen());
+            pedido.setLonOrigen(dto.getLonOrigen());
+            pedido.setLatDestino(dto.getLatDestino());
+            pedido.setLonDestino(dto.getLonDestino());
+            log.info("Coordenadas actualizadas - Origen: ({}, {}), Destino: ({}, {})",
+                    dto.getLatOrigen(), dto.getLonOrigen(), 
+                    dto.getLatDestino(), dto.getLonDestino());
+        }
+        
+        Pedido actualizado = pedidoRepository.save(pedido);
+        log.info("Pedido actualizado exitosamente");
+        
+        return convertirEntidadADto(actualizado);
     }
     
     @Async("taskExecutor")
@@ -220,6 +291,12 @@ public class PedidoService {
         dto.setFechaCreacion(pedido.getFechaCreacion());
         dto.setFechaAsignacion(pedido.getFechaAsignacion());
         dto.setFechaEntrega(pedido.getFechaEntrega());
+        
+        // ✅ NUEVO: Incluir coordenadas en la respuesta
+        dto.setLatOrigen(pedido.getLatOrigen());
+        dto.setLonOrigen(pedido.getLonOrigen());
+        dto.setLatDestino(pedido.getLatDestino());
+        dto.setLonDestino(pedido.getLonDestino());
         
         return dto;
     }
