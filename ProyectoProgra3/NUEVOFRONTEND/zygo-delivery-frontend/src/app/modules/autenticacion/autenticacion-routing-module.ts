@@ -1,12 +1,14 @@
-import { NgModule } from '@angular/core';
-import { CommonModule } from '@angular/common';
+// src/app/modules/autenticacion/autenticacion-routing-module.ts
 
+import { Routes } from '@angular/router';
 
-
-@NgModule({
-  declarations: [],
-  imports: [
-    CommonModule
-  ]
-})
-export class AutenticacionRoutingModule { }
+export const AUTH_ROUTES: Routes = [
+  {
+    path: 'login',
+    loadComponent: () => import('./login/login').then(m => m.LoginComponent)
+  },
+  {
+    path: 'register',
+    loadComponent: () => import('./register/register').then(m => m.RegisterComponent)
+  }
+];

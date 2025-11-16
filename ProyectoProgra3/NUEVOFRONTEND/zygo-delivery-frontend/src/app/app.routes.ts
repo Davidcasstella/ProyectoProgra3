@@ -9,48 +9,41 @@ export const routes: Routes = [
     redirectTo: '/login',
     pathMatch: 'full'
   },
+  // 🔐 AUTENTICACIÓN - Lazy Loading
   {
-    path: 'login',
-    loadComponent: () => import('./modules/autenticacion/login/login').then(m => m.LoginComponent)
+    path: '',
+    loadChildren: () => import('./modules/autenticacion/autenticacion-routing-module')
+      .then(m => m.AUTH_ROUTES)
   },
-  {
-    path: 'register',
-    loadComponent: () => import('./modules/autenticacion/register/register').then(m => m.RegisterComponent)
-  },
+  // 🏠 DASHBOARD - Lazy Loading
   {
     path: 'dashboard',
     canActivate: [authGuard],
-    loadComponent: () => import('./modules/gestion-dashboard/home/home').then(m => m.HomeComponent)
+    loadChildren: () => import('./modules/gestion-dashboard/gestion-dashboard-routing-module')
+      .then(m => m.DASHBOARD_ROUTES)
   },
+  // 👥 USUARIOS - Lazy Loading
   {
     path: 'usuarios',
     canActivate: [authGuard],
-    loadComponent: () => import('./modules/gestion-usuarios/listar-usuarios/listar-usuarios').then(m => m.ListarUsuariosComponent)
+    loadChildren: () => import('./modules/gestion-usuarios/gestion-usuarios-routing-module')
+      .then(m => m.USUARIOS_ROUTES)
   },
-  {
-    path: 'usuarios/crear',
-    canActivate: [authGuard],
-    loadComponent: () => import('./modules/gestion-usuarios/crear-usuarios/crear-usuarios').then(m => m.CrearUsuariosComponent)
-  },
-  {
-    path: 'usuarios/editar/:id',
-    canActivate: [authGuard],
-    loadComponent: () => import('./modules/gestion-usuarios/editar-usuarios/editar-usuarios').then(m => m.EditarUsuariosComponent)
-  },
-  // ✨ PEDIDOS - Ahora con Standalone Components
+  // 📦 PEDIDOS - Lazy Loading (ya estaba)
   {
     path: 'pedidos',
     canActivate: [authGuard],
     loadChildren: () => import('./modules/gestion-pedidos/gestion-pedidos-routing-module')
       .then(m => m.PEDIDOS_ROUTES)
   },
-  // ✨ MAPAS
+  // 🗺️ MAPAS - Lazy Loading (ya estaba)
   {
     path: 'mapas',
     canActivate: [authGuard],
     loadChildren: () => import('./modules/gestion-mapas/gestion-mapas-routing-module')
       .then(m => m.MAPAS_ROUTES)
   },
+  // ❌ Ruta no encontrada
   {
     path: '**',
     redirectTo: '/login'

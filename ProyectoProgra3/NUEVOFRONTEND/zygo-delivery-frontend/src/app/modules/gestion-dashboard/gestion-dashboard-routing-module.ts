@@ -1,12 +1,10 @@
-import { NgModule } from '@angular/core';
-import { CommonModule } from '@angular/common';
+// src/app/modules/gestion-dashboard/gestion-dashboard-routing-module.ts
 
+import { Routes } from '@angular/router';
 
-
-@NgModule({
-  declarations: [],
-  imports: [
-    CommonModule
-  ]
-})
-export class GestionDashboardRoutingModule { }
+export const DASHBOARD_ROUTES: Routes = [
+  {
+    path: '',
+    loadComponent: () => import('./home/home').then(m => m.HomeComponent)
+  }
+];
