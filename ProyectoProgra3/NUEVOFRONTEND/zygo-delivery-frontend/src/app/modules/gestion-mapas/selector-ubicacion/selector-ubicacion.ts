@@ -2,6 +2,7 @@
 
 import { Component, OnInit, OnDestroy, ChangeDetectorRef, Input, Output, EventEmitter } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { Router } from '@angular/router'; // ✅ NUEVO
 import * as L from 'leaflet';
 import { LugarService } from '../../../services/lugar.service';
 import { RutaOptima, Coordenadas } from '../../../models/ruta.model';
@@ -57,7 +58,8 @@ export class SelectorUbicacionComponent implements OnInit, OnDestroy {
 
   constructor(
     private lugarService: LugarService,
-    private cdr: ChangeDetectorRef
+    private cdr: ChangeDetectorRef,
+    private router: Router // ✅ NUEVO
   ) {}
 
   ngOnInit(): void {
@@ -71,6 +73,14 @@ export class SelectorUbicacionComponent implements OnInit, OnDestroy {
     if (this.map) {
       this.map.remove();
     }
+  }
+
+  /**
+   * ✅ NUEVO: Volver atrás (al dashboard)
+   */
+  volverAtras(): void {
+    console.log('⬅️ Volviendo al dashboard...');
+    this.router.navigate(['/dashboard']);
   }
 
   /**

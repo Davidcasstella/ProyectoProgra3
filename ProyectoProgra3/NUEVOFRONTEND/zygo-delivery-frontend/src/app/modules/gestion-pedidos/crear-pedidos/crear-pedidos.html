@@ -69,6 +69,37 @@
           </select>
         </div>
 
+        <!-- ✅ NUEVO: Selector de Estado -->
+        <div class="form-group">
+          <label for="estado">
+            🏷️ Estado del Pedido <span class="required">*</span>
+          </label>
+          <select 
+            id="estado" 
+            formControlName="estado" 
+            class="form-control estado-selector"
+            [class.invalid]="estado?.invalid && estado?.touched">
+            <option 
+              *ngFor="let estadoOpt of estadosDisponibles" 
+              [value]="estadoOpt.valor">
+              {{ estadoOpt.etiqueta }}
+            </option>
+          </select>
+          
+          <!-- Descripción del estado seleccionado -->
+          <small class="help-text estado-description" *ngIf="pedidoForm.get('estado')?.value">
+            <ng-container *ngFor="let estadoOpt of estadosDisponibles">
+              <span *ngIf="pedidoForm.get('estado')?.value === estadoOpt.valor">
+                💡 {{ estadoOpt.descripcion }}
+              </span>
+            </ng-container>
+          </small>
+          
+          <small *ngIf="estado?.invalid && estado?.touched" class="error-text">
+            El estado es requerido
+          </small>
+        </div>
+
         <!-- Descripción -->
         <div class="form-group">
           <label for="descripcion">
@@ -226,14 +257,6 @@
 
       <!-- Cuando NO hay instrucciones -->
       <div class="no-instrucciones" *ngIf="!instruccionesRuta || instruccionesRuta.length === 0">
-        <div class="icon">🗺️</div>
-        <p>Selecciona ambos puntos en el mapa y se calcularán las instrucciones de navegación</p>
-      </div>
-    </div>
-
-    <!-- Mensaje cuando no hay instrucciones -->
-    <div class="instrucciones-navegacion" *ngIf="origenCoordenadas && destinoCoordenadas && !instruccionesRuta">
-      <div class="no-instrucciones">
         <div class="icon">🗺️</div>
         <p>Selecciona ambos puntos en el mapa y se calcularán las instrucciones de navegación</p>
       </div>

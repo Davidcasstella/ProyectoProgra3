@@ -4,7 +4,13 @@
   
   <!-- Panel de Control -->
   <div class="panel-control">
-    <h2 class="titulo">🗺️ Selector de Ubicaciones</h2>
+    <!-- ✅ NUEVO: Botón de Volver -->
+    <div class="header-panel">
+      <button class="btn-volver" (click)="volverAtras()" title="Volver atrás">
+        ← Volver
+      </button>
+      <h2 class="titulo">🗺️ Selector de Ubicaciones</h2>
+    </div>
     
     <!-- Instrucciones -->
     <div class="instrucciones">
@@ -95,7 +101,7 @@
 
       <!-- Instrucciones paso a paso -->
       <div *ngIf="rutaCalculada.instrucciones && rutaCalculada.instrucciones.length > 0" class="instrucciones-ruta">
-        <h4>📍 Instrucciones:</h4>
+        <h4>📋 Instrucciones:</h4>
         <ol>
           <li *ngFor="let instruccion of rutaCalculada.instrucciones">
             {{ instruccion }}

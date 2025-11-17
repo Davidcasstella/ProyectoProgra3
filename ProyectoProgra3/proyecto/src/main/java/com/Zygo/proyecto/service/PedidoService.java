@@ -43,9 +43,17 @@ public class PedidoService {
         pedido.setDireccionDestino(dto.getDireccionDestino());
         pedido.setDistanciaKm(dto.getDistanciaKm());
         pedido.setCosto(calcularCosto(dto.getDistanciaKm()));
-        pedido.setEstado(EstadoPedido.PENDIENTE);
         
-        // ✅ NUEVO: Guardar coordenadas si están presentes
+        // ✅ CORREGIDO: Respetar el estado que viene del frontend
+        if (dto.getEstado() != null) {
+            pedido.setEstado(dto.getEstado());
+            log.info("✅ Estado personalizado recibido: {}", dto.getEstado());
+        } else {
+            pedido.setEstado(EstadoPedido.PENDIENTE);
+            log.info("Estado por defecto: PENDIENTE");
+        }
+        
+        // Guardar coordenadas si están presentes
         if (dto.getLatOrigen() != null) {
             pedido.setLatOrigen(dto.getLatOrigen());
             pedido.setLonOrigen(dto.getLonOrigen());
@@ -56,18 +64,37 @@ public class PedidoService {
                     dto.getLatDestino(), dto.getLonDestino());
         }
         
-        Pedido guardado = pedidoRepository.save(pedido);
-        log.info("Pedido creado con ID: {}", guardado.getId());
+        // ✅ CORREGIDO: Si viene con repartidor, asignarlo directamente
+        if (dto.getRepartidorId() != null) {
+            Usuario repartidor = usuarioRepository.findById(dto.getRepartidorId())
+                    .orElseThrow(() -> new RuntimeException("Repartidor no encontrado"));
+            pedido.setRepartidor(repartidor);
+            pedido.setFechaAsignacion(LocalDateTime.now());
+            log.info("✅ Repartidor {} asignado desde la creación", dto.getRepartidorId());
+        }
         
-        // Asignar repartidor de forma asíncrona
-        asignarRepartidorAsync(guardado.getId());
+        // ✅ CORREGIDO: Si viene ENTREGADO, establecer fecha de entrega
+        if (dto.getEstado() == EstadoPedido.ENTREGADO) {
+            pedido.setFechaEntrega(LocalDateTime.now());
+            log.info("✅ Fecha de entrega establecida para pedido completado");
+        }
+        
+        Pedido guardado = pedidoRepository.save(pedido);
+        log.info("Pedido creado con ID: {} con estado: {}", guardado.getId(), guardado.getEstado());
+        
+        // ✅ CRÍTICO: Solo activar procesos automáticos si el estado es PENDIENTE
+        if (guardado.getEstado() == EstadoPedido.PENDIENTE) {
+            log.info("🔄 Activando asignación automática para pedido PENDIENTE");
+            asignarRepartidorAsync(guardado.getId());
+        } else {
+            log.info("⏸️ Procesos automáticos desactivados - Estado: {}", guardado.getEstado());
+        }
         
         return convertirEntidadADto(guardado);
     }
-    // ✅ AGREGA ESTE MÉTODO A TU PedidoService.java (después del método crearPedido)
-
+    
     /**
-     * ✅ NUEVO: Actualizar pedido completo
+     * ✅ ACTUALIZADO: Actualizar pedido completo
      */
     @Transactional
     public PedidoDTO actualizarPedido(Long id, PedidoDTO dto) {
@@ -88,6 +115,11 @@ public class PedidoService {
             Usuario repartidor = usuarioRepository.findById(dto.getRepartidorId())
                     .orElseThrow(() -> new RuntimeException("Repartidor no encontrado"));
             pedido.setRepartidor(repartidor);
+            
+            // Si antes no tenía repartidor, establecer fecha de asignación
+            if (pedido.getFechaAsignacion() == null) {
+                pedido.setFechaAsignacion(LocalDateTime.now());
+            }
         }
         
         // Actualizar campos básicos
@@ -108,7 +140,19 @@ public class PedidoService {
             pedido.setCosto(calcularCosto(dto.getDistanciaKm()));
         }
         
-        // ✅ Actualizar coordenadas
+        // ✅ NUEVO: Actualizar estado si viene en el DTO
+        if (dto.getEstado() != null) {
+            EstadoPedido estadoAnterior = pedido.getEstado();
+            pedido.setEstado(dto.getEstado());
+            log.info("🔄 Estado cambiado de {} a {}", estadoAnterior, dto.getEstado());
+            
+            // Establecer fecha de entrega si cambió a ENTREGADO
+            if (dto.getEstado() == EstadoPedido.ENTREGADO && pedido.getFechaEntrega() == null) {
+                pedido.setFechaEntrega(LocalDateTime.now());
+            }
+        }
+        
+        // Actualizar coordenadas
         if (dto.getLatOrigen() != null) {
             pedido.setLatOrigen(dto.getLatOrigen());
             pedido.setLonOrigen(dto.getLonOrigen());
@@ -135,8 +179,10 @@ public class PedidoService {
             Pedido pedido = pedidoRepository.findById(pedidoId)
                     .orElseThrow(() -> new RuntimeException("Pedido no encontrado"));
             
+            // ✅ CORREGIDO: Solo asignar si sigue en PENDIENTE
             if (pedido.getEstado() != EstadoPedido.PENDIENTE) {
-                log.warn("[HILO ASYNC] Pedido {} ya no está pendiente", pedidoId);
+                log.warn("[HILO ASYNC] Pedido {} ya no está pendiente (estado: {}), cancelando asignación automática", 
+                        pedidoId, pedido.getEstado());
                 return CompletableFuture.completedFuture(null);
             }
             
@@ -145,7 +191,7 @@ public class PedidoService {
                     .findRepartidoresActivos(Usuario.TipoUsuario.REPARTIDOR);
             
             if (!repartidores.isEmpty()) {
-                Usuario repartidor = repartidores.get(0); // Asigna el primero disponible
+                Usuario repartidor = repartidores.get(0);
                 asignarRepartidor(pedidoId, repartidor.getId());
                 log.info("[HILO ASYNC] Repartidor {} asignado al pedido {}", 
                         repartidor.getId(), pedidoId);
@@ -192,13 +238,24 @@ public class PedidoService {
             Thread.sleep(5000); // Simula tiempo de entrega
             
             Pedido pedido = pedidoRepository.findById(pedidoId).orElse(null);
+            
+            // ✅ CORREGIDO: Solo continuar si el pedido está en ASIGNADO
             if (pedido != null && pedido.getEstado() == EstadoPedido.ASIGNADO) {
                 actualizarEstadoPedido(pedidoId, EstadoPedido.EN_CAMINO);
                 log.info("[HILO ASYNC] Pedido {} ahora está en camino", pedidoId);
                 
                 Thread.sleep(5000); // Simula llegada
-                actualizarEstadoPedido(pedidoId, EstadoPedido.ENTREGADO);
-                log.info("[HILO ASYNC] Pedido {} entregado exitosamente", pedidoId);
+                
+                // Verificar nuevamente antes de marcar como entregado
+                pedido = pedidoRepository.findById(pedidoId).orElse(null);
+                if (pedido != null && pedido.getEstado() == EstadoPedido.EN_CAMINO) {
+                    actualizarEstadoPedido(pedidoId, EstadoPedido.ENTREGADO);
+                    log.info("[HILO ASYNC] Pedido {} entregado exitosamente", pedidoId);
+                } else {
+                    log.warn("[HILO ASYNC] Pedido {} cambió de estado, no se marca como entregado", pedidoId);
+                }
+            } else {
+                log.warn("[HILO ASYNC] Pedido {} no está en estado ASIGNADO, simulación cancelada", pedidoId);
             }
             
         } catch (InterruptedException e) {
@@ -292,7 +349,7 @@ public class PedidoService {
         dto.setFechaAsignacion(pedido.getFechaAsignacion());
         dto.setFechaEntrega(pedido.getFechaEntrega());
         
-        // ✅ NUEVO: Incluir coordenadas en la respuesta
+        // Incluir coordenadas en la respuesta
         dto.setLatOrigen(pedido.getLatOrigen());
         dto.setLonOrigen(pedido.getLonOrigen());
         dto.setLatDestino(pedido.getLatDestino());

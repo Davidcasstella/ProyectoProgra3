@@ -95,16 +95,16 @@ public class SecurityConfig {
                 session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
             
             .authorizeHttpRequests(auth -> auth
-                // ✅ Acceso público
+                // ✅ Acceso público (SIN AUTENTICACIÓN)
                 .requestMatchers("/api/auth/**").permitAll()
+                .requestMatchers("/api/rutas/**").permitAll()      // ✅ CRÍTICO: Permitir rutas
+                .requestMatchers("/api/lugares/**").permitAll()    // ✅ Permitir lugares
                 .requestMatchers("/", "/index.html", "/mapa.html", "/static/**", "/*.html").permitAll()
                 
-                // ✅ SOLUCIÓN: Usar hasAuthority en lugar de hasRole
+                // ✅ Endpoints protegidos (CON AUTENTICACIÓN)
                 .requestMatchers("/api/admin/osm/**").hasAuthority("ROLE_ADMIN")
                 .requestMatchers("/api/usuarios/**").hasAnyAuthority("ROLE_ADMIN", "ROLE_CLIENTE", "ROLE_REPARTIDOR")
                 .requestMatchers("/api/pedidos/**").hasAnyAuthority("ROLE_ADMIN", "ROLE_CLIENTE", "ROLE_REPARTIDOR")
-                .requestMatchers("/api/rutas/**").hasAnyAuthority("ROLE_ADMIN", "ROLE_CLIENTE", "ROLE_REPARTIDOR")
-                .requestMatchers("/api/lugares/**").hasAnyAuthority("ROLE_ADMIN", "ROLE_CLIENTE", "ROLE_REPARTIDOR")
                 
                 .anyRequest().authenticated()
             );

@@ -293,3 +293,82 @@
     height: 50vh;
   }
 }
+/* ✅ AGREGAR ESTOS ESTILOS A selector-ubicacion.css */
+
+/* ===== HEADER DEL PANEL CON BOTÓN VOLVER ===== */
+.header-panel {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+  padding-bottom: 1rem;
+  border-bottom: 2px solid rgba(139, 92, 246, 0.3);
+}
+
+.header-panel .titulo {
+  flex: 1;
+  margin: 0;
+  font-size: 1.5rem;
+  color: #ffffff;
+  font-weight: 700;
+  text-align: center;
+}
+
+/* ✅ BOTÓN DE VOLVER */
+.btn-volver {
+  padding: 0.625rem 1.25rem;
+  background: rgba(139, 92, 246, 0.2);
+  border: 1px solid rgba(139, 92, 246, 0.5);
+  color: #a78bfa;
+  border-radius: 0.5rem;
+  cursor: pointer;
+  font-weight: 600;
+  font-size: 0.95rem;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.btn-volver:hover {
+  background: rgba(139, 92, 246, 0.3);
+  border-color: #8b5cf6;
+  color: #ffffff;
+  transform: translateX(-3px);
+  box-shadow: 0 4px 12px rgba(139, 92, 246, 0.3);
+}
+
+.btn-volver:active {
+  transform: translateX(-3px) scale(0.95);
+}
+
+/* ===== RESPONSIVE ===== */
+@media (max-width: 768px) {
+  .header-panel {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .header-panel .titulo {
+    text-align: center;
+    font-size: 1.25rem;
+  }
+
+  .btn-volver {
+    width: 100%;
+    justify-content: center;
+  }
+}
+
+@media (max-width: 576px) {
+  .header-panel .titulo {
+    font-size: 1.1rem;
+  }
+  
+  .btn-volver {
+    font-size: 0.9rem;
+    padding: 0.5rem 1rem;
+  }
+}

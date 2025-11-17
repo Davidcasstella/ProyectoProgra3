@@ -3,9 +3,15 @@ package com.Zygo.proyecto.model;
 import jakarta.persistence.*;
 import java.time.LocalDateTime;
 
+// ✅ IMPORTS CORRECTOS para el Logger
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 @Entity
 @Table(name = "pedidos")
 public class Pedido {
+    // ✅ Logger correcto usando SLF4J
+    private static final Logger log = LoggerFactory.getLogger(Pedido.class);
     
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -47,7 +53,7 @@ public class Pedido {
     @Column(name = "fecha_entrega")
     private LocalDateTime fechaEntrega;
 
-        // Agregar a Pedido.java
+    // Coordenadas para el mapa
     @Column(name = "lat_origen")
     private Double latOrigen;
 
@@ -63,7 +69,14 @@ public class Pedido {
     @PrePersist
     protected void onCreate() {
         fechaCreacion = LocalDateTime.now();
-        estado = EstadoPedido.PENDIENTE;
+        
+        // ✅ Solo establecer PENDIENTE si no viene estado
+        if (estado == null) {
+            estado = EstadoPedido.PENDIENTE;
+            log.info("Estado establecido por defecto: PENDIENTE");
+        } else {
+            log.info("✅ Estado personalizado conservado: {}", estado);
+        }
     }
     
     public enum EstadoPedido {
@@ -191,6 +204,7 @@ public class Pedido {
     public void setFechaEntrega(LocalDateTime fechaEntrega) {
         this.fechaEntrega = fechaEntrega;
     }
+    
     // Getters y Setters para coordenadas
     public Double getLatOrigen() {
         return latOrigen;

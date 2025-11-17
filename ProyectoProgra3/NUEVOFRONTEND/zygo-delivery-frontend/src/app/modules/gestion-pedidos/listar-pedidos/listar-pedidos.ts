@@ -1,6 +1,6 @@
 // src/app/modules/gestion-pedidos/listar-pedidos/listar-pedidos.ts
 
-import { Component, OnInit, OnDestroy, ViewChild, inject } from '@angular/core';
+import { Component, OnInit, OnDestroy, ViewChild, inject, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 import { interval, Subscription } from 'rxjs';
@@ -24,6 +24,7 @@ export class ListarPedidos implements OnInit, OnDestroy {
   private lugarService = inject(LugarService);
   private authService = inject(AuthService);
   private router = inject(Router);
+  private cdr = inject(ChangeDetectorRef); // ✅ NUEVO: Para forzar detección de cambios
 
   pedidos: Pedido[] = [];
   pedidosFiltrados: Pedido[] = [];
@@ -38,9 +39,9 @@ export class ListarPedidos implements OnInit, OnDestroy {
 
   // Filtros
   filtroEstado: string = 'TODOS';
-  estadosDisponibles = ['TODOS', 'PENDIENTE', 'ASIGNADO', 'EN_CAMINO', 'ENTREGADO'];
+  estadosDisponibles = ['TODOS', 'PENDIENTE', 'ASIGNADO', 'EN_CAMINO', 'ENTREGADO', 'CANCELADO'];
 
-  // ✅ Auto-actualización
+  // Auto-actualización
   private refreshSubscription?: Subscription;
   private readonly REFRESH_INTERVAL = 10000; // 10 segundos
 
@@ -50,8 +51,13 @@ export class ListarPedidos implements OnInit, OnDestroy {
 
   ngOnInit(): void {
     console.log('🚀 Iniciando ListarPedidos...');
-    this.cargarPedidos();
-    this.iniciarAutoActualizacion();
+    console.log('👤 Usuario actual:', this.usuarioActual);
+    
+    // ✅ CORRECCIÓN: Usar setTimeout para asegurar que el ciclo de Angular esté listo
+    setTimeout(() => {
+      this.cargarPedidos();
+      this.iniciarAutoActualizacion();
+    }, 0);
   }
 
   ngOnDestroy(): void {
@@ -65,7 +71,7 @@ export class ListarPedidos implements OnInit, OnDestroy {
   iniciarAutoActualizacion(): void {
     this.refreshSubscription = interval(this.REFRESH_INTERVAL).subscribe(() => {
       console.log('🔄 Auto-actualizando lista de pedidos...');
-      this.cargarPedidos(true); // true = actualización silenciosa
+      this.cargarPedidos(true);
     });
   }
 
@@ -79,59 +85,72 @@ export class ListarPedidos implements OnInit, OnDestroy {
   }
 
   /**
-   * ✅ Carga los pedidos (con opción de actualización silenciosa)
+   * ✅ Carga los pedidos (CORREGIDO con detección de cambios)
    */
-cargarPedidos(silencioso: boolean = false): void {
-  if (!silencioso) {
-    this.cargando = true;
-  }
-  this.error = null;
-
-  const usuario = this.usuarioActual;
-  if (!usuario) {
-    this.error = 'No hay usuario autenticado';
-    this.cargando = false;
-    return;
-  }
-
-  console.log('📡 Solicitando pedidos al backend...');
-  console.log('👤 Usuario:', usuario.tipo, usuario.id);
-
-  // ✅ SOLUCIÓN SIMPLE: Siempre cargar TODOS los pedidos
-  const observable = this.pedidoService.obtenerTodos();
-
-  observable.subscribe({
-    next: (pedidos) => {
-      console.log('📦 Respuesta del backend:', pedidos);
-      console.log('📊 Total de pedidos:', pedidos.length);
-      
-      const ids = pedidos.map(p => p.id);
-      console.log('🔢 IDs de pedidos:', ids);
-      
-      const pedidosAnteriores = this.pedidos.length;
-      this.pedidos = pedidos;
-      this.aplicarFiltros();
-      this.cargando = false;
-
-      if (!silencioso) {
-        console.log(`✅ ${pedidos.length} pedidos cargados`);
-      } else if (pedidos.length !== pedidosAnteriores) {
-        console.log(`🔄 Lista actualizada: ${pedidosAnteriores} → ${pedidos.length} pedidos`);
-      }
-    },
-    error: (err) => {
-      this.error = 'Error al cargar pedidos';
-      this.cargando = false;
-      console.error('❌ Error al cargar pedidos:', err);
+  cargarPedidos(silencioso: boolean = false): void {
+    if (!silencioso) {
+      this.cargando = true;
+      // ✅ Forzar detección de cambios para que aparezca el spinner
+      this.cdr.detectChanges();
     }
-  });
-}
+    this.error = null;
 
+    const usuario = this.usuarioActual;
+    if (!usuario) {
+      this.error = 'No hay usuario autenticado';
+      this.cargando = false;
+      this.cdr.detectChanges();
+      return;
+    }
+
+    console.log('📡 Solicitando pedidos al backend...');
+    console.log('👤 Usuario:', usuario.tipo, usuario.id);
+
+    const observable = this.pedidoService.obtenerTodos();
+
+    observable.subscribe({
+      next: (pedidos) => {
+        console.log('📦 Respuesta del backend:', pedidos);
+        console.log('📊 Total de pedidos:', pedidos.length);
+        
+        const ids = pedidos.map(p => p.id);
+        console.log('🔢 IDs de pedidos:', ids);
+        
+        const pedidosAnteriores = this.pedidos.length;
+        
+        // ✅ CORRECCIÓN: Actualizar en el orden correcto
+        this.pedidos = [...pedidos]; // Crear nuevo array
+        this.aplicarFiltros();
+        this.cargando = false;
+        
+        // ✅ CRÍTICO: Forzar detección de cambios
+        this.cdr.detectChanges();
+
+        if (!silencioso) {
+          console.log(`✅ ${pedidos.length} pedidos cargados`);
+        } else if (pedidos.length !== pedidosAnteriores) {
+          console.log(`🔄 Lista actualizada: ${pedidosAnteriores} → ${pedidos.length} pedidos`);
+        }
+        
+        console.log('🎯 pedidosFiltrados.length:', this.pedidosFiltrados.length);
+        console.log('📋 Estado de cargando:', this.cargando);
+      },
+      error: (err) => {
+        this.error = 'Error al cargar pedidos';
+        this.cargando = false;
+        this.cdr.detectChanges();
+        console.error('❌ Error al cargar pedidos:', err);
+      }
+    });
+  }
 
   /**
    * Aplica filtros según el estado seleccionado
    */
   aplicarFiltros(): void {
+    console.log('🔍 Aplicando filtros - Estado:', this.filtroEstado);
+    console.log('📦 Total pedidos antes de filtrar:', this.pedidos.length);
+    
     if (this.filtroEstado === 'TODOS') {
       this.pedidosFiltrados = [...this.pedidos];
     } else {
@@ -139,14 +158,26 @@ cargarPedidos(silencioso: boolean = false): void {
         p => p.estado === this.filtroEstado
       );
     }
+    
+    console.log(`✅ Filtrado: ${this.pedidosFiltrados.length} pedidos con estado ${this.filtroEstado}`);
   }
 
   /**
    * Cambia el filtro de estado
    */
   cambiarFiltro(estado: string): void {
+    console.log(`🔄 Cambiando filtro a: ${estado}`);
     this.filtroEstado = estado;
     this.aplicarFiltros();
+    this.cdr.detectChanges(); // ✅ Forzar detección de cambios
+  }
+
+  /**
+   * ✅ Volver al dashboard
+   */
+  volverAlDashboard(): void {
+    console.log('⬅️ Volviendo al dashboard...');
+    this.router.navigate(['/dashboard']);
   }
 
   /**
@@ -239,12 +270,12 @@ cargarPedidos(silencioso: boolean = false): void {
         if (index !== -1) {
           this.pedidos[index] = pedidoActualizado;
           this.aplicarFiltros();
+          this.cdr.detectChanges();
         }
 
         if (this.pedidoSeleccionado?.id === pedido.id) {
           this.pedidoSeleccionado = pedidoActualizado;
           
-          // ✅ Cerrar modal automáticamente si se marca como ENTREGADO
           if (nuevoEstado === 'ENTREGADO') {
             setTimeout(() => {
               this.cerrarModalRuta();

@@ -1,11 +1,18 @@
 <!-- src/app/modules/gestion-pedidos/listar-pedidos/listar-pedidos.html -->
 
 <div class="pedidos-container">
-  <!-- 🎯 HEADER -->
+  <!-- 🎯 HEADER CON BOTÓN DE VOLVER -->
   <div class="header">
     <div class="header-content">
-      <h1>🚴 Mis Pedidos</h1>
-      <p class="subtitle">Gestiona tus entregas asignadas</p>
+      <!-- ✅ NUEVO: Botón para volver al dashboard -->
+      <button class="btn-volver" (click)="volverAlDashboard()" title="Volver al Dashboard">
+        ← Volver
+      </button>
+      
+      <div class="header-text">
+        <h1>🚴 Mis Pedidos</h1>
+        <p class="subtitle">Gestiona tus entregas asignadas</p>
+      </div>
     </div>
   </div>
 
@@ -41,7 +48,7 @@
   <div *ngIf="!cargando && !error" class="pedidos-grid">
     <!-- 🎨 SIN PEDIDOS -->
     <div *ngIf="pedidosFiltrados.length === 0" class="empty-state">
-      <div class="empty-icon">📭</div>
+      <div class="empty-icon">🔭</div>
       <h3>No hay pedidos</h3>
       <p>No tienes pedidos {{ filtroEstado !== 'TODOS' ? 'con estado ' + filtroEstado : '' }}</p>
     </div>
@@ -177,7 +184,7 @@
 
       <!-- INSTRUCCIONES DE LA RUTA -->
       <div *ngIf="rutaCalculada && rutaCalculada.instrucciones" class="instrucciones-container">
-        <h3>📍 Instrucciones de la Ruta</h3>
+        <h3>📋 Instrucciones de la Ruta</h3>
         <div class="instrucciones-list">
           <div 
             *ngFor="let instruccion of rutaCalculada.instrucciones; let i = index"

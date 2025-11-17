@@ -33,4 +33,5 @@ describe('HomeComponent', () => {
   it('should set loading to true initially', () => {
     expect(component.loading()).toBe(true);
   });
+  
 });
