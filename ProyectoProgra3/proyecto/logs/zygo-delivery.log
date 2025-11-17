@@ -2451,3 +2451,8 @@
 2025-11-16 22:24:29 [http-nio-8080-exec-4] DEBUG c.Z.proyecto.service.PedidoService - Obteniendo todos los pedidos
 2025-11-16 22:24:29 [http-nio-8080-exec-4] INFO  c.Z.p.controller.PedidoController - ✅ Retornando 9 pedidos
 2025-11-16 22:24:29 [http-nio-8080-exec-4] INFO  c.Z.p.controller.PedidoController - 🔢 IDs de pedidos: [1, 2, 3, 4, 5, 6, 7, 8, 9]
+2025-11-16 22:24:38 [http-nio-8080-exec-5] DEBUG c.Z.p.s.JwtAuthenticationFilter - Usuario autenticado: dave@gmail.com
+2025-11-16 22:24:38 [http-nio-8080-exec-5] INFO  c.Z.p.controller.PedidoController - 📋 GET /api/pedidos - Obteniendo todos los pedidos
+2025-11-16 22:24:38 [http-nio-8080-exec-5] DEBUG c.Z.proyecto.service.PedidoService - Obteniendo todos los pedidos
+2025-11-16 22:24:39 [http-nio-8080-exec-5] INFO  c.Z.p.controller.PedidoController - ✅ Retornando 9 pedidos
+2025-11-16 22:24:39 [http-nio-8080-exec-5] INFO  c.Z.p.controller.PedidoController - 🔢 IDs de pedidos: [1, 2, 3, 4, 5, 6, 7, 8, 9]
