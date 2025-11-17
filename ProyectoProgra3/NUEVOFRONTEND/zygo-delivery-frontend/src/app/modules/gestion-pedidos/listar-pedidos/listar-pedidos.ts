@@ -81,43 +81,52 @@ export class ListarPedidos implements OnInit, OnDestroy {
   /**
    * ✅ Carga los pedidos (con opción de actualización silenciosa)
    */
-  cargarPedidos(silencioso: boolean = false): void {
-    if (!silencioso) {
-      this.cargando = true;
-    }
-    this.error = null;
-
-    const usuario = this.usuarioActual;
-    if (!usuario) {
-      this.error = 'No hay usuario autenticado';
-      this.cargando = false;
-      return;
-    }
-
-    const observable = usuario.tipo === 'REPARTIDOR' && usuario.id
-      ? this.pedidoService.obtenerPorRepartidor(usuario.id)
-      : this.pedidoService.obtenerTodos();
-
-    observable.subscribe({
-      next: (pedidos) => {
-        const pedidosAnteriores = this.pedidos.length;
-        this.pedidos = pedidos;
-        this.aplicarFiltros();
-        this.cargando = false;
-
-        if (!silencioso) {
-          console.log(`✅ ${pedidos.length} pedidos cargados`);
-        } else if (pedidos.length !== pedidosAnteriores) {
-          console.log(`🔄 Lista actualizada: ${pedidosAnteriores} → ${pedidos.length} pedidos`);
-        }
-      },
-      error: (err) => {
-        this.error = 'Error al cargar pedidos';
-        this.cargando = false;
-        console.error('❌ Error al cargar pedidos:', err);
-      }
-    });
+cargarPedidos(silencioso: boolean = false): void {
+  if (!silencioso) {
+    this.cargando = true;
   }
+  this.error = null;
+
+  const usuario = this.usuarioActual;
+  if (!usuario) {
+    this.error = 'No hay usuario autenticado';
+    this.cargando = false;
+    return;
+  }
+
+  console.log('📡 Solicitando pedidos al backend...');
+  console.log('👤 Usuario:', usuario.tipo, usuario.id);
+
+  // ✅ SOLUCIÓN SIMPLE: Siempre cargar TODOS los pedidos
+  const observable = this.pedidoService.obtenerTodos();
+
+  observable.subscribe({
+    next: (pedidos) => {
+      console.log('📦 Respuesta del backend:', pedidos);
+      console.log('📊 Total de pedidos:', pedidos.length);
+      
+      const ids = pedidos.map(p => p.id);
+      console.log('🔢 IDs de pedidos:', ids);
+      
+      const pedidosAnteriores = this.pedidos.length;
+      this.pedidos = pedidos;
+      this.aplicarFiltros();
+      this.cargando = false;
+
+      if (!silencioso) {
+        console.log(`✅ ${pedidos.length} pedidos cargados`);
+      } else if (pedidos.length !== pedidosAnteriores) {
+        console.log(`🔄 Lista actualizada: ${pedidosAnteriores} → ${pedidos.length} pedidos`);
+      }
+    },
+    error: (err) => {
+      this.error = 'Error al cargar pedidos';
+      this.cargando = false;
+      console.error('❌ Error al cargar pedidos:', err);
+    }
+  });
+}
+
 
   /**
    * Aplica filtros según el estado seleccionado

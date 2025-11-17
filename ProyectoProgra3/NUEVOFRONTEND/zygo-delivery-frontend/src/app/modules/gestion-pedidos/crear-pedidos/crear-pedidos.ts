@@ -297,64 +297,77 @@ export class CrearPedidos implements OnInit {
   /**
    * Enviar formulario
    */
-  onSubmit(): void {
-    console.log('📤 Intentando enviar formulario...');
+  /**
+ * Enviar formulario
+ */
+onSubmit(): void {
+  console.log('📤 Intentando enviar formulario...');
 
-    if (this.pedidoForm.invalid) {
-      this.mostrarError('Por favor completa todos los campos requeridos');
-      Object.keys(this.pedidoForm.controls).forEach(key => {
-        const control = this.pedidoForm.get(key);
-        if (control?.invalid) {
-          control.markAsTouched();
-        }
-      });
-      return;
-    }
-
-    if (!this.origenCoordenadas || !this.destinoCoordenadas) {
-      this.mostrarError('Por favor selecciona origen y destino en el mapa');
-      return;
-    }
-
-    if (!this.distanciaCalculada || !this.costoCalculado) {
-      this.mostrarError('Por favor espera a que se calcule la ruta');
-      return;
-    }
-
-    this.cargando = true;
-    this.error = null;
-
-    const pedidoData = {
-      clienteId: this.pedidoForm.get('clienteId')?.value,
-      repartidorId: this.pedidoForm.get('repartidorId')?.value || null,
-      descripcion: this.pedidoForm.get('descripcion')?.value,
-      direccionOrigen: this.pedidoForm.get('direccionOrigen')?.value,
-      direccionDestino: this.pedidoForm.get('direccionDestino')?.value,
-      distanciaKm: this.distanciaCalculada,
-      costo: this.costoCalculado,
-      latOrigen: this.origenCoordenadas.lat,
-      lonOrigen: this.origenCoordenadas.lng,
-      latDestino: this.destinoCoordenadas.lat,
-      lonDestino: this.destinoCoordenadas.lng
-    };
-
-    console.log('📦 Enviando pedido:', pedidoData);
-
-    this.pedidoService.crear(pedidoData).subscribe({
-      next: (response: any) => {
-        console.log('✅ Pedido creado exitosamente:', response);
-        this.mostrarExito('¡Pedido creado exitosamente!');
-        setTimeout(() => {
-          this.router.navigate(['/pedidos/listar-pedidos']);
-        }, 1500);
-      },
-      error: (err: any) => {
-        console.error('❌ Error al crear pedido:', err);
-        this.mostrarError(err.error?.mensaje || 'Error al crear el pedido');
-        this.cargando = false;
+  if (this.pedidoForm.invalid) {
+    this.mostrarError('Por favor completa todos los campos requeridos');
+    Object.keys(this.pedidoForm.controls).forEach(key => {
+      const control = this.pedidoForm.get(key);
+      if (control?.invalid) {
+        control.markAsTouched();
       }
     });
+    return;
   }
+
+  if (!this.origenCoordenadas || !this.destinoCoordenadas) {
+    this.mostrarError('Por favor selecciona origen y destino en el mapa');
+    return;
+  }
+
+  if (!this.distanciaCalculada || !this.costoCalculado) {
+    this.mostrarError('Por favor espera a que se calcule la ruta');
+    return;
+  }
+
+  this.cargando = true;
+  this.error = null;
+
+  const pedidoData = {
+    clienteId: this.pedidoForm.get('clienteId')?.value,
+    repartidorId: this.pedidoForm.get('repartidorId')?.value || null,
+    descripcion: this.pedidoForm.get('descripcion')?.value,
+    direccionOrigen: this.pedidoForm.get('direccionOrigen')?.value,
+    direccionDestino: this.pedidoForm.get('direccionDestino')?.value,
+    distanciaKm: this.distanciaCalculada,
+    costo: this.costoCalculado,
+    latOrigen: this.origenCoordenadas.lat,
+    lonOrigen: this.origenCoordenadas.lng,
+    latDestino: this.destinoCoordenadas.lat,
+    lonDestino: this.destinoCoordenadas.lng
+  };
+
+  console.log('📦 Enviando pedido:', pedidoData);
+
+  this.pedidoService.crear(pedidoData).subscribe({
+    next: (response: any) => {
+      console.log('✅ Pedido creado exitosamente:', response);
+      console.log('🆔 ID del nuevo pedido:', response.id);
+      
+      this.mostrarExito('¡Pedido creado exitosamente!');
+      
+      // ✅ SOLUCIÓN MEJORADA: Esperar 2 segundos y recargar completamente
+      setTimeout(() => {
+        console.log('🔄 Redirigiendo a lista de pedidos...');
+        
+        // Opción 1: Recarga completa con caché deshabilitado
+        window.location.replace('/pedidos/listar-pedidos');
+        
+        // Si no funciona, descomentar esto:
+        // window.location.href = '/pedidos/listar-pedidos?' + new Date().getTime();
+      }, 2000);
+    },
+    error: (err: any) => {
+      console.error('❌ Error al crear pedido:', err);
+      this.mostrarError(err.error?.mensaje || 'Error al crear el pedido');
+      this.cargando = false;
+    }
+  });
+}
 
   /**
    * Cancelar y volver

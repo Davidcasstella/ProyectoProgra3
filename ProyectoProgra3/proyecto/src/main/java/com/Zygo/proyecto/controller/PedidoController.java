@@ -12,6 +12,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/pedidos")
@@ -28,14 +29,17 @@ public class PedidoController {
      */
     @PostMapping
     public ResponseEntity<PedidoDTO> crearPedido(@Valid @RequestBody PedidoDTO pedidoDTO) {
-        log.info("📥 POST /api/pedidos - Creando pedido");
+        log.info("🔥 POST /api/pedidos - Creando pedido");
+        log.info("📝 Datos recibidos: {}", pedidoDTO);
         log.info("📍 Coordenadas recibidas - Origen: ({}, {}), Destino: ({}, {})", 
                 pedidoDTO.getLatOrigen(), pedidoDTO.getLonOrigen(),
                 pedidoDTO.getLatDestino(), pedidoDTO.getLonDestino());
         
         PedidoDTO creado = pedidoService.crearPedido(pedidoDTO);
         
-        log.info("✅ Pedido creado con ID: {}", creado.getId());
+        log.info("✅ Pedido creado exitosamente con ID: {}", creado.getId());
+        log.info("📦 Pedido completo: {}", creado);
+        
         return ResponseEntity.status(HttpStatus.CREATED).body(creado);
     }
     
@@ -55,13 +59,24 @@ public class PedidoController {
     @GetMapping
     public ResponseEntity<List<PedidoDTO>> obtenerTodosLosPedidos() {
         log.info("📋 GET /api/pedidos - Obteniendo todos los pedidos");
+        
         List<PedidoDTO> pedidos = pedidoService.obtenerTodosLosPedidos();
+        
         log.info("✅ Retornando {} pedidos", pedidos.size());
+        
+        // ✅ Log de IDs para debugging
+        if (!pedidos.isEmpty()) {
+            List<Long> ids = pedidos.stream()
+                .map(PedidoDTO::getId)
+                .collect(Collectors.toList());
+            log.info("🔢 IDs de pedidos: {}", ids);
+        }
+        
         return ResponseEntity.ok(pedidos);
     }
     
     /**
-     * ✅ ACTUALIZAR PEDIDO COMPLETO (NUEVO)
+     * ✅ ACTUALIZAR PEDIDO COMPLETO
      */
     @PutMapping("/{id}")
     public ResponseEntity<PedidoDTO> actualizarPedido(

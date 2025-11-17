@@ -14,8 +14,10 @@ export class PedidoService {
   private apiUrl = `${environment.apiUrl}/pedidos`;
 
   obtenerTodos(): Observable<Pedido[]> {
-    return this.http.get<Pedido[]>(this.apiUrl);
-  }
+  // ✅ Agregar timestamp para evitar cache del navegador
+  const timestamp = new Date().getTime();
+  return this.http.get<Pedido[]>(`${this.apiUrl}?_t=${timestamp}`);
+}
 
   obtenerPorId(id: number): Observable<Pedido> {
     return this.http.get<Pedido>(`${this.apiUrl}/${id}`);
@@ -34,12 +36,13 @@ export class PedidoService {
   }
 
   obtenerPorCliente(clienteId: number): Observable<Pedido[]> {
-    return this.http.get<Pedido[]>(`${this.apiUrl}/cliente/${clienteId}`);
-  }
-
+  const timestamp = new Date().getTime();
+  return this.http.get<Pedido[]>(`${this.apiUrl}/cliente/${clienteId}?_t=${timestamp}`);
+}
   obtenerPorRepartidor(repartidorId: number): Observable<Pedido[]> {
-    return this.http.get<Pedido[]>(`${this.apiUrl}/repartidor/${repartidorId}`);
-  }
+  const timestamp = new Date().getTime();
+  return this.http.get<Pedido[]>(`${this.apiUrl}/repartidor/${repartidorId}?_t=${timestamp}`);
+}
 
   asignarRepartidor(pedidoId: number, repartidorId: number): Observable<Pedido> {
     return this.http.put<Pedido>(`${this.apiUrl}/${pedidoId}/asignar/${repartidorId}`, {});
