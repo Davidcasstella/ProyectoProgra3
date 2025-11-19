@@ -74,13 +74,34 @@ export class AuthService {
     return this.currentUserSubject.value;
   }
 
+  // ✨ NUEVO - Obtener ROL del usuario actual
+  getUserRole(): string | null {
+    const user = this.getCurrentUser();
+    return user?.tipoUsuario || user?.tipo || null;
+  }
+
+  // ✨ NUEVO - Verificar si es ADMIN
+  isAdmin(): boolean {
+    return this.getUserRole() === 'ADMIN';
+  }
+
+  // ✨ NUEVO - Verificar si es CLIENTE
+  isCliente(): boolean {
+    return this.getUserRole() === 'CLIENTE';
+  }
+
+  // ✨ NUEVO - Verificar si es REPARTIDOR
+  isRepartidor(): boolean {
+    return this.getUserRole() === 'REPARTIDOR';
+  }
+
   // Guardar sesión
   private guardarSesion(response: LoginResponse): void {
     const user: AuthUser = {
       id: response.id,
       nombre: response.nombre,
       email: response.email,
-      tipo: response.tipoUsuario,  // Ambos campos para compatibilidad
+      tipo: response.tipoUsuario,
       tipoUsuario: response.tipoUsuario,
       token: response.token
     };
@@ -91,6 +112,8 @@ export class AuthService {
     this.currentUserSubject.next(user);
     this.isAuthenticated.set(true);
     this.currentUserSignal.set(user);
+
+    console.log('✅ Sesión guardada - Rol:', user.tipoUsuario);
   }
 
   // Cargar usuario del storage al iniciar
@@ -104,8 +127,9 @@ export class AuthService {
         this.currentUserSubject.next(user);
         this.isAuthenticated.set(true);
         this.currentUserSignal.set(user);
+        console.log('🔄 Usuario cargado del storage - Rol:', user.tipoUsuario);
       } catch (error) {
-        console.error('Error al cargar usuario del storage:', error);
+        console.error('❌ Error al cargar usuario del storage:', error);
         this.logout();
       }
     }

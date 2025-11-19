@@ -21,14 +21,10 @@ import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
 import java.util.Arrays;
-import java.util.List;
 
-/**
- * 🔒 CONFIGURACIÓN DE SEGURIDAD CORREGIDA
- */
 @Configuration
 @EnableWebSecurity
-@EnableMethodSecurity
+@EnableMethodSecurity  // 🔥 Habilita @PreAuthorize en controladores
 public class SecurityConfig {
     
     @Autowired
@@ -55,99 +51,46 @@ public class SecurityConfig {
         return authConfig.getAuthenticationManager();
     }
     
-    /**
-     * ✅ CONFIGURACIÓN CORS CORREGIDA
-     */
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
-        
-        // ✅ Permitir todos los orígenes en desarrollo
         configuration.setAllowedOriginPatterns(Arrays.asList("*"));
-        
-        // ✅ Métodos HTTP permitidos
         configuration.setAllowedMethods(Arrays.asList(
             "GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH", "HEAD"
         ));
-        
-        // ✅ Headers permitidos
         configuration.setAllowedHeaders(Arrays.asList("*"));
-        
-        // ✅ Permitir credenciales
         configuration.setAllowCredentials(true);
-        
-        // ✅ Headers expuestos
         configuration.setExposedHeaders(Arrays.asList(
-            "Authorization",
-            "Content-Type",
-            "X-Requested-With",
-            "Access-Control-Allow-Origin",
-            "Access-Control-Allow-Credentials"
+            "Authorization", "Content-Type", "X-Requested-With",
+            "Access-Control-Allow-Origin", "Access-Control-Allow-Credentials"
         ));
-        
-        // ✅ Cache de preflight (1 hora)
         configuration.setMaxAge(3600L);
         
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", configuration);
-        
         return source;
     }
     
-    /**
-     * ✅ CADENA DE FILTROS DE SEGURIDAD CORREGIDA
-     */
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
-            // ✅ Habilitar CORS
             .cors(cors -> cors.configurationSource(corsConfigurationSource()))
-            
-            // ✅ Deshabilitar CSRF (usamos JWT)
             .csrf(csrf -> csrf.disable())
-            
-            // ✅ Sin estado (stateless) - JWT
             .sessionManagement(session -> 
                 session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
             
-            // ✅ AUTORIZACIÓN DE ENDPOINTS
             .authorizeHttpRequests(auth -> auth
                 // 🟢 PÚBLICOS - Sin autenticación
                 .requestMatchers(
                     "/api/auth/**",
-                    "/api/auth/login",
-                    "/api/auth/register",
                     "/actuator/health",
                     "/error"
                 ).permitAll()
                 
-                // 🟢 Endpoints públicos de pedidos
-                .requestMatchers(
-                    "/api/pedidos/crear-con-asignacion",
-                    "/api/pedidos/estadisticas/**"
-                ).permitAll()
-                
-                // 🟢 Endpoints públicos de rutas y lugares
-                .requestMatchers(
-                    "/api/rutas/**",
-                    "/api/lugares/**"
-                ).permitAll()
-                
-                // 🟢 Endpoints públicos del admin para mapa
-                .requestMatchers(
-                    "/api/admin/estadisticas",
-                    "/api/admin/mapa/**"
-                ).permitAll()
-                
                 // 🟢 Recursos estáticos
                 .requestMatchers(
-                    "/",
-                    "/index.html",
-                    "/mapa.html",
-                    "/static/**",
-                    "/*.html",
-                    "/*.css",
-                    "/*.js",
+                    "/", "/index.html", "/mapa.html",
+                    "/static/**", "/*.html", "/*.css", "/*.js",
                     "/assets/**"
                 ).permitAll()
                 
@@ -155,26 +98,33 @@ public class SecurityConfig {
                 .requestMatchers("/api/admin/**")
                     .hasAuthority("ROLE_ADMIN")
                 
-                // 🟡 USUARIOS - Todos los roles autenticados
-                .requestMatchers("/api/usuarios/**")
-                    .hasAnyAuthority("ROLE_ADMIN", "ROLE_CLIENTE", "ROLE_REPARTIDOR")
+                // 🔵 CLIENTE - Solo clientes
+                .requestMatchers("/api/cliente/**")
+                    .hasAuthority("ROLE_CLIENTE")
                 
-                // 🟡 PEDIDOS - Todos los roles autenticados
+                // 🟡 REPARTIDOR - Solo repartidores
+                .requestMatchers("/api/repartidor/**")
+                    .hasAuthority("ROLE_REPARTIDOR")
+                
+                // 🟣 USUARIOS - Admin puede gestionar
+                .requestMatchers("/api/usuarios/**")
+                    .hasAuthority("ROLE_ADMIN")
+                
+                // 🟠 PEDIDOS - Acceso diferenciado
+                .requestMatchers("/api/pedidos/crear-con-asignacion")
+                    .permitAll()  // Puede ser público o requerir CLIENTE
                 .requestMatchers("/api/pedidos/**")
                     .hasAnyAuthority("ROLE_ADMIN", "ROLE_CLIENTE", "ROLE_REPARTIDOR")
                 
-                // 🟡 REPARTIDOR - Solo repartidores y admins
-                .requestMatchers("/api/repartidor/**")
-                    .hasAnyAuthority("ROLE_ADMIN", "ROLE_REPARTIDOR")
+                // 🗺️ RUTAS Y LUGARES - Todos los autenticados
+                .requestMatchers("/api/rutas/**", "/api/lugares/**")
+                    .authenticated()
                 
                 // 🔴 Todo lo demás requiere autenticación
                 .anyRequest().authenticated()
             );
         
-        // ✅ Configurar provider de autenticación
         http.authenticationProvider(authenticationProvider());
-        
-        // ✅ Agregar filtro JWT ANTES del filtro de autenticación estándar
         http.addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
         
         return http.build();
