@@ -447,4 +447,8 @@ public void limpiarGrafo() {
     log.info("✓ {} nodos eliminados", nodosEliminados);
     log.info("✓ Grafo limpiado completamente");
 }
+   public void importarSogamoso() {
+    // TODO Auto-generated method stub
+    throw new UnsupportedOperationException("Unimplemented method 'importarSogamoso'");
+   }
 }

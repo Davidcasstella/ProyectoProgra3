@@ -31,7 +31,16 @@
             <line x1="3" y1="6" x2="21" y2="6"/>
             <path d="M16 10a4 4 0 0 1-8 0"/>
           </svg>
-          <span>Pedidos</span>
+          <span>Listar Pedidos</span>
+        </a>
+        
+        <a [routerLink]="['/pedidos/crear-pedidos']" routerLinkActive="active" class="nav-link">
+          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="10"/>
+            <line x1="12" y1="8" x2="12" y2="16"/>
+            <line x1="8" y1="12" x2="16" y2="12"/>
+          </svg>
+          <span>Crear Pedido</span>
         </a>
         
         <a [routerLink]="['/mapas/selector-ubicacion']" routerLinkActive="active" class="nav-link">
@@ -107,6 +116,137 @@
         }
       </div>
 
+      <!-- 🗺️ SECCIÓN DE MAPA CON HISTORIAL -->
+      <div class="map-historial-container">
+        <!-- Panel Lateral de Historial -->
+        <div class="historial-panel" [class.hidden]="!historialVisible()">
+          <div class="historial-header">
+            <h3>📜 Historial de Rutas</h3>
+            <button class="btn-toggle" (click)="toggleHistorial()" title="Ocultar panel">
+              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <polyline points="15 18 9 12 15 6"/>
+              </svg>
+            </button>
+          </div>
+
+          <div class="historial-list">
+            @if (pedidosConCoordenadas().length === 0) {
+              <div class="empty-state">
+                <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <circle cx="12" cy="10" r="3"/>
+                  <path d="M12 21.7C17.3 17 20 13 20 10a8 8 0 1 0-16 0c0 3 2.7 6.9 8 11.7z"/>
+                </svg>
+                <p>No hay pedidos con coordenadas</p>
+              </div>
+            } @else {
+              @for (pedido of pedidosConCoordenadas(); track pedido.id) {
+                <div 
+                  class="historial-item" 
+                  [class.selected]="pedidoSeleccionado()?.id === pedido.id"
+                  (click)="dibujarRutaPedido(pedido)"
+                >
+                  <div class="historial-item-header">
+                    <span class="historial-item-id">#{{ pedido.id }}</span>
+                    <span class="historial-item-badge" [ngClass]="getEstadoClass(pedido.estado)">
+                      {{ pedido.estado }}
+                    </span>
+                  </div>
+                  
+                  <div class="historial-item-description">
+                    {{ pedido.descripcion }}
+                  </div>
+                  
+                  <div class="historial-item-info">
+                    <div class="info-row">
+                      <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+                        <circle cx="12" cy="7" r="4"/>
+                      </svg>
+                      <span>{{ pedido.nombreCliente || 'Cliente' }}</span>
+                    </div>
+                    
+                    @if (pedido.nombreRepartidor) {
+                      <div class="info-row">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                          <circle cx="5.5" cy="17.5" r="3.5"/>
+                          <circle cx="18.5" cy="17.5" r="3.5"/>
+                          <path d="M12 17.5V14l-3-3 4-3 2 3h2"/>
+                        </svg>
+                        <span>{{ pedido.nombreRepartidor }}</span>
+                      </div>
+                    }
+                    
+                    <div class="info-row">
+                      <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <circle cx="12" cy="12" r="10"/>
+                        <polyline points="12 6 12 12 16 14"/>
+                      </svg>
+                      <span>{{ formatFecha(pedido.fechaCreacion) }}</span>
+                    </div>
+                  </div>
+                  
+                  <div class="historial-item-distance">
+                    📍 {{ pedido.distanciaKm ? pedido.distanciaKm.toFixed(2) : '0.00' }} km
+                  </div>
+                </div>
+              }
+            }
+          </div>
+        </div>
+
+        <!-- Botón para mostrar historial (cuando está oculto) -->
+        @if (!historialVisible()) {
+          <button class="btn-show-historial" (click)="toggleHistorial()" title="Mostrar historial">
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <polyline points="9 18 15 12 9 6"/>
+            </svg>
+          </button>
+        }
+
+        <!-- Mapa Principal -->
+        <div class="map-container">
+          <div class="map-controls">
+            <button class="btn-map-control" (click)="limpiarRuta()" title="Limpiar ruta">
+              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <polyline points="1 4 1 10 7 10"/>
+                <path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"/>
+              </svg>
+              <span>Limpiar</span>
+            </button>
+            
+            @if (pedidoSeleccionado(); as pedido) {
+              <div class="selected-pedido-info">
+                <span class="selected-badge">Pedido #{{ pedido.id }}</span>
+                <span class="selected-estado" [style.color]="getColorForEstado(pedido.estado || 'PENDIENTE')">
+                  {{ pedido.estado }}
+                </span>
+              </div>
+            }
+          </div>
+          
+          <div id="historialMap" class="map-leaflet"></div>
+
+          <!-- ✨ SPINNER DE CARGA -->
+          @if (rutaCargando()) {
+            <div class="ruta-spinner-overlay">
+              <div class="ruta-spinner-container">
+                <div class="ruta-spinner"></div>
+                <p>🚀 Calculando ruta con Dijkstra...</p>
+              </div>
+            </div>
+          }
+
+          <!-- ⚠️ MENSAJE DE ERROR -->
+          @if (errorRuta()) {
+            <div class="ruta-error-message">
+              <span>❌ Error: {{ errorRuta() }}</span>
+              <p class="error-fallback">Mostrando línea recta como alternativa</p>
+            </div>
+          }
+        </div>
+      </div>
+
+      <!-- Grid de Cards Restantes -->
       <div class="dashboard-grid">
         <!-- Gráfico de Barras -->
         <div class="dashboard-card">
@@ -169,76 +309,6 @@
                 </div>
               }
             }
-          </div>
-        </div>
-
-        <!-- Progreso Circular -->
-        <div class="dashboard-card progress-card">
-          <div class="card-header">
-            <h3>Tasa de Entrega</h3>
-          </div>
-          <div class="progress-circle-container">
-            <div class="progress-circle">
-              <svg viewBox="0 0 120 120">
-                <circle cx="60" cy="60" r="50" fill="none" stroke="rgba(138, 43, 226, 0.1)" stroke-width="10"/>
-                <circle 
-                  cx="60" 
-                  cy="60" 
-                  r="50" 
-                  fill="none" 
-                  stroke="url(#gradient)" 
-                  stroke-width="10"
-                  stroke-dasharray="314"
-                  stroke-dashoffset="80"
-                  stroke-linecap="round"
-                  transform="rotate(-90 60 60)"
-                />
-                <defs>
-                  <linearGradient id="gradient" x1="0%" y1="0%" x2="100%" y2="100%">
-                    <stop offset="0%" style="stop-color:#8a2be2;stop-opacity:1" />
-                    <stop offset="100%" style="stop-color:#4b0082;stop-opacity:1" />
-                  </linearGradient>
-                </defs>
-              </svg>
-              <div class="progress-text">
-                <div class="progress-value">74.2%</div>
-                <div class="progress-label">Completados</div>
-              </div>
-            </div>
-            <div class="progress-buttons">
-              <button class="progress-btn">EMAIL</button>
-              <button class="progress-btn">EXPORT</button>
-            </div>
-          </div>
-        </div>
-
-        <!-- Estadística Simple -->
-        <div class="dashboard-card simple-stat">
-          <div class="card-header">
-            <h3>YOUR TITLE</h3>
-          </div>
-          <div class="simple-stat-content">
-            <div class="simple-stat-value">153.2</div>
-            <div class="simple-stat-chart">
-              <svg viewBox="0 0 200 60" preserveAspectRatio="none">
-                <defs>
-                  <linearGradient id="areaGradient" x1="0%" y1="0%" x2="0%" y2="100%">
-                    <stop offset="0%" style="stop-color:#8a2be2;stop-opacity:0.3" />
-                    <stop offset="100%" style="stop-color:#8a2be2;stop-opacity:0" />
-                  </linearGradient>
-                </defs>
-                <path 
-                  d="M0,45 L20,40 L40,30 L60,35 L80,25 L100,30 L120,20 L140,25 L160,15 L180,20 L200,10" 
-                  fill="none" 
-                  stroke="#8a2be2" 
-                  stroke-width="2"
-                />
-                <path 
-                  d="M0,45 L20,40 L40,30 L60,35 L80,25 L100,30 L120,20 L140,25 L160,15 L180,20 L200,10 L200,60 L0,60 Z" 
-                  fill="url(#areaGradient)"
-                />
-              </svg>
-            </div>
           </div>
         </div>
       </div>

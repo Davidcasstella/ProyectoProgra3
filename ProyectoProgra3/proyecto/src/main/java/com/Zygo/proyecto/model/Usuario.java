@@ -35,6 +35,18 @@ public class Usuario {
     
     @Column(nullable = false)
     private Boolean activo = true;
+    // Agregar DESPUÉS de la línea "private String direccion;"
+
+    // Coordenadas para ubicación en tiempo real (especialmente repartidores)
+    @Column(name = "latitud")
+    private Double latitud;
+
+    @Column(name = "longitud")
+    private Double longitud;
+
+    // Disponibilidad del repartidor
+    @Column(name = "disponible")
+    private Boolean disponible = true;
     
     @PrePersist
     protected void onCreate() {
@@ -134,5 +146,28 @@ public class Usuario {
     
     public void setActivo(Boolean activo) {
         this.activo = activo;
+    }
+    public Double getLatitud() {
+    return latitud;
+    }
+
+    public void setLatitud(Double latitud) {
+        this.latitud = latitud;
+    }
+
+    public Double getLongitud() {
+        return longitud;
+    }
+
+    public void setLongitud(Double longitud) {
+        this.longitud = longitud;
+    }
+
+    public Boolean getDisponible() {
+        return disponible;
+    }
+
+    public void setDisponible(Boolean disponible) {
+        this.disponible = disponible;
     }
 }

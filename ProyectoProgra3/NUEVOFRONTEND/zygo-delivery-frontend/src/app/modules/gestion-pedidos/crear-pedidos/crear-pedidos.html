@@ -10,7 +10,7 @@
       </button>
       <div class="header-text">
         <h1>📦 Crear Nuevo Pedido</h1>
-        <p class="subtitle">Completa el formulario y selecciona las ubicaciones en el mapa</p>
+        <p class="subtitle">Proceso guiado paso a paso</p>
       </div>
     </div>
   </div>
@@ -24,242 +24,480 @@
     ✅ {{ exito }}
   </div>
 
-  <!-- Layout Principal: Formulario + Mapa -->
-  <div class="main-layout">
-    
-    <!-- Panel Izquierdo: Formulario -->
-    <div class="form-panel">
-      <form [formGroup]="pedidoForm" (ngSubmit)="onSubmit()">
-        
-        <h2 class="section-title">📋 Información del Pedido</h2>
-
-        <!-- Cliente -->
-        <div class="form-group">
-          <label for="clienteId">
-            👤 Cliente <span class="required">*</span>
-          </label>
-          <select 
-            id="clienteId" 
-            formControlName="clienteId" 
-            class="form-control"
-            [class.invalid]="clienteId?.invalid && clienteId?.touched">
-            <option value="">Seleccionar cliente...</option>
-            <option *ngFor="let cliente of clientes" [value]="cliente.id">
-              {{ cliente.nombre }}
-            </option>
-          </select>
-          <small *ngIf="clienteId?.invalid && clienteId?.touched" class="error-text">
-            Cliente es requerido
-          </small>
+  <!-- Barra de Progreso -->
+  <div class="progress-bar-container">
+    <div class="progress-bar">
+      <div class="progress-fill" [style.width.%]="(pasoActual / totalPasos) * 100"></div>
+    </div>
+    <div class="progress-steps">
+      <div class="step-indicator" 
+           *ngFor="let paso of pasos; let i = index"
+           [class.active]="pasoActual === i + 1"
+           [class.completed]="pasoActual > i + 1">
+        <div class="step-circle">
+          <span *ngIf="pasoActual > i + 1">✓</span>
+          <span *ngIf="pasoActual <= i + 1">{{ i + 1 }}</span>
         </div>
+        <span class="step-label">{{ paso.titulo }}</span>
+      </div>
+    </div>
+  </div>
 
-        <!-- Repartidor -->
-        <div class="form-group">
-          <label for="repartidorId">
-            🚴 Repartidor (opcional)
-          </label>
-          <select 
-            id="repartidorId" 
-            formControlName="repartidorId" 
-            class="form-control">
-            <option value="">Sin asignar</option>
-            <option *ngFor="let repartidor of repartidores" [value]="repartidor.id">
-              {{ repartidor.nombre }}
-            </option>
-          </select>
-        </div>
+  <!-- Contenedor del Wizard -->
+  <div class="wizard-container">
+    <form [formGroup]="pedidoForm">
 
-        <!-- ✅ NUEVO: Selector de Estado -->
-        <div class="form-group">
-          <label for="estado">
-            🏷️ Estado del Pedido <span class="required">*</span>
-          </label>
-          <select 
-            id="estado" 
-            formControlName="estado" 
-            class="form-control estado-selector"
-            [class.invalid]="estado?.invalid && estado?.touched">
-            <option 
-              *ngFor="let estadoOpt of estadosDisponibles" 
-              [value]="estadoOpt.valor">
-              {{ estadoOpt.etiqueta }}
-            </option>
-          </select>
-          
-          <!-- Descripción del estado seleccionado -->
-          <small class="help-text estado-description" *ngIf="pedidoForm.get('estado')?.value">
-            <ng-container *ngFor="let estadoOpt of estadosDisponibles">
-              <span *ngIf="pedidoForm.get('estado')?.value === estadoOpt.valor">
-                💡 {{ estadoOpt.descripcion }}
-              </span>
-            </ng-container>
-          </small>
-          
-          <small *ngIf="estado?.invalid && estado?.touched" class="error-text">
-            El estado es requerido
-          </small>
-        </div>
-
-        <!-- Descripción -->
-        <div class="form-group">
-          <label for="descripcion">
-            📝 Descripción del Pedido <span class="required">*</span>
-          </label>
-          <textarea 
-            id="descripcion" 
-            formControlName="descripcion" 
-            class="form-control"
-            rows="3"
-            placeholder="Ej: 2 pizzas medianas, bebidas y postre..."
-            [class.invalid]="descripcion?.invalid && descripcion?.touched">
-          </textarea>
-          <small *ngIf="descripcion?.invalid && descripcion?.touched" class="error-text">
-            La descripción debe tener al menos 10 caracteres
-          </small>
-        </div>
-
-        <hr class="divider">
-
-        <h2 class="section-title">📍 Ubicaciones Seleccionadas</h2>
-
-        <!-- Dirección Origen (read-only) -->
-        <div class="form-group">
-          <label>
-            🟢 Dirección de Origen
-          </label>
-          <input 
-            type="text" 
-            formControlName="direccionOrigen" 
-            class="form-control"
-            placeholder="Haz click en el mapa para seleccionar origen..."
-            readonly>
-          <small class="help-text" *ngIf="origenCoordenadas">
-            📍 Lat: {{ origenCoordenadas.lat.toFixed(6) }}, 
-            Lon: {{ origenCoordenadas.lng.toFixed(6) }}
-          </small>
-        </div>
-
-        <!-- Dirección Destino (read-only) -->
-        <div class="form-group">
-          <label>
-            🔴 Dirección de Destino
-          </label>
-          <input 
-            type="text" 
-            formControlName="direccionDestino" 
-            class="form-control"
-            placeholder="Haz click nuevamente en el mapa para seleccionar destino..."
-            readonly>
-          <small class="help-text" *ngIf="destinoCoordenadas">
-            🎯 Lat: {{ destinoCoordenadas.lat.toFixed(6) }}, 
-            Lon: {{ destinoCoordenadas.lng.toFixed(6) }}
-          </small>
-        </div>
-
-        <!-- Información de Ruta Calculada -->
-        <div class="ruta-info" *ngIf="distanciaCalculada && costoCalculado">
-          <h3>🧭 Información de la Ruta</h3>
-          
-          <div class="ruta-stats">
-            <div class="stat-item">
-              <span class="stat-icon">📏</span>
-              <div class="stat-content">
-                <span class="stat-label">Distancia</span>
-                <span class="stat-value">{{ distanciaCalculada.toFixed(2) }} km</span>
-              </div>
-            </div>
-
-            <div class="stat-item">
-              <span class="stat-icon">⏱️</span>
-              <div class="stat-content">
-                <span class="stat-label">Tiempo</span>
-                <span class="stat-value">{{ tiempoEstimado?.toFixed(0) }} min</span>
-              </div>
-            </div>
-
-            <div class="stat-item">
-              <span class="stat-icon">💰</span>
-              <div class="stat-content">
-                <span class="stat-label">Costo</span>
-                <span class="stat-value">${{ costoCalculado.toFixed(2) }}</span>
-              </div>
-            </div>
+      <!-- ============================================= -->
+      <!-- PASO 1: INFORMACIÓN DEL CLIENTE -->
+      <!-- ============================================= -->
+      <div class="wizard-step" *ngIf="pasoActual === 1">
+        <div class="step-content">
+          <div class="step-header">
+            <div class="step-icon">👤</div>
+            <h2>¿Para quién es el pedido?</h2>
+            <p class="step-description">Selecciona el cliente que recibirá el pedido</p>
           </div>
-        </div>
 
-        <div class="alert-info" *ngIf="calculandoRuta">
-          ⏳ Calculando ruta óptima...
-        </div>
+          <div class="form-section">
+            <div class="form-group-wizard">
+              <label for="clienteId">
+                Cliente <span class="required">*</span>
+              </label>
+              <select 
+                id="clienteId" 
+                formControlName="clienteId" 
+                class="form-control-wizard"
+                [class.invalid]="clienteId?.invalid && clienteId?.touched">
+                <option value="">Seleccionar cliente...</option>
+                <option *ngFor="let cliente of clientes" [value]="cliente.id">
+                  {{ cliente.nombre }}
+                </option>
+              </select>
+              <small *ngIf="clienteId?.invalid && clienteId?.touched" class="error-text">
+                ⚠️ Debes seleccionar un cliente
+              </small>
+              <small *ngIf="clienteId?.valid && clienteId?.value" class="success-text">
+                ✅ Cliente seleccionado correctamente
+              </small>
+            </div>
 
-        <!-- Botón Limpiar -->
-        <div class="limpiar-container" *ngIf="origenCoordenadas || destinoCoordenadas">
-          <button 
-            type="button" 
-            class="btn-limpiar" 
-            (click)="limpiarUbicaciones()">
-            🗑️ Limpiar Ubicaciones
-          </button>
-        </div>
-
-        <hr class="divider">
-
-        <!-- Botones de Acción -->
-        <div class="form-actions">
-          <button 
-            type="button" 
-            class="btn btn-secondary" 
-            (click)="cancelar()"
-            [disabled]="cargando">
-            ❌ Cancelar
-          </button>
-          
-          <button 
-            type="submit" 
-            class="btn btn-primary" 
-            [disabled]="pedidoForm.invalid || cargando || !origenCoordenadas || !destinoCoordenadas || !distanciaCalculada">
-            <span *ngIf="!cargando">✅ Crear Pedido</span>
-            <span *ngIf="cargando">⏳ Creando...</span>
-          </button>
-        </div>
-
-      </form>
-    </div>
-
-    <!-- Panel Derecho: Mapa Integrado -->
-    <div class="map-panel">
-      <app-selector-ubicacion
-        (ubicacionSeleccionada)="origenCoordenadas ? onDestinoSeleccionado($event) : onOrigenSeleccionado($event)">
-      </app-selector-ubicacion>
-    </div>
-
-   <!-- Panel de Instrucciones de Navegación (SIEMPRE VISIBLE pero con contenido condicional) -->
-    <div class="instrucciones-navegacion">
-      <!-- Cuando HAY instrucciones -->
-      <div *ngIf="instruccionesRuta && instruccionesRuta.length > 0">
-        <h3>
-          <span class="icon">🧭</span>
-          Instrucciones de Navegación
-        </h3>
-        
-        <div class="pasos-navegacion">
-          <div class="paso-item" *ngFor="let paso of instruccionesRuta; let i = index">
-            <div class="paso-numero">{{ i + 1 }}</div>
-            <div class="paso-contenido">
-              <div class="paso-instruccion">{{ paso.texto }}</div>
-              <div class="paso-distancia" *ngIf="paso.distancia || paso.tiempo">
-                <span class="badge" *ngIf="paso.distancia">📏 {{ paso.distancia }}</span>
-                <span class="badge" *ngIf="paso.tiempo">⏱️ {{ paso.tiempo }}</span>
+            <!-- Info del cliente seleccionado -->
+            <div class="info-card" *ngIf="clienteSeleccionado">
+              <div class="info-header">
+                <span class="info-icon">📋</span>
+                <strong>Información del Cliente</strong>
+              </div>
+              <div class="info-body">
+                <div class="info-item">
+                  <span class="label">Nombre:</span>
+                  <span class="value">{{ clienteSeleccionado.nombre }}</span>
+                </div>
+                <div class="info-item">
+                  <span class="label">Email:</span>
+                  <span class="value">{{ clienteSeleccionado.email }}</span>
+                </div>
+                <div class="info-item" *ngIf="clienteSeleccionado.telefono">
+                  <span class="label">Teléfono:</span>
+                  <span class="value">{{ clienteSeleccionado.telefono }}</span>
+                </div>
               </div>
             </div>
           </div>
         </div>
       </div>
 
-      <!-- Cuando NO hay instrucciones -->
-      <div class="no-instrucciones" *ngIf="!instruccionesRuta || instruccionesRuta.length === 0">
-        <div class="icon">🗺️</div>
-        <p>Selecciona ambos puntos en el mapa y se calcularán las instrucciones de navegación</p>
+      <!-- ============================================= -->
+      <!-- PASO 2: DESCRIPCIÓN DEL PEDIDO -->
+      <!-- ============================================= -->
+      <div class="wizard-step" *ngIf="pasoActual === 2">
+        <div class="step-content">
+          <div class="step-header">
+            <div class="step-icon">📝</div>
+            <h2>¿Qué se va a entregar?</h2>
+            <p class="step-description">Describe detalladamente el contenido del pedido</p>
+          </div>
+
+          <div class="form-section">
+            <div class="form-group-wizard">
+              <label for="descripcion">
+                Descripción del pedido <span class="required">*</span>
+              </label>
+              <textarea 
+                id="descripcion" 
+                formControlName="descripcion" 
+                class="form-control-wizard textarea-wizard"
+                rows="6"
+                placeholder="Ej: 2 pizzas medianas (una pepperoni, una hawaiana), 2 coca colas de 1.5L, orden de alitas BBQ..."
+                [class.invalid]="descripcion?.invalid && descripcion?.touched">
+              </textarea>
+              
+              <div class="char-counter" [class.valid]="descripcion?.valid">
+                {{ descripcion?.value?.length || 0 }} / 10 caracteres mínimo
+              </div>
+
+              <small *ngIf="descripcion?.invalid && descripcion?.touched" class="error-text">
+                ⚠️ La descripción debe tener al menos 10 caracteres
+              </small>
+              <small *ngIf="descripcion?.valid && descripcion?.value" class="success-text">
+                ✅ Descripción válida
+              </small>
+            </div>
+
+            <div class="tips-card">
+              <div class="tips-header">
+                <span class="tips-icon">💡</span>
+                <strong>Consejos para una buena descripción:</strong>
+              </div>
+              <ul class="tips-list">
+                <li>✓ Especifica cantidades exactas</li>
+                <li>✓ Menciona características especiales</li>
+                <li>✓ Incluye instrucciones si son necesarias</li>
+                <li>✓ Sé claro y detallado</li>
+              </ul>
+            </div>
+          </div>
+        </div>
       </div>
+
+      <!-- ============================================= -->
+      <!-- PASO 3: ASIGNACIÓN -->
+      <!-- ============================================= -->
+      <div class="wizard-step" *ngIf="pasoActual === 3">
+        <div class="step-content">
+          <div class="step-header">
+            <div class="step-icon">🚴</div>
+            <h2>Asignación del Pedido</h2>
+            <p class="step-description">Configura quién entregará y el estado inicial</p>
+          </div>
+
+          <div class="form-section">
+            <!-- Repartidor -->
+            <div class="form-group-wizard">
+              <label for="repartidorId">
+                Repartidor (opcional)
+              </label>
+              <select 
+                id="repartidorId" 
+                formControlName="repartidorId" 
+                class="form-control-wizard">
+                <option value="">🤖 Asignar automáticamente</option>
+                <option *ngFor="let repartidor of repartidores" [value]="repartidor.id">
+                  {{ repartidor.nombre }}
+                </option>
+              </select>
+              <small class="help-text">
+                💡 Si no seleccionas un repartidor, el sistema asignará uno automáticamente
+              </small>
+            </div>
+
+            <!-- Estado -->
+            <div class="form-group-wizard">
+              <label for="estado">
+                🏷️ Estado inicial <span class="required">*</span>
+              </label>
+              <div class="estado-grid">
+                <div class="estado-card" 
+                     *ngFor="let estadoOpt of estadosDisponibles"
+                     [class.selected]="pedidoForm.get('estado')?.value === estadoOpt.valor"
+                     (click)="seleccionarEstado(estadoOpt.valor)">
+                  <div class="estado-icon">{{ estadoOpt.etiqueta.split(' ')[0] }}</div>
+                  <div class="estado-info">
+                    <strong>{{ estadoOpt.etiqueta.substring(2) }}</strong>
+                    <small>{{ estadoOpt.descripcion }}</small>
+                  </div>
+                  <div class="estado-check" *ngIf="pedidoForm.get('estado')?.value === estadoOpt.valor">
+                    ✓
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Info del repartidor seleccionado -->
+            <div class="info-card" *ngIf="repartidorSeleccionado">
+              <div class="info-header">
+                <span class="info-icon">🚴</span>
+                <strong>Repartidor Asignado</strong>
+              </div>
+              <div class="info-body">
+                <div class="info-item">
+                  <span class="label">Nombre:</span>
+                  <span class="value">{{ repartidorSeleccionado.nombre }}</span>
+                </div>
+                <div class="info-item">
+                  <span class="label">Email:</span>
+                  <span class="value">{{ repartidorSeleccionado.email }}</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ============================================= -->
+      <!-- PASO 4: SELECCIÓN DE UBICACIONES EN MAPA COMPLETO -->
+      <!-- ============================================= -->
+      <div class="wizard-step-map-fullscreen" 
+           [class.puntos-completos]="origenCoordenadas && destinoCoordenadas"
+           *ngIf="pasoActual === 4">
+        <!-- Panel de instrucciones - Solo visible si falta seleccionar algún punto -->
+        <div class="map-instructions-floating" *ngIf="!origenCoordenadas || !destinoCoordenadas">
+          <div class="instruction-card-compact">
+            <h3>🗺️ Selecciona las ubicaciones</h3>
+            <div class="instruction-steps-compact">
+              <div class="instruction-step-compact" [class.completed]="origenCoordenadas">
+                <span class="step-number-compact">1</span>
+                <div class="step-text-compact">
+                  <strong>Marca el punto de origen</strong>
+                  <small>Haz clic en el mapa</small>
+                </div>
+                <span class="check-mark-compact" *ngIf="origenCoordenadas">✓</span>
+              </div>
+              <div class="instruction-step-compact" [class.completed]="destinoCoordenadas">
+                <span class="step-number-compact">2</span>
+                <div class="step-text-compact">
+                  <strong>Marca el punto de llegada</strong>
+                  <small>Haz clic en el mapa</small>
+                </div>
+                <span class="check-mark-compact" *ngIf="destinoCoordenadas">✓</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Panel de puntos seleccionados - Solo visible cuando AMBOS están seleccionados -->
+        <div class="map-selected-panel" *ngIf="origenCoordenadas && destinoCoordenadas">
+          <div class="selected-panel-card">
+            <div class="selected-header">
+              <span class="selected-icon">✅</span>
+              <strong>Ubicaciones Seleccionadas</strong>
+            </div>
+            <div class="selected-content">
+              <div class="selected-point origen">
+                <span class="dot">🟢</span>
+                <div>
+                  <strong>Origen</strong>
+                  <small>{{ origenCoordenadas.lat.toFixed(4) }}, {{ origenCoordenadas.lng.toFixed(4) }}</small>
+                </div>
+              </div>
+              <div class="selected-point destino">
+                <span class="dot">🔴</span>
+                <div>
+                  <strong>Destino</strong>
+                  <small>{{ destinoCoordenadas.lat.toFixed(4) }}, {{ destinoCoordenadas.lng.toFixed(4) }}</small>
+                </div>
+              </div>
+            </div>
+            
+            <!-- Estado de cálculo -->
+            <div class="calculation-status" *ngIf="calculandoRuta">
+              <div class="loading-spinner">⏳</div>
+              <span>Calculando ruta...</span>
+            </div>
+            
+            <div class="calculation-status success" *ngIf="distanciaCalculada && !calculandoRuta">
+              <div class="success-icon">✅</div>
+              <div class="calculation-info">
+                <strong>Ruta calculada</strong>
+                <small>{{ distanciaCalculada.toFixed(2) }} km · {{ tiempoEstimado?.toFixed(0) }} min · ${{ costoCalculado?.toFixed(2) }}</small>
+              </div>
+            </div>
+            
+            <div class="selected-actions">
+              <button type="button" class="btn-clear-map" (click)="limpiarUbicaciones()">
+                🗑️ Limpiar
+              </button>
+            </div>
+          </div>
+        </div>
+        
+        <!-- Mapa en pantalla completa -->
+        <div class="fullscreen-map-absolute">
+          <app-selector-ubicacion
+            (ubicacionSeleccionada)="origenCoordenadas ? onDestinoSeleccionado($event) : onOrigenSeleccionado($event)">
+          </app-selector-ubicacion>
+        </div>
+      </div>
+
+      <!-- ============================================= -->
+      <!-- PASO 5: RESUMEN DE DATOS -->
+      <!-- ============================================= -->
+      <div class="wizard-step" *ngIf="pasoActual === 5">
+        <div class="step-content">
+          <div class="step-header">
+            <div class="step-icon">📊</div>
+            <h2>Resumen del Pedido</h2>
+            <p class="step-description">Revisa los detalles antes de continuar</p>
+          </div>
+
+          <div class="resumen-container">
+            
+            <!-- Cliente -->
+            <div class="resumen-card">
+              <div class="resumen-header">
+                <span class="resumen-icon">👤</span>
+                <strong>Cliente</strong>
+                <button type="button" class="btn-editar" (click)="irAPaso(1)">✏️ Editar</button>
+              </div>
+              <div class="resumen-body">
+                <p><strong>{{ clienteSeleccionado?.nombre }}</strong></p>
+                <p class="text-muted">{{ clienteSeleccionado?.email }}</p>
+              </div>
+            </div>
+
+            <!-- Descripción -->
+            <div class="resumen-card">
+              <div class="resumen-header">
+                <span class="resumen-icon">📝</span>
+                <strong>Descripción del Pedido</strong>
+                <button type="button" class="btn-editar" (click)="irAPaso(2)">✏️ Editar</button>
+              </div>
+              <div class="resumen-body">
+                <p>{{ pedidoForm.get('descripcion')?.value }}</p>
+              </div>
+            </div>
+
+            <!-- Asignación -->
+            <div class="resumen-card">
+              <div class="resumen-header">
+                <span class="resumen-icon">🚴</span>
+                <strong>Asignación</strong>
+                <button type="button" class="btn-editar" (click)="irAPaso(3)">✏️ Editar</button>
+              </div>
+              <div class="resumen-body">
+                <div class="resumen-item">
+                  <span class="label">Repartidor:</span>
+                  <span class="value">
+                    {{ repartidorSeleccionado ? repartidorSeleccionado.nombre : 'Asignación automática' }}
+                  </span>
+                </div>
+                <div class="resumen-item">
+                  <span class="label">Estado:</span>
+                  <span class="value badge-estado">
+                    {{ obtenerEtiquetaEstado(pedidoForm.get('estado')?.value) }}
+                  </span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Datos de la Ruta -->
+            <div class="resumen-card" *ngIf="distanciaCalculada && costoCalculado">
+              <div class="resumen-header">
+                <span class="resumen-icon">📏</span>
+                <strong>Datos del Viaje</strong>
+                <button type="button" class="btn-editar" (click)="irAPaso(4)">✏️ Editar</button>
+              </div>
+              <div class="resumen-body">
+                <div class="stats-grid">
+                  <div class="stat-box">
+                    <div class="stat-icon">📍</div>
+                    <div class="stat-value">{{ distanciaCalculada.toFixed(2) }} km</div>
+                    <div class="stat-label">Distancia Total</div>
+                  </div>
+                  <div class="stat-box">
+                    <div class="stat-icon">⏱️</div>
+                    <div class="stat-value">{{ tiempoEstimado?.toFixed(0) }} min</div>
+                    <div class="stat-label">Tiempo Estimado</div>
+                  </div>
+                  <div class="stat-box">
+                    <div class="stat-icon">💰</div>
+                    <div class="stat-value">${{ costoCalculado.toFixed(2) }}</div>
+                    <div class="stat-label">Costo del Envío</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+          </div>
+        </div>
+      </div>
+
+      <!-- ============================================= -->
+      <!-- PASO 6: VISUALIZACIÓN DE LA RUTA -->
+      <!-- ============================================= -->
+      <div class="wizard-step wizard-step-ruta" *ngIf="pasoActual === 6">
+        <div class="step-content">
+          <div class="step-header">
+            <div class="step-icon">🧭</div>
+            <h2>Ruta a Seguir</h2>
+            <p class="step-description">Este es el camino que debe seguir el repartidor</p>
+          </div>
+
+          <div class="ruta-visualizacion">
+            <div class="ruta-mapa">
+              <app-selector-ubicacion></app-selector-ubicacion>
+            </div>
+            
+            <div class="ruta-instrucciones">
+              <h3>📋 Instrucciones de Navegación</h3>
+              
+              <div class="instrucciones-list" *ngIf="instruccionesRuta && instruccionesRuta.length > 0">
+                <div class="instruccion-item-ruta" *ngFor="let instruccion of instruccionesRuta; let i = index">
+                  <span class="instruccion-numero">{{ i + 1 }}</span>
+                  <div class="instruccion-detalle">
+                    <p>{{ instruccion.texto }}</p>
+                    <div class="instruccion-meta" *ngIf="instruccion.distancia || instruccion.tiempo">
+                      <span *ngIf="instruccion.distancia">📏 {{ instruccion.distancia }}</span>
+                      <span *ngIf="instruccion.tiempo">⏱️ {{ instruccion.tiempo }}</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="no-instrucciones" *ngIf="!instruccionesRuta || instruccionesRuta.length === 0">
+                <p>📍 Ruta directa entre origen y destino</p>
+                <div class="ruta-simple" *ngIf="origenCoordenadas && destinoCoordenadas">
+                  <div class="punto-ruta">
+                    <span class="dot">🟢</span>
+                    <strong>Origen</strong>
+                    <small>{{ origenCoordenadas.lat.toFixed(6) }}, {{ origenCoordenadas.lng.toFixed(6) }}</small>
+                  </div>
+                  <div class="arrow">↓</div>
+                  <div class="punto-ruta">
+                    <span class="dot">🔴</span>
+                    <strong>Destino</strong>
+                    <small>{{ destinoCoordenadas.lat.toFixed(6) }}, {{ destinoCoordenadas.lng.toFixed(6) }}</small>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </form>
+
+    <!-- Navegación del Wizard -->
+    <div class="wizard-navigation">
+      <button 
+        type="button" 
+        class="btn-nav btn-anterior" 
+        (click)="pasoAnterior()"
+        [disabled]="pasoActual === 1 || cargando">
+        ← Anterior
+      </button>
+
+      <div class="nav-info">
+        Paso {{ pasoActual }} de {{ totalPasos }}
+      </div>
+
+      <button 
+        type="button" 
+        class="btn-nav btn-siguiente" 
+        *ngIf="pasoActual < totalPasos"
+        (click)="pasoSiguiente()"
+        [disabled]="!puedeContinuar() || cargando">
+        Siguiente →
+      </button>
+
+      <button 
+        type="button" 
+        class="btn-nav btn-crear" 
+        *ngIf="pasoActual === totalPasos"
+        (click)="onSubmit()"
+        [disabled]="pedidoForm.invalid || cargando || !origenCoordenadas || !destinoCoordenadas">
+        <span *ngIf="!cargando">✅ Crear Pedido</span>
+        <span *ngIf="cargando">⏳ Creando...</span>
+      </button>
     </div>
 
   </div>

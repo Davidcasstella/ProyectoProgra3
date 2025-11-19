@@ -17,7 +17,7 @@ import { SelectorUbicacionComponent } from '../../gestion-mapas/selector-ubicaci
   standalone: true,
   imports: [CommonModule, ReactiveFormsModule, SelectorUbicacionComponent],
   templateUrl: './crear-pedidos.html',
-  styleUrl: './crear-pedidos.css',
+  styleUrl: './crear-pedidos.css'
 })
 export class CrearPedidos implements OnInit {
   @ViewChild(SelectorUbicacionComponent) mapaComponent!: SelectorUbicacionComponent;
@@ -26,13 +26,25 @@ export class CrearPedidos implements OnInit {
   clientes: Usuario[] = [];
   repartidores: Usuario[] = [];
   
-  // ✅ NUEVO: Estados disponibles para el selector
+  // ✅ Estados disponibles para el selector
   estadosDisponibles = [
     { valor: EstadoPedido.PENDIENTE, etiqueta: '⏳ Pendiente', descripcion: 'En espera de asignación' },
     { valor: EstadoPedido.ASIGNADO, etiqueta: '📋 Asignado', descripcion: 'Asignado a un repartidor' },
     { valor: EstadoPedido.EN_CAMINO, etiqueta: '🚴 En Camino', descripcion: 'El repartidor está en ruta' },
     { valor: EstadoPedido.ENTREGADO, etiqueta: '✅ Entregado', descripcion: 'Pedido completado' },
     { valor: EstadoPedido.CANCELADO, etiqueta: '❌ Cancelado', descripcion: 'Pedido cancelado' }
+  ];
+  
+  // 🎯 WIZARD: Control de pasos (ahora 6 pasos)
+  pasoActual = 1;
+  totalPasos = 6;
+  pasos = [
+    { numero: 1, titulo: 'Cliente', icono: '👤' },
+    { numero: 2, titulo: 'Descripción', icono: '📝' },
+    { numero: 3, titulo: 'Asignación', icono: '🚴' },
+    { numero: 4, titulo: 'Ubicaciones', icono: '🗺️' },
+    { numero: 5, titulo: 'Resumen', icono: '📊' },
+    { numero: 6, titulo: 'Ruta', icono: '🧭' }
   ];
   
   // Coordenadas seleccionadas desde el mapa
@@ -50,6 +62,7 @@ export class CrearPedidos implements OnInit {
   calculandoRuta = false;
   error: string | null = null;
   exito: string | null = null;
+  pedidoCreado = false;
 
   constructor(
     private fb: FormBuilder,
@@ -66,14 +79,13 @@ export class CrearPedidos implements OnInit {
   }
 
   /**
-   * ✅ ACTUALIZADO: Inicializa el formulario con el campo de estado
+   * Inicializa el formulario con el campo de estado
    */
   inicializarFormulario(): void {
     this.pedidoForm = this.fb.group({
       clienteId: ['', Validators.required],
       repartidorId: [''],
       descripcion: ['', [Validators.required, Validators.minLength(10)]],
-      // ✅ NUEVO: Campo de estado con PENDIENTE como valor por defecto
       estado: [EstadoPedido.PENDIENTE, Validators.required],
       direccionOrigen: [{ value: '', disabled: true }],
       direccionDestino: [{ value: '', disabled: true }],
@@ -98,6 +110,115 @@ export class CrearPedidos implements OnInit {
     });
   }
 
+  // ========================================
+  // 🎯 FUNCIONES DEL WIZARD
+  // ========================================
+
+  /**
+   * Avanza al siguiente paso si la validación del paso actual es correcta
+   */
+  pasoSiguiente(): void {
+    if (!this.puedeContinuar()) {
+      this.mostrarError('Completa los campos requeridos antes de continuar');
+      return;
+    }
+
+    if (this.pasoActual < this.totalPasos) {
+      this.pasoActual++;
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+
+      // Si llegamos al paso 6, dibujamos la ruta en el mapa
+      if (this.pasoActual === 6 && this.mapaComponent) {
+        setTimeout(() => {
+          this.dibujarRutaEnMapa();
+        }, 300);
+      }
+    }
+  }
+
+  /**
+   * Retrocede al paso anterior
+   */
+  pasoAnterior(): void {
+    if (this.pasoActual > 1) {
+      this.pasoActual--;
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+  }
+
+  /**
+   * Navega directamente a un paso específico (usado desde el resumen)
+   */
+  irAPaso(paso: number): void {
+    if (paso >= 1 && paso <= this.totalPasos) {
+      this.pasoActual = paso;
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+  }
+
+  /**
+   * Valida si el usuario puede continuar al siguiente paso
+   */
+  puedeContinuar(): boolean {
+    switch (this.pasoActual) {
+      case 1: // Cliente
+        return this.clienteId?.valid || false;
+      
+      case 2: // Descripción
+        return this.descripcion?.valid || false;
+      
+      case 3: // Asignación (siempre puede continuar, el repartidor es opcional)
+        return this.estado?.valid || false;
+      
+      case 4: // Ubicaciones
+        return !!(this.origenCoordenadas && this.destinoCoordenadas && this.distanciaCalculada);
+      
+      case 5: // Resumen
+        return this.pedidoForm.valid && 
+               !!(this.origenCoordenadas && this.destinoCoordenadas && this.distanciaCalculada);
+      
+      case 6: // Ruta (siempre puede continuar al botón de crear)
+        return true;
+      
+      default:
+        return false;
+    }
+  }
+
+  /**
+   * Selecciona un estado desde las cards
+   */
+  seleccionarEstado(estado: EstadoPedido): void {
+    this.pedidoForm.patchValue({ estado });
+  }
+
+  /**
+   * Obtiene la etiqueta visual de un estado
+   */
+  obtenerEtiquetaEstado(valor: EstadoPedido | null): string {
+    if (!valor) return '';
+    const estado = this.estadosDisponibles.find(e => e.valor === valor);
+    return estado ? estado.etiqueta : valor;
+  }
+
+  // ========================================
+  // 📋 GETTERS PARA DATOS SELECCIONADOS
+  // ========================================
+
+  get clienteSeleccionado(): Usuario | undefined {
+    const clienteId = this.pedidoForm.get('clienteId')?.value;
+    return this.clientes.find(c => c.id === clienteId);
+  }
+
+  get repartidorSeleccionado(): Usuario | undefined {
+    const repartidorId = this.pedidoForm.get('repartidorId')?.value;
+    return repartidorId ? this.repartidores.find(r => r.id === repartidorId) : undefined;
+  }
+
+  // ========================================
+  // 🗺️ FUNCIONES DEL MAPA
+  // ========================================
+
   /**
    * Maneja la selección de origen desde el componente de mapa
    */
@@ -111,6 +232,7 @@ export class CrearPedidos implements OnInit {
 
     if (this.destinoCoordenadas) {
       this.calcularRutaAutomatica();
+      this.ocultarPanelSelectorUbicacion();
     }
   }
 
@@ -127,7 +249,35 @@ export class CrearPedidos implements OnInit {
 
     if (this.origenCoordenadas) {
       this.calcularRutaAutomatica();
+      this.ocultarPanelSelectorUbicacion();
     }
+  }
+
+  /**
+   * Oculta el panel interno del componente selector-ubicacion
+   */
+  ocultarPanelSelectorUbicacion(): void {
+    setTimeout(() => {
+      // Buscar y ocultar todos los paneles posibles del componente hijo
+      const paneles = document.querySelectorAll(
+        'app-selector-ubicacion .map-sidebar, ' +
+        'app-selector-ubicacion .panel-lateral, ' +
+        'app-selector-ubicacion .instrucciones-panel, ' +
+        'app-selector-ubicacion .ubicaciones-panel, ' +
+        'app-selector-ubicacion .control-panel, ' +
+        'app-selector-ubicacion [class*="panel"], ' +
+        'app-selector-ubicacion [class*="sidebar"]'
+      );
+      
+      paneles.forEach((panel: Element) => {
+        const htmlPanel = panel as HTMLElement;
+        htmlPanel.style.display = 'none';
+        htmlPanel.style.visibility = 'hidden';
+        htmlPanel.style.opacity = '0';
+      });
+      
+      console.log('🚫 Paneles ocultos:', paneles.length);
+    }, 100);
   }
 
   /**
@@ -171,10 +321,6 @@ export class CrearPedidos implements OnInit {
             this.calculandoRuta = false;
             this.mostrarExito(`Ruta calculada: ${(this.distanciaCalculada || 0).toFixed(2)} km`);
             
-            if (this.mapaComponent && ruta) {
-              this.mapaComponent.dibujarRuta(ruta);
-            }
-
             this.cdr.detectChanges();
           }, 0);
         },
@@ -182,6 +328,46 @@ export class CrearPedidos implements OnInit {
           console.error('❌ Error al calcular ruta:', err);
           this.calculandoRuta = false;
           this.mostrarError('Error al calcular la ruta');
+        }
+      });
+  }
+
+  /**
+   * Dibuja la ruta en el mapa del paso 6
+   */
+  dibujarRutaEnMapa(): void {
+    if (!this.mapaComponent) {
+      console.warn('⚠️ Componente de mapa no disponible');
+      return;
+    }
+
+    if (!this.origenCoordenadas || !this.destinoCoordenadas) {
+      console.warn('⚠️ No hay coordenadas para dibujar');
+      return;
+    }
+
+    console.log('🎨 Dibujando ruta en el mapa del paso 6...');
+
+    // Calcular de nuevo la ruta para obtener la información completa
+    const request = {
+      latOrigen: this.origenCoordenadas.lat,
+      lonOrigen: this.origenCoordenadas.lng,
+      latDestino: this.destinoCoordenadas.lat,
+      lonDestino: this.destinoCoordenadas.lng
+    };
+
+    this.lugarService.calcularRutaPorCoordenadas(request)
+      .subscribe({
+        next: (response: any) => {
+          const ruta = response.ruta || response;
+          
+          if (this.mapaComponent && ruta) {
+            this.mapaComponent.dibujarRuta(ruta);
+            console.log('✅ Ruta dibujada en el mapa');
+          }
+        },
+        error: (err: any) => {
+          console.error('❌ Error al dibujar ruta:', err);
         }
       });
   }
@@ -295,8 +481,12 @@ export class CrearPedidos implements OnInit {
     }
   }
 
+  // ========================================
+  // 📤 ENVÍO DEL FORMULARIO
+  // ========================================
+
   /**
-   * ✅ ACTUALIZADO: Enviar formulario con el estado seleccionado
+   * Enviar formulario - ahora sin redirección
    */
   onSubmit(): void {
     console.log('📤 Intentando enviar formulario...');
@@ -325,12 +515,11 @@ export class CrearPedidos implements OnInit {
     this.cargando = true;
     this.error = null;
 
-    // ✅ ACTUALIZADO: Incluir el estado seleccionado
     const pedidoData = {
       clienteId: this.pedidoForm.get('clienteId')?.value,
       repartidorId: this.pedidoForm.get('repartidorId')?.value || null,
       descripcion: this.pedidoForm.get('descripcion')?.value,
-      estado: this.pedidoForm.get('estado')?.value, // ✅ NUEVO
+      estado: this.pedidoForm.get('estado')?.value,
       direccionOrigen: this.pedidoForm.get('direccionOrigen')?.value,
       direccionDestino: this.pedidoForm.get('direccionDestino')?.value,
       distanciaKm: this.distanciaCalculada,
@@ -348,12 +537,9 @@ export class CrearPedidos implements OnInit {
         console.log('✅ Pedido creado exitosamente:', response);
         console.log('🆔 ID del nuevo pedido:', response.id);
         
-        this.mostrarExito('¡Pedido creado exitosamente!');
-        
-        setTimeout(() => {
-          console.log('🔄 Redirigiendo a lista de pedidos...');
-          window.location.replace('/pedidos/listar-pedidos');
-        }, 2000);
+        this.pedidoCreado = true;
+        this.cargando = false;
+        this.mostrarExito('¡Pedido creado exitosamente! Puedes crear otro pedido o volver al inicio.');
       },
       error: (err: any) => {
         console.error('❌ Error al crear pedido:', err);
@@ -363,32 +549,21 @@ export class CrearPedidos implements OnInit {
     });
   }
 
-  /**
-   * Cancelar y volver
-   */
-  cancelar(): void {
-    this.router.navigate(['/pedidos/listar-pedidos']);
-  }
+  // ========================================
+  // 🎨 UTILIDADES
+  // ========================================
 
   /**
-   * Volver atrás (al dashboard)
+   * Volver atrás (al dashboard o lista de pedidos)
    */
   volverAtras(): void {
-    this.router.navigate(['/dashboard']);
-  }
-
-  /**
-   * Ir al Dashboard
-   */
-  irADashboard(): void {
-    this.router.navigate(['/dashboard']);
-  }
-
-  /**
-   * Ir a Lista de Pedidos
-   */
-  irAListaPedidos(): void {
-    this.router.navigate(['/pedidos/listar-pedidos']);
+    if (this.pedidoCreado) {
+      // Si ya se creó el pedido, podemos ir a la lista
+      this.router.navigate(['/pedidos/listar-pedidos']);
+    } else {
+      // Si no, volver al dashboard
+      this.router.navigate(['/dashboard']);
+    }
   }
 
   /**
@@ -396,6 +571,7 @@ export class CrearPedidos implements OnInit {
    */
   mostrarError(mensaje: string): void {
     this.error = mensaje;
+    window.scrollTo({ top: 0, behavior: 'smooth' });
     setTimeout(() => this.error = null, 5000);
   }
 
@@ -404,7 +580,8 @@ export class CrearPedidos implements OnInit {
    */
   mostrarExito(mensaje: string): void {
     this.exito = mensaje;
-    setTimeout(() => this.exito = null, 3000);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+    setTimeout(() => this.exito = null, 5000);
   }
 
   /**
@@ -412,7 +589,7 @@ export class CrearPedidos implements OnInit {
    */
   get clienteId() { return this.pedidoForm.get('clienteId'); }
   get descripcion() { return this.pedidoForm.get('descripcion'); }
-  get estado() { return this.pedidoForm.get('estado'); } // ✅ NUEVO
+  get estado() { return this.pedidoForm.get('estado'); }
   get direccionOrigen() { return this.pedidoForm.get('direccionOrigen'); }
   get direccionDestino() { return this.pedidoForm.get('direccionDestino'); }
 }

@@ -82,7 +82,7 @@ public class PedidoService {
         Pedido guardado = pedidoRepository.save(pedido);
         log.info("Pedido creado con ID: {} con estado: {}", guardado.getId(), guardado.getEstado());
         
-        // ✅ CRÍTICO: Solo activar procesos automáticos si el estado es PENDIENTE
+        // ✅ Activar asignación automática
         if (guardado.getEstado() == EstadoPedido.PENDIENTE) {
             log.info("🔄 Activando asignación automática para pedido PENDIENTE");
             asignarRepartidorAsync(guardado.getId());

@@ -20,6 +20,9 @@ public interface GraphRepository extends JpaRepository<Graph, Long> {
     
     List<Graph> findByTipo(TipoNodo tipo);
     
+    // ✅ NUEVO: Contar nodos por tipo
+    long countByTipo(TipoNodo tipo);
+    
     @Query("SELECT g FROM Graph g WHERE g.latitud BETWEEN :latMin AND :latMax AND g.longitud BETWEEN :lonMin AND :lonMax")
     List<Graph> findNodosEnArea(@Param("latMin") Double latMin, 
                                  @Param("latMax") Double latMax,

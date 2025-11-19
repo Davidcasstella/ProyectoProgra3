@@ -32,79 +32,21 @@
       }
       
       @for (item of menuItems; track item.label) {
-        <!-- Menú sin hijos -->
-        @if (!item.children) {
-          <a 
-            [routerLink]="item.route" 
-            routerLinkActive="active"
-            class="menu-item"
-            [title]="item.label"
-          >
-            <div class="menu-icon">
-              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <g [innerHTML]="item.svg"></g>
-              </svg>
-            </div>
-            @if (menuExpanded()) {
-              <span class="menu-label">{{ item.label }}</span>
-            }
-          </a>
-        }
-
-        <!-- Menú con submenu -->
-        @if (item.children) {
-          <div class="menu-item-group">
-            <button 
-              class="menu-item menu-item-parent"
-              (click)="toggleSubmenu(item)"
-              [class.active]="item.expanded"
-              [title]="item.label"
-            >
-              <div class="menu-icon">
-                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                  <g [innerHTML]="item.svg"></g>
-                </svg>
-              </div>
-              @if (menuExpanded()) {
-                <span class="menu-label">{{ item.label }}</span>
-                <svg 
-                  class="chevron" 
-                  [class.rotated]="item.expanded"
-                  xmlns="http://www.w3.org/2000/svg" 
-                  width="16" 
-                  height="16" 
-                  viewBox="0 0 24 24" 
-                  fill="none" 
-                  stroke="currentColor" 
-                  stroke-width="2"
-                >
-                  <polyline points="6 9 12 15 18 9"/>
-                </svg>
-              }
-            </button>
-
-            <!-- Submenú -->
-            @if (item.expanded && menuExpanded()) {
-              <div class="submenu">
-                @for (child of item.children; track child.route) {
-                  <a 
-                    [routerLink]="child.route"
-                    routerLinkActive="active"
-                    class="submenu-item"
-                    [title]="child.label"
-                  >
-                    <div class="submenu-icon">
-                      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <g [innerHTML]="child.svg"></g>
-                      </svg>
-                    </div>
-                    <span class="submenu-label">{{ child.label }}</span>
-                  </a>
-                }
-              </div>
-            }
+        <a 
+          [routerLink]="item.route" 
+          routerLinkActive="active"
+          class="menu-item"
+          [title]="item.label"
+        >
+          <div class="menu-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <g [innerHTML]="item.svg"></g>
+            </svg>
           </div>
-        }
+          @if (menuExpanded()) {
+            <span class="menu-label">{{ item.label }}</span>
+          }
+        </a>
       }
     </div>
 

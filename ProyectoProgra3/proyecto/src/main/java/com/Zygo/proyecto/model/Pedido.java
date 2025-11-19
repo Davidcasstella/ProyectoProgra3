@@ -24,6 +24,20 @@ public class Pedido {
     @ManyToOne
     @JoinColumn(name = "repartidor_id")
     private Usuario repartidor;
+        // Restaurante asignado automáticamente
+    @ManyToOne
+    @JoinColumn(name = "restaurante_id")
+    private Graph restaurante;
+
+    // Nodo del grafo más cercano al cliente
+    @ManyToOne
+    @JoinColumn(name = "nodo_cliente_id")
+    private Graph nodoCliente;
+
+    // Nodo del grafo donde está el repartidor
+    @ManyToOne
+    @JoinColumn(name = "nodo_repartidor_id")
+    private Graph nodoRepartidor;
     
     @Column(nullable = false)
     private String descripcion;
@@ -236,5 +250,28 @@ public class Pedido {
 
     public void setLonDestino(Double lonDestino) {
         this.lonDestino = lonDestino;
+    }
+    public Graph getRestaurante() {
+    return restaurante;
+    }
+
+      public void setRestaurante(Graph restaurante) {
+        this.restaurante = restaurante;
+    }
+
+    public Graph getNodoCliente() {
+        return nodoCliente;
+    }
+
+    public void setNodoCliente(Graph nodoCliente) {
+        this.nodoCliente = nodoCliente;
+    }
+
+    public Graph getNodoRepartidor() {
+        return nodoRepartidor;
+    }
+
+    public void setNodoRepartidor(Graph nodoRepartidor) {
+        this.nodoRepartidor = nodoRepartidor;
     }
 }
