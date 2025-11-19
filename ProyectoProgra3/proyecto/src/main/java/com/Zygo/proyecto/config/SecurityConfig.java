@@ -19,19 +19,12 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
-import org.springframework.http.HttpMethod;
 
 import java.util.Arrays;
 import java.util.List;
 
 /**
- * 🔒 CONFIGURACIÓN DE SEGURIDAD
- * 
- * Maneja:
- * - Autenticación JWT
- * - CORS para frontend
- * - Autorización por roles
- * - Endpoints públicos vs protegidos
+ * 🔒 CONFIGURACIÓN DE SEGURIDAD CORREGIDA
  */
 @Configuration
 @EnableWebSecurity
@@ -63,38 +56,36 @@ public class SecurityConfig {
     }
     
     /**
-     * ✅ CONFIGURACIÓN CORS
-     * Permite que el frontend (Angular) se comunique con el backend
+     * ✅ CONFIGURACIÓN CORS CORREGIDA
      */
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
         
-        // ✅ Orígenes permitidos
-        configuration.setAllowedOriginPatterns(List.of(
-            "http://localhost:4200",      // Angular dev server
-            "http://localhost:*",         // Cualquier puerto local
-            "http://127.0.0.1:4200",      // IPv4 local
-            "http://192.168.*.*:*"        // Red local
-        ));
+        // ✅ Permitir todos los orígenes en desarrollo
+        configuration.setAllowedOriginPatterns(Arrays.asList("*"));
         
         // ✅ Métodos HTTP permitidos
         configuration.setAllowedMethods(Arrays.asList(
-            "GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"
+            "GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH", "HEAD"
         ));
         
-        // ✅ Headers permitidos (incluyendo Authorization)
-        configuration.setAllowedHeaders(List.of("*"));
+        // ✅ Headers permitidos
+        configuration.setAllowedHeaders(Arrays.asList("*"));
+        
+        // ✅ Permitir credenciales
         configuration.setAllowCredentials(true);
         
-        // ✅ Headers expuestos en respuesta
+        // ✅ Headers expuestos
         configuration.setExposedHeaders(Arrays.asList(
             "Authorization",
             "Content-Type",
-            "Access-Control-Allow-Origin"
+            "X-Requested-With",
+            "Access-Control-Allow-Origin",
+            "Access-Control-Allow-Credentials"
         ));
         
-        // ✅ Tiempo de caché de preflight
+        // ✅ Cache de preflight (1 hora)
         configuration.setMaxAge(3600L);
         
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
@@ -104,56 +95,86 @@ public class SecurityConfig {
     }
     
     /**
-     * ✅ CADENA DE FILTROS DE SEGURIDAD
-     * 
-     * Define qué endpoints son públicos y cuáles requieren autenticación
+     * ✅ CADENA DE FILTROS DE SEGURIDAD CORREGIDA
      */
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
-            // CORS
+            // ✅ Habilitar CORS
             .cors(cors -> cors.configurationSource(corsConfigurationSource()))
             
-            // Deshabilitar CSRF (usamos JWT en su lugar)
+            // ✅ Deshabilitar CSRF (usamos JWT)
             .csrf(csrf -> csrf.disable())
             
-            // Stateless - sin sesiones (JWT)
+            // ✅ Sin estado (stateless) - JWT
             .sessionManagement(session -> 
                 session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
             
-            // ✅ CONFIGURACIÓN DE AUTORIZACIÓN
+            // ✅ AUTORIZACIÓN DE ENDPOINTS
             .authorizeHttpRequests(auth -> auth
+                // 🟢 PÚBLICOS - Sin autenticación
+                .requestMatchers(
+                    "/api/auth/**",
+                    "/api/auth/login",
+                    "/api/auth/register",
+                    "/actuator/health",
+                    "/error"
+                ).permitAll()
                 
-                // 🟢 ENDPOINTS PÚBLICOS (sin autenticación)
-                .requestMatchers("/api/auth/**").permitAll()
+                // 🟢 Endpoints públicos de pedidos
+                .requestMatchers(
+                    "/api/pedidos/crear-con-asignacion",
+                    "/api/pedidos/estadisticas/**"
+                ).permitAll()
                 
-                // ⭐ CORREGIDO: Usar HttpMethod en lugar de strings
-                .requestMatchers(HttpMethod.POST, "/api/pedidos/crear-con-asignacion").permitAll()
-                .requestMatchers(HttpMethod.GET, "/api/pedidos/estadisticas/**").permitAll()
+                // 🟢 Endpoints públicos de rutas y lugares
+                .requestMatchers(
+                    "/api/rutas/**",
+                    "/api/lugares/**"
+                ).permitAll()
                 
-                .requestMatchers("/api/rutas/**").permitAll()
-                .requestMatchers("/api/lugares/**").permitAll()
-                .requestMatchers("/api/admin/estadisticas").permitAll()
-                .requestMatchers("/api/admin/mapa/**").permitAll()
-                .requestMatchers("/", "/index.html", "/mapa.html", "/static/**", "/*.html").permitAll()
-                .requestMatchers("/actuator/health").permitAll()
+                // 🟢 Endpoints públicos del admin para mapa
+                .requestMatchers(
+                    "/api/admin/estadisticas",
+                    "/api/admin/mapa/**"
+                ).permitAll()
                 
-                // 🟠 ENDPOINTS PROTEGIDOS - Solo ADMIN
-                .requestMatchers("/api/admin/**").hasAuthority("ROLE_ADMIN")
+                // 🟢 Recursos estáticos
+                .requestMatchers(
+                    "/",
+                    "/index.html",
+                    "/mapa.html",
+                    "/static/**",
+                    "/*.html",
+                    "/*.css",
+                    "/*.js",
+                    "/assets/**"
+                ).permitAll()
                 
-                // 🟠 ENDPOINTS PROTEGIDOS - Clientes, Repartidores, Admin
-                .requestMatchers("/api/usuarios/**").hasAnyAuthority("ROLE_ADMIN", "ROLE_CLIENTE", "ROLE_REPARTIDOR")
-                .requestMatchers("/api/pedidos/**").hasAnyAuthority("ROLE_ADMIN", "ROLE_CLIENTE", "ROLE_REPARTIDOR")
-                .requestMatchers("/api/repartidor/**").hasAnyAuthority("ROLE_ADMIN", "ROLE_REPARTIDOR")
+                // 🔴 ADMIN - Solo administradores
+                .requestMatchers("/api/admin/**")
+                    .hasAuthority("ROLE_ADMIN")
                 
-                // ⚠️ Rechazar todo lo demás
+                // 🟡 USUARIOS - Todos los roles autenticados
+                .requestMatchers("/api/usuarios/**")
+                    .hasAnyAuthority("ROLE_ADMIN", "ROLE_CLIENTE", "ROLE_REPARTIDOR")
+                
+                // 🟡 PEDIDOS - Todos los roles autenticados
+                .requestMatchers("/api/pedidos/**")
+                    .hasAnyAuthority("ROLE_ADMIN", "ROLE_CLIENTE", "ROLE_REPARTIDOR")
+                
+                // 🟡 REPARTIDOR - Solo repartidores y admins
+                .requestMatchers("/api/repartidor/**")
+                    .hasAnyAuthority("ROLE_ADMIN", "ROLE_REPARTIDOR")
+                
+                // 🔴 Todo lo demás requiere autenticación
                 .anyRequest().authenticated()
             );
         
-        // Proveedores de autenticación
+        // ✅ Configurar provider de autenticación
         http.authenticationProvider(authenticationProvider());
         
-        // Filtro JWT
+        // ✅ Agregar filtro JWT ANTES del filtro de autenticación estándar
         http.addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
         
         return http.build();
