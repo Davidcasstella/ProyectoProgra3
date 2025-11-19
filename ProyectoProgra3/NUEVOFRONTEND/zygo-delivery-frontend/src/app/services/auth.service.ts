@@ -134,4 +134,34 @@ export class AuthService {
       }
     }
   }
+
+getUsuarioActual(): any {
+  console.log('🔍 Obteniendo usuario actual del localStorage...');
+  
+  // ✅ Usar 'currentUser' (no 'usuario')
+  const usuarioStr = localStorage.getItem('currentUser');
+  console.log('📦 Usuario en localStorage (currentUser):', usuarioStr);
+  
+  if (!usuarioStr) {
+    console.warn('⚠️ No hay usuario en localStorage');
+    return null;
+  }
+  
+  try {
+    const usuario = JSON.parse(usuarioStr);
+    console.log('✅ Usuario parseado:', usuario);
+    return usuario;
+  } catch (error) {
+    console.error('❌ Error al parsear usuario:', error);
+    return null;
+  }
+}
+
+/**
+ * ✅ Obtiene el tipo de usuario actual
+ */
+getTipoUsuario(): string | null {
+  const usuario = this.getUsuarioActual();
+  return usuario?.tipoUsuario || usuario?.tipo || null;
+}
 }

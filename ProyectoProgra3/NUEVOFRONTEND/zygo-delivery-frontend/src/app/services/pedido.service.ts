@@ -23,9 +23,9 @@ export class PedidoService {
     return this.http.get<Pedido>(`${this.apiUrl}/${id}`);
   }
 
-  crear(pedido: Pedido): Observable<Pedido> {
-    return this.http.post<Pedido>(this.apiUrl, pedido);
-  }
+crear(pedido: Pedido): Observable<any> {
+  return this.http.post<any>(`${this.apiUrl}/crear-con-asignacion`, pedido);
+}
 
   actualizar(id: number, pedido: Pedido): Observable<Pedido> {
     return this.http.put<Pedido>(`${this.apiUrl}/${id}`, pedido);

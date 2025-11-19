@@ -6,11 +6,14 @@ import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angula
 import { Router } from '@angular/router';
 import { PedidoService } from '../../../services/pedido.service';
 import { UsuarioService } from '../../../services/usuario.service';
+import { ClienteService } from '../../../services/cliente.service';
 import { LugarService } from '../../../services/lugar.service';
+import { AuthService } from '../../../services/auth.service';
 import { Usuario } from '../../../models/usuario.model';
 import { EstadoPedido } from '../../../models/pedido.model';
 import { Coordenadas } from '../../../models/ruta.model';
 import { SelectorUbicacionComponent } from '../../gestion-mapas/selector-ubicacion/selector-ubicacion';
+import { RutaService } from '../../../services/ruta.service';
 
 @Component({
   selector: 'app-crear-pedidos',
@@ -22,11 +25,19 @@ import { SelectorUbicacionComponent } from '../../gestion-mapas/selector-ubicaci
 export class CrearPedidos implements OnInit {
   @ViewChild(SelectorUbicacionComponent) mapaComponent!: SelectorUbicacionComponent;
   
+  // Control del mapa (inicialmente desactivado)
+  mostrarMapa = false;
+  
   pedidoForm!: FormGroup;
   clientes: Usuario[] = [];
   repartidores: Usuario[] = [];
   
-  // ✅ Estados disponibles para el selector
+  // Detectar si el usuario es CLIENTE
+  esCliente = false;
+  usuarioActual: any = null;
+  ubicacionCliente: { latitud: number; longitud: number } | null = null;
+  
+  // Estados disponibles para el selector
   estadosDisponibles = [
     { valor: EstadoPedido.PENDIENTE, etiqueta: '⏳ Pendiente', descripcion: 'En espera de asignación' },
     { valor: EstadoPedido.ASIGNADO, etiqueta: '📋 Asignado', descripcion: 'Asignado a un repartidor' },
@@ -35,7 +46,7 @@ export class CrearPedidos implements OnInit {
     { valor: EstadoPedido.CANCELADO, etiqueta: '❌ Cancelado', descripcion: 'Pedido cancelado' }
   ];
   
-  // 🎯 WIZARD: Control de pasos (ahora 6 pasos)
+  // WIZARD: Control de pasos (dinámico según el rol)
   pasoActual = 1;
   totalPasos = 6;
   pasos = [
@@ -57,6 +68,9 @@ export class CrearPedidos implements OnInit {
   tiempoEstimado: number | null = null;
   instruccionesRuta: Array<{texto: string, distancia?: string, tiempo?: string}> | null = null;
   
+  // ID de la ruta guardada
+  rutaId: number | null = null;
+
   // Estados
   cargando = false;
   calculandoRuta = false;
@@ -68,18 +82,118 @@ export class CrearPedidos implements OnInit {
     private fb: FormBuilder,
     private pedidoService: PedidoService,
     private usuarioService: UsuarioService,
+    private clienteService: ClienteService,
     private lugarService: LugarService,
+    private rutaService: RutaService,
+    private authService: AuthService,
     private router: Router,
     private cdr: ChangeDetectorRef
   ) {}
 
   ngOnInit(): void {
+    console.log('🚀 Iniciando componente crear pedido');
+    
     this.inicializarFormulario();
-    this.cargarUsuarios();
+    this.verificarTipoUsuario();
   }
 
   /**
-   * Inicializa el formulario con el campo de estado
+   * Verificar si el usuario es CLIENTE
+   */
+  verificarTipoUsuario(): void {
+    this.usuarioActual = this.authService.getUsuarioActual();
+    console.log('👤 Usuario actual:', this.usuarioActual);
+
+    const tipoUsuario = this.usuarioActual?.tipoUsuario || this.usuarioActual?.tipo;
+
+    if (this.usuarioActual && tipoUsuario === 'CLIENTE') {
+      console.log('✅ Usuario es CLIENTE');
+      this.esCliente = true;
+      this.ajustarWizardParaCliente();
+      this.cargarUbicacionCliente();
+    } else {
+      console.log('👨‍💼 Usuario es ADMIN/REPARTIDOR');
+      this.esCliente = false;
+      this.cargarUsuarios();
+    }
+  }
+
+  /**
+   * Ajustar el wizard para clientes
+   */
+  ajustarWizardParaCliente(): void {
+    console.log('🔧 Ajustando wizard para CLIENTE...');
+    
+    // Para clientes: Descripción → Ubicación (Destino) → Resumen
+    this.pasos = [
+      { numero: 1, titulo: 'Descripción', icono: '📝' },
+      { numero: 2, titulo: 'Destino', icono: '🗺️' },
+      { numero: 3, titulo: 'Resumen', icono: '📊' }
+    ];
+    this.totalPasos = 3;
+    
+    console.log('✅ Wizard ajustado:', { totalPasos: this.totalPasos, pasos: this.pasos });
+  }
+
+  /**
+   * Cargar ubicación guardada del cliente
+   */
+  cargarUbicacionCliente(): void {
+    console.log('📍 Cargando ubicación del cliente...');
+    
+    this.clienteService.obtenerPerfil().subscribe({
+      next: (perfil: any) => {
+        console.log('✅ Perfil del cliente cargado:', perfil);
+        
+        if (perfil.latitud && perfil.longitud) {
+          this.ubicacionCliente = {
+            latitud: perfil.latitud,
+            longitud: perfil.longitud
+          };
+          
+          // Pre-llenar el origen con la ubicación guardada
+          this.origenCoordenadas = {
+            lat: perfil.latitud,
+            lng: perfil.longitud
+          };
+          
+          this.pedidoForm.patchValue({
+            clienteId: perfil.id,
+            direccionOrigen: `📍 Mi ubicación: ${perfil.latitud.toFixed(6)}, ${perfil.longitud.toFixed(6)}`
+          });
+          
+          console.log('✅ Origen pre-llenado:', this.origenCoordenadas);
+          
+          setTimeout(() => {
+            this.mostrarExito('Tu ubicación ha sido cargada automáticamente');
+            this.cdr.detectChanges();
+          }, 0);
+        } else {
+          console.warn('⚠️ Cliente sin ubicación guardada');
+          
+          setTimeout(() => {
+            this.mostrarError('Por favor, guarda tu ubicación primero en "Guardar Ubicación"');
+            this.cdr.detectChanges();
+          }, 0);
+          
+          setTimeout(() => {
+            this.router.navigate(['/dashboard/guardar-ubicacion']);
+          }, 3000);
+        }
+      },
+      error: (err: any) => {
+        console.error('❌ Error al cargar perfil del cliente:', err);
+        
+        setTimeout(() => {
+          this.mostrarError('Error al cargar tu ubicación');
+          this.cdr.detectChanges();
+        }, 0);
+      }
+    });
+  }
+
+  /**
+   * Inicializa el formulario
    */
   inicializarFormulario(): void {
     this.pedidoForm = this.fb.group({
@@ -95,7 +209,7 @@ export class CrearPedidos implements OnInit {
   }
 
   /**
-   * Carga clientes y repartidores
+   * Carga clientes y repartidores (solo para ADMIN)
    */
   cargarUsuarios(): void {
     this.usuarioService.obtenerTodosLosUsuarios().subscribe({
@@ -115,23 +229,82 @@ export class CrearPedidos implements OnInit {
   // ========================================
 
   /**
-   * Avanza al siguiente paso si la validación del paso actual es correcta
+   * Avanza al siguiente paso
    */
   pasoSiguiente(): void {
+    console.log('⭐️ Intentando avanzar desde paso:', this.pasoActual);
+    
     if (!this.puedeContinuar()) {
-      this.mostrarError('Completa los campos requeridos antes de continuar');
+      if (this.esCliente && this.pasoActual === 1) {
+        this.mostrarError('⚠️ La descripción debe tener al menos 10 caracteres');
+        this.pedidoForm.get('descripcion')?.markAsTouched();
+      } else if (this.pasoActual === 2 && this.esCliente && !this.destinoCoordenadas) {
+        this.mostrarError('⚠️ Debes seleccionar el destino en el mapa');
+      } else {
+        this.mostrarError('⚠️ Completa los campos requeridos antes de continuar');
+      }
       return;
     }
 
     if (this.pasoActual < this.totalPasos) {
       this.pasoActual++;
-      window.scrollTo({ top: 0, behavior: 'smooth' });
-
-      // Si llegamos al paso 6, dibujamos la ruta en el mapa
-      if (this.pasoActual === 6 && this.mapaComponent) {
+      console.log('✅ Avanzando a paso:', this.pasoActual);
+      
+      // ✅ Activar el mapa solo cuando llegues al paso 2 y seas CLIENTE
+      if (this.esCliente && this.pasoActual === 2) {
+        setTimeout(() => {
+          this.mostrarMapa = true;
+          console.log('🗺️ Mapa activado');
+          this.cdr.detectChanges();
+        }, 100);
+      }
+      
+      // Solo dibujar ruta si NO es cliente y llegamos al paso 6
+      if (!this.esCliente && this.pasoActual === 6 && this.mapaComponent) {
         setTimeout(() => {
           this.dibujarRutaEnMapa();
         }, 300);
+      }
+      
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+  }
+
+  /**
+   * Verifica si se puede continuar al siguiente paso
+   */
+  puedeContinuar(): boolean {
+    if (this.esCliente) {
+      // Para CLIENTES: 3 pasos
+      switch (this.pasoActual) {
+        case 1: // Descripción
+          const descripcionValor = this.pedidoForm.get('descripcion')?.value || '';
+          return descripcionValor.trim().length >= 10;
+        
+        case 2: // Destino
+          return !!(this.origenCoordenadas && 
+                   this.destinoCoordenadas && 
+                   this.distanciaCalculada);
+        
+        case 3: // Resumen
+          return this.pedidoForm.valid && 
+                 !!(this.origenCoordenadas && 
+                    this.destinoCoordenadas && 
+                    this.distanciaCalculada);
+        
+        default:
+          return false;
+      }
+    } else {
+      // Para ADMIN: 6 pasos originales
+      switch (this.pasoActual) {
+        case 1: return this.clienteId?.valid || false;
+        case 2: return this.descripcion?.valid || false;
+        case 3: return this.estado?.valid || false;
+        case 4: return !!(this.origenCoordenadas && this.destinoCoordenadas && this.distanciaCalculada);
+        case 5: return this.pedidoForm.valid && !!(this.origenCoordenadas && this.destinoCoordenadas && this.distanciaCalculada);
+        case 6: return true;
+        default: return false;
       }
     }
   }
@@ -142,46 +315,35 @@ export class CrearPedidos implements OnInit {
   pasoAnterior(): void {
     if (this.pasoActual > 1) {
       this.pasoActual--;
+      
+      // Desactivar el mapa si vuelves al paso 1 siendo cliente
+      if (this.esCliente && this.pasoActual === 1) {
+        this.mostrarMapa = false;
+        console.log('🗺️ Mapa desactivado');
+      }
+      
+      console.log('⬅️ Retrocediendo a paso:', this.pasoActual);
       window.scrollTo({ top: 0, behavior: 'smooth' });
     }
   }
 
   /**
-   * Navega directamente a un paso específico (usado desde el resumen)
+   * Navega directamente a un paso específico
    */
   irAPaso(paso: number): void {
     if (paso >= 1 && paso <= this.totalPasos) {
       this.pasoActual = paso;
+      
+      // Activar mapa si navegas al paso 2 siendo cliente
+      if (this.esCliente && this.pasoActual === 2) {
+        setTimeout(() => {
+          this.mostrarMapa = true;
+          this.cdr.detectChanges();
+        }, 100);
+      }
+      
+      console.log('🎯 Navegando a paso:', this.pasoActual);
       window.scrollTo({ top: 0, behavior: 'smooth' });
-    }
-  }
-
-  /**
-   * Valida si el usuario puede continuar al siguiente paso
-   */
-  puedeContinuar(): boolean {
-    switch (this.pasoActual) {
-      case 1: // Cliente
-        return this.clienteId?.valid || false;
-      
-      case 2: // Descripción
-        return this.descripcion?.valid || false;
-      
-      case 3: // Asignación (siempre puede continuar, el repartidor es opcional)
-        return this.estado?.valid || false;
-      
-      case 4: // Ubicaciones
-        return !!(this.origenCoordenadas && this.destinoCoordenadas && this.distanciaCalculada);
-      
-      case 5: // Resumen
-        return this.pedidoForm.valid && 
-               !!(this.origenCoordenadas && this.destinoCoordenadas && this.distanciaCalculada);
-      
-      case 6: // Ruta (siempre puede continuar al botón de crear)
-        return true;
-      
-      default:
-        return false;
     }
   }
 
@@ -190,6 +352,7 @@ export class CrearPedidos implements OnInit {
    */
   seleccionarEstado(estado: EstadoPedido): void {
     this.pedidoForm.patchValue({ estado });
+    console.log('🏷️ Estado seleccionado:', estado);
   }
 
   /**
@@ -220,9 +383,14 @@ export class CrearPedidos implements OnInit {
   // ========================================
 
   /**
-   * Maneja la selección de origen desde el componente de mapa
+   * Maneja la selección de origen (solo ADMIN)
    */
   onOrigenSeleccionado(coords: Coordenadas): void {
+    if (this.esCliente) {
+      console.log('⚠️ Los clientes no pueden cambiar su ubicación de origen');
+      return;
+    }
+    
     console.log('🟢 Origen seleccionado:', coords);
     this.origenCoordenadas = { ...coords };
     
@@ -237,7 +405,7 @@ export class CrearPedidos implements OnInit {
   }
 
   /**
-   * Maneja la selección de destino desde el componente de mapa
+   * Maneja la selección de destino
    */
   onDestinoSeleccionado(coords: Coordenadas): void {
     console.log('🔴 Destino seleccionado:', coords);
@@ -258,7 +426,6 @@ export class CrearPedidos implements OnInit {
    */
   ocultarPanelSelectorUbicacion(): void {
     setTimeout(() => {
-      // Buscar y ocultar todos los paneles posibles del componente hijo
       const paneles = document.querySelectorAll(
         'app-selector-ubicacion .map-sidebar, ' +
         'app-selector-ubicacion .panel-lateral, ' +
@@ -281,7 +448,7 @@ export class CrearPedidos implements OnInit {
   }
 
   /**
-   * Calcula la ruta automáticamente cuando se tienen ambos puntos
+   * Calcula la ruta automáticamente
    */
   calcularRutaAutomatica(): void {
     if (!this.origenCoordenadas || !this.destinoCoordenadas) {
@@ -318,6 +485,8 @@ export class CrearPedidos implements OnInit {
               costo: (this.costoCalculado || 0).toFixed(2)
             });
 
+            this.guardarRutaEnBD(ruta);
+
             this.calculandoRuta = false;
             this.mostrarExito(`Ruta calculada: ${(this.distanciaCalculada || 0).toFixed(2)} km`);
             
@@ -333,7 +502,40 @@ export class CrearPedidos implements OnInit {
   }
 
   /**
-   * Dibuja la ruta en el mapa del paso 6
+   * Guardar ruta en BD
+   */
+  private guardarRutaEnBD(rutaResponse: any): void {
+    const rutaGuardar = {
+      origenLatitud: this.origenCoordenadas?.lat,
+      origenLongitud: this.origenCoordenadas?.lng,
+      destinoLatitud: this.destinoCoordenadas?.lat,
+      destinoLongitud: this.destinoCoordenadas?.lng,
+      distanciaKm: this.distanciaCalculada,
+      tiempoEstimadoMinutos: this.tiempoEstimado,
+      costoEstimado: this.costoCalculado,
+      instrucciones: this.instruccionesRuta ? 
+        this.instruccionesRuta.map(i => i.texto).join(' | ') : 
+        'Ruta directa',
+      nodos: rutaResponse.nodos || [],
+      segmentos: rutaResponse.segmentos || []
+    };
+
+    console.log('💾 Guardando ruta:', rutaGuardar);
+
+    this.rutaService.guardarRuta(rutaGuardar).subscribe({
+      next: (response: any) => {
+        console.log('✅ Ruta guardada exitosamente:', response);
+        this.rutaId = response.id || response;
+        console.log('🆔 ID de ruta guardado:', this.rutaId);
+      },
+      error: (err: any) => {
+        console.error('❌ Error al guardar la ruta en BD:', err);
+      }
+    });
+  }
+
+  /**
+   * Dibuja la ruta en el mapa del último paso
    */
   dibujarRutaEnMapa(): void {
     if (!this.mapaComponent) {
@@ -346,9 +548,8 @@ export class CrearPedidos implements OnInit {
       return;
     }
 
-    console.log('🎨 Dibujando ruta en el mapa del paso 6...');
+    console.log('🎨 Dibujando ruta en el mapa...');
 
-    // Calcular de nuevo la ruta para obtener la información completa
     const request = {
       latOrigen: this.origenCoordenadas.lat,
       lonOrigen: this.origenCoordenadas.lng,
@@ -379,7 +580,7 @@ export class CrearPedidos implements OnInit {
     this.instruccionesRuta = [];
 
     if (ruta.instrucciones && ruta.instrucciones.length > 0) {
-      console.log('✅ Usando instrucciones del backend:', ruta.instrucciones.length);
+      console.log('✅ Usando instrucciones del backend');
       
       ruta.instrucciones.forEach((instruccion: string, index: number) => {
         let icono = '➡️';
@@ -394,12 +595,11 @@ export class CrearPedidos implements OnInit {
         });
       });
       
-      console.log('📋 Instrucciones procesadas:', this.instruccionesRuta.length);
       return;
     }
 
     if (ruta.segmentos && ruta.segmentos.length > 0) {
-      console.log('✅ Usando segmentos de ruta:', ruta.segmentos.length);
+      console.log('✅ Usando segmentos de ruta');
       
       if (ruta.nodos && ruta.nodos.length > 0) {
         this.instruccionesRuta.push({
@@ -408,17 +608,10 @@ export class CrearPedidos implements OnInit {
       }
 
       ruta.segmentos.forEach((segmento: any) => {
-        const distanciaTexto = segmento.distanciaKm 
-          ? `${segmento.distanciaKm.toFixed(2)} km` 
-          : undefined;
-        const tiempoTexto = segmento.tiempoEstimadoMinutos 
-          ? `${segmento.tiempoEstimadoMinutos} min` 
-          : undefined;
-
         this.instruccionesRuta!.push({
           texto: `➡️ Continúa por ${segmento.nombreCalle || 'la calle'}`,
-          distancia: distanciaTexto,
-          tiempo: tiempoTexto
+          distancia: segmento.distanciaKm ? `${segmento.distanciaKm.toFixed(2)} km` : undefined,
+          tiempo: segmento.tiempoEstimadoMinutos ? `${segmento.tiempoEstimadoMinutos} min` : undefined
         });
       });
 
@@ -428,28 +621,6 @@ export class CrearPedidos implements OnInit {
         });
       }
       
-      console.log('📋 Instrucciones procesadas:', this.instruccionesRuta.length);
-      return;
-    }
-
-    if (ruta.nodos && ruta.nodos.length > 0) {
-      console.log('⚠️ Generando instrucciones básicas desde nodos:', ruta.nodos.length);
-      
-      this.instruccionesRuta.push({
-        texto: `🚀 Inicia en: ${ruta.nodos[0].nombre || 'Punto de origen'}`
-      });
-
-      for (let i = 1; i < ruta.nodos.length - 1; i++) {
-        this.instruccionesRuta.push({
-          texto: `➡️ Pasa por: ${ruta.nodos[i].nombre || `Punto ${i}`}`
-        });
-      }
-
-      this.instruccionesRuta.push({
-        texto: `🎯 Llegarás a: ${ruta.nodos[ruta.nodos.length - 1].nombre || 'Punto de destino'}`
-      });
-      
-      console.log('📋 Instrucciones procesadas:', this.instruccionesRuta.length);
       return;
     }
 
@@ -462,7 +633,15 @@ export class CrearPedidos implements OnInit {
    */
   limpiarUbicaciones(): void {
     console.log('🗑️ Limpiando ubicaciones');
-    this.origenCoordenadas = null;
+    
+    // Si es CLIENTE, no limpiar el origen
+    if (!this.esCliente) {
+      this.origenCoordenadas = null;
+      this.pedidoForm.patchValue({
+        direccionOrigen: ''
+      });
+    }
+    
     this.destinoCoordenadas = null;
     this.distanciaCalculada = null;
     this.costoCalculado = null;
@@ -470,7 +649,6 @@ export class CrearPedidos implements OnInit {
     this.instruccionesRuta = null;
     
     this.pedidoForm.patchValue({
-      direccionOrigen: '',
       direccionDestino: '',
       distanciaKm: '',
       costo: ''
@@ -486,7 +664,7 @@ export class CrearPedidos implements OnInit {
   // ========================================
 
   /**
-   * Enviar formulario - ahora sin redirección
+   * Enviar formulario
    */
   onSubmit(): void {
     console.log('📤 Intentando enviar formulario...');
@@ -535,11 +713,21 @@ export class CrearPedidos implements OnInit {
     this.pedidoService.crear(pedidoData).subscribe({
       next: (response: any) => {
         console.log('✅ Pedido creado exitosamente:', response);
-        console.log('🆔 ID del nuevo pedido:', response.id);
         
         this.pedidoCreado = true;
         this.cargando = false;
-        this.mostrarExito('¡Pedido creado exitosamente! Puedes crear otro pedido o volver al inicio.');
+        this.mostrarExito('¡Pedido creado exitosamente! Redirigiendo...');
+        
+        // ✅ Redirigir después de 2 segundos
+        setTimeout(() => {
+          if (this.esCliente) {
+            // Los clientes van a su dashboard
+            this.router.navigate(['/dashboard']);
+          } else {
+            // Los admins van a la lista de pedidos
+            this.router.navigate(['/pedidos/listar-pedidos']);
+          }
+        }, 2000);
       },
       error: (err: any) => {
         console.error('❌ Error al crear pedido:', err);
@@ -557,12 +745,16 @@ export class CrearPedidos implements OnInit {
    * Volver atrás (al dashboard o lista de pedidos)
    */
   volverAtras(): void {
-    if (this.pedidoCreado) {
-      // Si ya se creó el pedido, podemos ir a la lista
-      this.router.navigate(['/pedidos/listar-pedidos']);
-    } else {
-      // Si no, volver al dashboard
+    if (this.esCliente) {
+      // Los clientes siempre vuelven a su dashboard
       this.router.navigate(['/dashboard']);
+    } else {
+      // Los admins vuelven a la lista de pedidos si ya crearon uno, sino al dashboard
+      if (this.pedidoCreado) {
+        this.router.navigate(['/pedidos/listar-pedidos']);
+      } else {
+        this.router.navigate(['/dashboard']);
+      }
     }
   }
 

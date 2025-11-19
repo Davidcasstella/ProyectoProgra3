@@ -34,4 +34,7 @@ public interface UsuarioRepository extends JpaRepository<Usuario, Long> {
     @Query("SELECT u FROM Usuario u WHERE u.tipo = 'REPARTIDOR' AND u.activo = true AND u.disponible = true " +
            "ORDER BY SQRT(POWER(u.latitud - :lat, 2) + POWER(u.longitud - :lon, 2))")
     List<Usuario> findRepartidoresCercanos(@Param("lat") Double latitud, @Param("lon") Double longitud);
+    
+
+    
 }

@@ -1,3 +1,7 @@
+// ========================================
+// 📍 ACTUALIZAR: ClienteController.java
+// ========================================
+
 package com.Zygo.proyecto.controller;
 
 import com.Zygo.proyecto.model.Pedido;
@@ -11,18 +15,15 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
-/**
- * 🛒 CONTROLADOR PARA CLIENTES
- * Solo pueden:
- * - Ver SUS propios pedidos
- * - Crear nuevos pedidos
- * - Cancelar sus pedidos (solo si están PENDIENTE)
- */
 @RestController
 @RequestMapping("/api/cliente")
 @PreAuthorize("hasRole('CLIENTE')")
@@ -35,6 +36,109 @@ public class ClienteController {
     
     @Autowired
     private UsuarioRepository usuarioRepository;
+    
+    /**
+     * 📍 NUEVO: Guardar ubicación del cliente en tiempo real
+     * POST /api/cliente/guardar-ubicacion
+     * {
+     *   "latitud": 5.7147,
+     *   "longitud": -72.9341
+     * }
+     */
+    @PostMapping("/guardar-ubicacion")
+    public ResponseEntity<?> guardarUbicacion(@RequestBody UbicacionRequest request) {
+        try {
+            Usuario cliente = obtenerClienteActual();
+            
+            // Validar coordenadas
+            if (request.latitud() == null || request.longitud() == null) {
+                return ResponseEntity.badRequest()
+                        .body(Map.of("error", "Latitud y longitud son requeridas"));
+            }
+            
+            if (request.latitud() < -90 || request.latitud() > 90) {
+                return ResponseEntity.badRequest()
+                        .body(Map.of("error", "Latitud debe estar entre -90 y 90"));
+            }
+            
+            if (request.longitud() < -180 || request.longitud() > 180) {
+                return ResponseEntity.badRequest()
+                        .body(Map.of("error", "Longitud debe estar entre -180 y 180"));
+            }
+            
+            // Actualizar ubicación del cliente
+            cliente.setLatitud(request.latitud());
+            cliente.setLongitud(request.longitud());
+            usuarioRepository.save(cliente);
+            
+            log.info("📍 Cliente {} guardó ubicación: ({}, {})", 
+                    cliente.getNombre(), request.latitud(), request.longitud());
+            
+            Map<String, Object> response = new HashMap<>();
+            response.put("mensaje", "Ubicación guardada exitosamente");
+            response.put("latitud", cliente.getLatitud());
+            response.put("longitud", cliente.getLongitud());
+            response.put("nombreCliente", cliente.getNombre());
+            
+            return ResponseEntity.ok(response);
+            
+        } catch (Exception e) {
+            log.error("❌ Error al guardar ubicación: {}", e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(Map.of("error", "Error al guardar ubicación"));
+        }
+    }
+    
+    /**
+     * 📍 NUEVO: Obtener mi ubicación actual
+     * GET /api/cliente/mi-ubicacion
+     */
+    @GetMapping("/mi-ubicacion")
+    public ResponseEntity<?> obtenerMiUbicacion() {
+        try {
+            Usuario cliente = obtenerClienteActual();
+            
+            if (cliente.getLatitud() == null || cliente.getLongitud() == null) {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                        .body(Map.of("error", "Ubicación no registrada"));
+            }
+            
+            Map<String, Object> ubicacion = new HashMap<>();
+            ubicacion.put("latitud", cliente.getLatitud());
+            ubicacion.put("longitud", cliente.getLongitud());
+            ubicacion.put("nombre", cliente.getNombre());
+            ubicacion.put("email", cliente.getEmail());
+            
+            return ResponseEntity.ok(ubicacion);
+            
+        } catch (Exception e) {
+            log.error("❌ Error al obtener ubicación: {}", e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(Map.of("error", "Error al obtener ubicación"));
+        }
+    }
+    
+    /**
+     * 🔍 NUEVO: Obtener todos los CLIENTES (solo para admin)
+     * Esto es para que el admin vea a todos los clientes en el mapa
+     * GET /api/cliente/todos
+     */
+    @GetMapping("/todos")
+    @PreAuthorize("hasRole('ADMIN')")  // 🔐 Solo admin
+    public ResponseEntity<?> obtenerTodosLosClientes() {
+        try {
+            List<Usuario> clientes = usuarioRepository.findByTipo(Usuario.TipoUsuario.CLIENTE);
+            
+            log.info("👥 Admin solicitó lista de {} clientes", clientes.size());
+            
+            return ResponseEntity.ok(clientes);
+            
+        } catch (Exception e) {
+            log.error("❌ Error al obtener clientes: {}", e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(Map.of("error", "Error al obtener clientes"));
+        }
+    }
     
     /**
      * 📦 Ver SOLO MIS pedidos
@@ -57,7 +161,7 @@ public class ClienteController {
     }
     
     /**
-     * 📦 Ver UN pedido MÍO específico
+     * 📦 Ver UN pedido MÍO especifico
      */
     @GetMapping("/mis-pedidos/{id}")
     public ResponseEntity<?> obtenerMiPedidoPorId(@PathVariable Long id) {
@@ -67,7 +171,7 @@ public class ClienteController {
             Pedido pedido = pedidoRepository.findById(id)
                     .orElseThrow(() -> new RuntimeException("Pedido no encontrado"));
             
-            // 🔒 Verificar que el pedido es del cliente
+            // 🔐 Verificar que el pedido es del cliente
             if (!pedido.getCliente().getId().equals(cliente.getId())) {
                 log.warn("⚠️ Cliente {} intentó acceder al pedido {} que no le pertenece", 
                         cliente.getNombre(), id);
@@ -85,7 +189,7 @@ public class ClienteController {
     }
     
     /**
-     * ➕ Crear un NUEVO pedido
+     * ➕ Crear un NUEVO pedido con ubicación
      */
     @PostMapping("/crear-pedido")
     public ResponseEntity<?> crearPedido(@RequestBody PedidoRequest request) {
@@ -101,11 +205,13 @@ public class ClienteController {
             pedido.setCosto(request.costo());
             pedido.setEstado(Pedido.EstadoPedido.PENDIENTE);
             
-            // Coordenadas si vienen
-            if (request.latOrigen() != null) pedido.setLatOrigen(request.latOrigen());
-            if (request.lonOrigen() != null) pedido.setLonOrigen(request.lonOrigen());
-            if (request.latDestino() != null) pedido.setLatDestino(request.latDestino());
-            if (request.lonDestino() != null) pedido.setLonDestino(request.lonDestino());
+            // Guardar coordenadas
+            if (request.latOrigen() != null) {
+                pedido.setLatOrigen(request.latOrigen());
+                pedido.setLonOrigen(request.lonOrigen());
+                pedido.setLatDestino(request.latDestino());
+                pedido.setLonDestino(request.lonDestino());
+            }
             
             Pedido nuevoPedido = pedidoRepository.save(pedido);
             
@@ -130,7 +236,7 @@ public class ClienteController {
             Pedido pedido = pedidoRepository.findById(id)
                     .orElseThrow(() -> new RuntimeException("Pedido no encontrado"));
             
-            // 🔒 Verificar que el pedido es del cliente
+            // 🔐 Verificar que el pedido es del cliente
             if (!pedido.getCliente().getId().equals(cliente.getId())) {
                 log.warn("⚠️ Cliente {} intentó cancelar pedido {} que no le pertenece", 
                         cliente.getNombre(), id);
@@ -138,7 +244,7 @@ public class ClienteController {
                         .body("No tienes permiso para cancelar este pedido");
             }
             
-            // 🔒 Solo se puede cancelar si está PENDIENTE
+            // 🔐 Solo se puede cancelar si está PENDIENTE
             if (pedido.getEstado() != Pedido.EstadoPedido.PENDIENTE) {
                 return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                         .body("Solo puedes cancelar pedidos en estado PENDIENTE");
@@ -206,6 +312,11 @@ public class ClienteController {
     }
     
     // DTOs
+    private record UbicacionRequest(
+            Double latitud,
+            Double longitud
+    ) {}
+    
     private record PedidoRequest(
             String descripcion,
             String direccionOrigen,
@@ -225,4 +336,78 @@ public class ClienteController {
             int entregados,
             int cancelados
     ) {}
+
+
+
+    /**
+ * ✅ NUEVO: Guardar ubicación del cliente
+ */
+@PutMapping("/guardar-ubicacion")
+public ResponseEntity<?> guardarUbicacion(
+        @RequestParam Double latitud,
+        @RequestParam Double longitud,
+        @AuthenticationPrincipal UserDetails userDetails) {
+    
+    try {
+        String email = userDetails.getUsername();
+        Usuario cliente = usuarioRepository.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
+        
+        if (cliente.getTipo() != Usuario.TipoUsuario.CLIENTE) {
+            return ResponseEntity.badRequest().body(Map.of(
+                "error", "Solo los clientes pueden guardar ubicación"
+            ));
+        }
+        
+        // Guardar ubicación
+        cliente.setLatitud(latitud);
+        cliente.setLongitud(longitud);
+        usuarioRepository.save(cliente);
+        
+        log.info("✅ Ubicación guardada para cliente {}: ({}, {})", 
+                cliente.getNombre(), latitud, longitud);
+        
+        return ResponseEntity.ok(Map.of(
+            "mensaje", "Ubicación guardada exitosamente",
+            "latitud", latitud,
+            "longitud", longitud
+        ));
+        
+    } catch (Exception e) {
+        log.error("❌ Error guardando ubicación: {}", e.getMessage());
+        return ResponseEntity.internalServerError().body(Map.of(
+            "error", "Error al guardar ubicación: " + e.getMessage()
+        ));
+    }
+}
+
+/**
+ * ✅ NUEVO: Obtener perfil del cliente con ubicación
+ */
+@GetMapping("/mi-perfil")
+public ResponseEntity<?> obtenerMiPerfil(@AuthenticationPrincipal UserDetails userDetails) {
+    try {
+        String email = userDetails.getUsername();
+        Usuario cliente = usuarioRepository.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
+        
+        Map<String, Object> perfil = new HashMap<>();
+        perfil.put("id", cliente.getId());
+        perfil.put("nombre", cliente.getNombre());
+        perfil.put("email", cliente.getEmail());
+        perfil.put("telefono", cliente.getTelefono());
+        perfil.put("direccion", cliente.getDireccion());
+        perfil.put("latitud", cliente.getLatitud());
+        perfil.put("longitud", cliente.getLongitud());
+        perfil.put("tipo", cliente.getTipo());
+        
+        return ResponseEntity.ok(perfil);
+        
+    } catch (Exception e) {
+        log.error("❌ Error obteniendo perfil: {}", e.getMessage());
+        return ResponseEntity.internalServerError().body(Map.of(
+            "error", "Error al obtener perfil"
+        ));
+    }
+}
 }

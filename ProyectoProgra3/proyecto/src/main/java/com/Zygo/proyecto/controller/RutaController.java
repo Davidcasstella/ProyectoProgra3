@@ -3,7 +3,10 @@ package com.Zygo.proyecto.controller;
 import com.Zygo.proyecto.dto.RutaOptimaDTO;
 import com.Zygo.proyecto.service.DijkstraServiceOptimizado; // ⚡ CAMBIO
 import com.Zygo.proyecto.service.LugarService;
+import com.Zygo.proyecto.service.RutaService;
 import com.Zygo.proyecto.model.Graph;
+import com.Zygo.proyecto.model.Ruta;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -107,4 +110,56 @@ public class RutaController {
         health.put("version", "2.0-optimized");
         return ResponseEntity.ok(health);
     }
+
+@Autowired
+    private RutaService rutaService; // ✅ AGREGAR ESTA LÍNEA
+
+    /**
+     * 💾 Guardar ruta en BD
+     */
+    @PostMapping("/guardar")
+    public ResponseEntity<Map<String, Object>> guardarRuta(
+            @RequestBody Map<String, Object> rutaData) {
+        
+        long tiempoInicio = System.currentTimeMillis();
+        
+        log.info("💾 POST /api/rutas/guardar");
+        log.info("📍 Origen: ({}, {})", 
+            rutaData.get("origenLatitud"), 
+            rutaData.get("origenLongitud"));
+        log.info("🎯 Destino: ({}, {})", 
+            rutaData.get("destinoLatitud"), 
+            rutaData.get("destinoLongitud"));
+        
+        try {
+            // Guardar ruta
+            Ruta rutaGuardada = rutaService.guardarRuta(rutaData);
+            
+            long duracion = System.currentTimeMillis() - tiempoInicio;
+            
+            Map<String, Object> respuesta = new HashMap<>();
+            respuesta.put("id", rutaGuardada.getId());
+            respuesta.put("distanciaKm", rutaGuardada.getDistanciaKm());
+            respuesta.put("tiempoEstimadoMinutos", rutaGuardada.getTiempoEstimadoMinutos());
+            respuesta.put("costoEstimado", rutaGuardada.getCostoEstimado());
+            respuesta.put("mensaje", "Ruta guardada exitosamente");
+            respuesta.put("tiempoGuardoMs", duracion);
+            
+            log.info("✅ Ruta guardada exitosamente en {}ms", duracion);
+            
+            return ResponseEntity.ok(respuesta);
+            
+        } catch (Exception e) {
+            log.error("❌ Error al guardar ruta: {}", e.getMessage(), e);
+            
+            Map<String, Object> error = new HashMap<>();
+            error.put("error", "Error al guardar la ruta");
+            error.put("detalle", e.getMessage());
+            
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(error);
+        }
+    }
+
+
+    
 }

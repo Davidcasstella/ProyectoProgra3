@@ -2,6 +2,7 @@
 
 import { Routes } from '@angular/router';
 import { authGuard } from './guards/auth-guard';
+import { GuardarUbicacionClienteComponent } from './modules/gestion-dashboard/guardar-ubicacion-cliente/guardar-ubicacion-cliente';
 
 export const routes: Routes = [
   {
@@ -44,6 +45,7 @@ export const routes: Routes = [
       .then(m => m.MAPAS_ROUTES)
   },
   // ❌ Ruta no encontrada
+
   {
     path: '**',
     redirectTo: '/login'

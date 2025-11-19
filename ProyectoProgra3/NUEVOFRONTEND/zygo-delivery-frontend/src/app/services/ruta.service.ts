@@ -43,6 +43,14 @@ export class RutaService {
   }
 
   /**
+ * 💾 Guardar ruta en la BD
+ */
+guardarRuta(rutaData: any): Observable<any> {
+  console.log('💾 Guardando ruta en BD:', rutaData);
+  return this.http.post<any>(`${this.apiUrl}/guardar`, rutaData);
+}
+
+  /**
    * 💾 Health check del servicio de rutas
    */
   healthCheck(): Observable<any> {
