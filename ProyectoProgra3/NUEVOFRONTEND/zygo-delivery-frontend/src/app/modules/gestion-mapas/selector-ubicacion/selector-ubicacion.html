@@ -4,12 +4,77 @@
   
   <!-- Panel de Control -->
   <div class="panel-control">
-    <!-- ✅ NUEVO: Botón de Volver -->
+    <!-- Botón de Volver -->
     <div class="header-panel">
       <button class="btn-volver" (click)="volverAtras()" title="Volver atrás">
         ← Volver
       </button>
       <h2 class="titulo">🗺️ Selector de Ubicaciones</h2>
+    </div>
+    
+    <!-- ✅ NUEVO: Controles de capas SOLO PARA ADMIN -->
+    <div *ngIf="esAdmin" class="controles-capas">
+      <h3>🎛️ Capas del Mapa</h3>
+      <div class="capas-grid">
+        <!-- Toggle Restaurantes -->
+        <div class="capa-item">
+          <label class="switch">
+            <input 
+              type="checkbox" 
+              [(ngModel)]="mostrarRestaurantes"
+              (change)="toggleRestaurantes()">
+            <span class="slider"></span>
+          </label>
+          <div class="capa-info">
+            <span class="capa-icono">🍽️</span>
+            <div>
+              <strong>Restaurantes</strong>
+              <small>{{ restaurantes.length }} disponibles</small>
+            </div>
+          </div>
+        </div>
+        
+        <!-- Toggle Repartidores -->
+        <div class="capa-item">
+          <label class="switch">
+            <input 
+              type="checkbox" 
+              [(ngModel)]="mostrarRepartidores"
+              (change)="toggleRepartidores()">
+            <span class="slider"></span>
+          </label>
+          <div class="capa-info">
+            <span class="capa-icono">🚴</span>
+            <div>
+              <strong>Repartidores</strong>
+              <small>{{ repartidores.length }} activos</small>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <!-- ✅ NUEVO: Leyenda del mapa SOLO PARA ADMIN -->
+    <div *ngIf="esAdmin" class="leyenda-mapa">
+      <h4>📌 Leyenda</h4>
+      <div class="leyenda-items">
+        <div class="leyenda-item">
+          <div class="marcador-ejemplo" style="background: #ff8c00;"></div>
+          <span>🍽️ Restaurantes</span>
+        </div>
+        <div class="leyenda-item">
+          <div class="marcador-ejemplo" style="background: #3b82f6;"></div>
+          <span>🚴 Repartidores</span>
+        </div>
+        <div class="leyenda-item">
+          <div class="marcador-ejemplo" style="background: #10b981;"></div>
+          <span>📍 Origen</span>
+        </div>
+        <div class="leyenda-item">
+          <div class="marcador-ejemplo" style="background: #ef4444;"></div>
+          <span>🎯 Destino</span>
+        </div>
+      </div>
     </div>
     
     <!-- Instrucciones -->
@@ -41,14 +106,6 @@
         </span>
         <span *ngIf="!destinoSeleccionado" class="pendiente">No seleccionado (Click en el mapa)</span>
       </div>
-    </div>
-
-    <!-- 🔍 DEBUG: Mostrar estado del botón -->
-    <div *ngIf="origenSeleccionado && destinoSeleccionado" style="background: rgba(16, 185, 129, 0.2); padding: 10px; border-radius: 8px; margin-bottom: 10px; color: #10b981;">
-      ✅ Ambos puntos seleccionados - Botón habilitado
-    </div>
-    <div *ngIf="!origenSeleccionado || !destinoSeleccionado" style="background: rgba(239, 68, 68, 0.2); padding: 10px; border-radius: 8px; margin-bottom: 10px; color: #ef4444;">
-      ⚠️ Selecciona ambos puntos en el mapa para habilitar el botón
     </div>
 
     <!-- Botones de acción -->

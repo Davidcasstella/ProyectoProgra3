@@ -116,4 +116,30 @@ public class UsuarioService {
         dto.setActivo(usuario.getActivo());
         return dto;
     }
+    // ✅ NUEVO: Obtener repartidores CON sus coordenadas
+@Transactional(readOnly = true)
+public List<UsuarioDTO> obtenerRepartidoresConUbicacion() {
+    log.debug("🚴 Buscando repartidores con ubicación");
+    return usuarioRepository.findByTipo(TipoUsuario.REPARTIDOR).stream()
+            .filter(Usuario::getActivo)
+            .map(this::convertirEntidadADtoConUbicacion)
+            .collect(Collectors.toList());
+}
+
+// ✅ NUEVO: Convertir entidad a DTO incluyendo coordenadas
+private UsuarioDTO convertirEntidadADtoConUbicacion(Usuario usuario) {
+    UsuarioDTO dto = new UsuarioDTO();
+    dto.setId(usuario.getId());
+    dto.setNombre(usuario.getNombre());
+    dto.setEmail(usuario.getEmail());
+    dto.setTelefono(usuario.getTelefono());
+    dto.setDireccion(usuario.getDireccion());
+    dto.setTipo(usuario.getTipo());
+    dto.setFechaRegistro(usuario.getFechaRegistro());
+    dto.setActivo(usuario.getActivo());
+    dto.setLatitud(usuario.getLatitud());      // ✅ NUEVO
+    dto.setLongitud(usuario.getLongitud());    // ✅ NUEVO
+    dto.setDisponible(usuario.getDisponible()); // ✅ NUEVO
+    return dto;
+}
 }

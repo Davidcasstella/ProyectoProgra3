@@ -42,10 +42,11 @@ public class UsuarioController {
         return ResponseEntity.ok(usuarios);
     }
     
+    // ✅ NUEVO: Obtener repartidores CON ubicación
     @GetMapping("/repartidores")
     public ResponseEntity<List<UsuarioDTO>> obtenerRepartidores() {
-        log.info("GET /api/usuarios/repartidores - Obteniendo repartidores disponibles");
-        List<UsuarioDTO> repartidores = usuarioService.obtenerRepartidoresDisponibles();
+        log.info("GET /api/usuarios/repartidores - Obteniendo repartidores con ubicación");
+        List<UsuarioDTO> repartidores = usuarioService.obtenerRepartidoresConUbicacion();
         return ResponseEntity.ok(repartidores);
     }
     

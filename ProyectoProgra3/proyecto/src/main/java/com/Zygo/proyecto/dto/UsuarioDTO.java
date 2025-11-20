@@ -8,6 +8,11 @@ import jakarta.validation.constraints.NotNull;
 import java.time.LocalDateTime;
 
 public class UsuarioDTO {
+    // ✅ NUEVOS CAMPOS para ubicación
+private Double latitud;
+private Double longitud;
+private Boolean disponible;
+
     
     private Long id;
     
@@ -110,4 +115,28 @@ public class UsuarioDTO {
     public void setActivo(Boolean activo) {
         this.activo = activo;
     }
+    // ✅ GETTERS Y SETTERS
+public Double getLatitud() {
+    return latitud;
+}
+
+public void setLatitud(Double latitud) {
+    this.latitud = latitud;
+}
+
+public Double getLongitud() {
+    return longitud;
+}
+
+public void setLongitud(Double longitud) {
+    this.longitud = longitud;
+}
+
+public Boolean getDisponible() {
+    return disponible;
+}
+
+public void setDisponible(Boolean disponible) {
+    this.disponible = disponible;
+}
 }

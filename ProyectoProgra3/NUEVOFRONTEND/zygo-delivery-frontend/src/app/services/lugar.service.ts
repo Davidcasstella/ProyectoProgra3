@@ -15,6 +15,7 @@ interface RutaCache {
 })
 export class LugarService {
   private apiUrl = 'http://localhost:8080/api/rutas';
+  private lugaresApiUrl = 'http://localhost:8080/api/lugares'; // ✅ NUEVA URL
   
   // 🗺️ Cache para el grafo completo
   private grafoCache$: Observable<any> | null = null;
@@ -217,5 +218,13 @@ export class LugarService {
         });
       }, index * 500); // Espaciadas 500ms para no saturar el servidor
     });
+  }
+
+  // ✅ CORREGIDO: Obtener restaurantes con la URL correcta
+  obtenerRestaurantes(): Observable<any[]> {
+    console.log('🍽️ Llamando a:', `${this.lugaresApiUrl}/restaurantes`);
+    return this.http.get<any[]>(`${this.lugaresApiUrl}/restaurantes`).pipe(
+      tap(data => console.log('✅ Restaurantes recibidos del backend:', data))
+    );
   }
 }

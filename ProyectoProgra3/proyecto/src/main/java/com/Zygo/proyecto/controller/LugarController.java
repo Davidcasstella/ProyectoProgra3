@@ -2,6 +2,7 @@ package com.Zygo.proyecto.controller;
 
 import com.Zygo.proyecto.dto.RutaOptimaDTO;
 import com.Zygo.proyecto.model.Graph;
+import com.Zygo.proyecto.repository.GraphRepository; // ✅ NUEVO IMPORT
 import com.Zygo.proyecto.service.LugarService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -13,6 +14,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 /**
  * Controlador para buscar lugares y calcular rutas por nombre
@@ -25,6 +27,9 @@ public class LugarController {
     
     @Autowired
     private LugarService lugarService;
+    
+    @Autowired
+    private GraphRepository graphRepository; // ✅ NUEVO: Inyectar GraphRepository
     
     /**
      * Buscar lugares/nodos por nombre
@@ -69,7 +74,7 @@ public class LugarController {
             ? (Boolean) request.get("considerarTrafico") 
             : true;
         
-        log.info("🗺️  Calculando ruta de '{}' a '{}' (tráfico: {})", 
+        log.info("🗺️ Calculando ruta de '{}' a '{}' (tráfico: {})", 
                  origen, destino, considerarTrafico);
         
         try {
@@ -214,12 +219,12 @@ public class LugarController {
      * Obtener lugares cercanos a una ubicación
      */
     @GetMapping("/cercanos")
-    public ResponseEntity<?> lugarcesCercanos(
+    public ResponseEntity<?> lugaresCercanos(
             @RequestParam Double lat,
             @RequestParam Double lon,
             @RequestParam(defaultValue = "1.0") Double radioKm) {
         
-        log.info("📍 Buscando lugares cercanos a {}, {} (radio: {} km)", lat, lon, radioKm);
+        log.info("🔍 Buscando lugares cercanos a {}, {} (radio: {} km)", lat, lon, radioKm);
         
         try {
             List<Map<String, Object>> lugares = lugarService.buscarLugaresCercanos(lat, lon, radioKm);
@@ -235,6 +240,38 @@ public class LugarController {
             log.error("Error buscando lugares cercanos: {}", e.getMessage());
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body(Map.of("error", e.getMessage()));
+        }
+    }
+    
+    /**
+     * ✅ NUEVO: Obtener todos los restaurantes
+     */
+    @GetMapping("/restaurantes")
+    public ResponseEntity<List<Map<String, Object>>> obtenerRestaurantes() {
+        log.info("🍽️ GET /api/lugares/restaurantes - Obteniendo restaurantes");
+        
+        try {
+            List<Graph> restaurantes = graphRepository.findByTipo(Graph.TipoNodo.RESTAURANTE);
+            
+            List<Map<String, Object>> resultado = restaurantes.stream()
+                .map(r -> {
+                    Map<String, Object> map = new HashMap<>();
+                    map.put("id", r.getId());
+                    map.put("nombre", r.getNombre());
+                    map.put("latitud", r.getLatitud());
+                    map.put("longitud", r.getLongitud());
+                    map.put("direccion", r.getDireccionCompleta());
+                    map.put("activo", r.getActivo());
+                    return map;
+                })
+                .collect(Collectors.toList());
+            
+            log.info("✅ {} restaurantes encontrados", resultado.size());
+            return ResponseEntity.ok(resultado);
+            
+        } catch (Exception e) {
+            log.error("❌ Error obteniendo restaurantes: {}", e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
         }
     }
     

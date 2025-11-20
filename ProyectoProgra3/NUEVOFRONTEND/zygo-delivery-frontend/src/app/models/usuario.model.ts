@@ -66,4 +66,8 @@ export interface UsuarioDTO {
   tipo: TipoUsuario;
   fechaRegistro?: Date;
   activo?: boolean;
+  latitud?: number;
+  longitud?: number;
+  disponible?: boolean;
 }
+export interface Usuario extends UsuarioDTO {}
