@@ -1,4 +1,5 @@
 <!-- src/app/modules/gestion-pedidos/crear-pedidos/crear-pedidos.html -->
+<!-- PARTE 1 DE 2 -->
 
 <div class="crear-pedidos-wrapper">
   
@@ -135,7 +136,7 @@
       </div>
 
       <!-- ============================================= -->
-      <!-- PASO 2: DESCRIPCIÓN (ADMIN) o MAPA (CLIENTE) -->
+      <!-- PASO 2: DESCRIPCIÓN (ADMIN) o UBICACIÓN (CLIENTE) -->
       <!-- ============================================= -->
 
       <!-- PARA ADMIN: Descripción del Pedido -->
@@ -168,75 +169,105 @@
         </div>
       </div>
 
-      <!-- PARA CLIENTE: Selección de Destino en Mapa -->
+      <!-- ✅ PARA CLIENTE: Selección de SU UBICACIÓN (UN SOLO PUNTO) -->
       <div class="wizard-step-map-fullscreen" 
-           [class.puntos-completos]="destinoCoordenadas"
            *ngIf="pasoActual === 2 && esCliente && mostrarMapa">
         
-        <!-- Panel de instrucciones -->
-        <div class="map-instructions-floating" *ngIf="!destinoCoordenadas">
+        <!-- Panel de instrucciones flotante -->
+        <div class="map-instructions-floating" *ngIf="!ubicacionClienteSeleccionada">
           <div class="instruction-card-compact">
-            <h3>🗺️ Selecciona el destino</h3>
-            <p>Tu ubicación de origen ya está guardada</p>
+            <h3>📍 Marca tu ubicación actual</h3>
+            <p>Haz clic en el mapa donde te encuentras ahora</p>
             <div class="instruction-steps-compact">
-              <div class="instruction-step-compact completed">
-                <span class="step-number-compact">✓</span>
+              <div class="instruction-step-compact">
+                <span class="step-number-compact">1</span>
                 <div class="step-text-compact">
-                  <strong>Origen: Tu ubicación</strong>
-                  <div *ngIf="origenCoordenadas">
-                    <small>{{ origenCoordenadas.lat.toFixed(4) }}, {{ origenCoordenadas.lng.toFixed(4) }}</small>
-                  </div>
+                  <strong>Busca tu ubicación en el mapa</strong>
+                  <small>Puedes usar zoom para mayor precisión</small>
                 </div>
               </div>
-              <div class="instruction-step-compact" [class.completed]="destinoCoordenadas">
+              <div class="instruction-step-compact">
                 <span class="step-number-compact">2</span>
                 <div class="step-text-compact">
-                  <strong>Haz clic para marcar el destino</strong>
-                  <small>¿A dónde quieres que te entreguen?</small>
+                  <strong>Haz clic donde estás</strong>
+                  <small>Se marcará con un pin verde 📍</small>
                 </div>
-                <span class="check-mark-compact" *ngIf="destinoCoordenadas">✓</span>
+              </div>
+              <div class="instruction-step-compact">
+                <span class="step-number-compact">3</span>
+                <div class="step-text-compact">
+                  <strong>Guarda tu ubicación</strong>
+                  <small>Presiona el botón "Guardar Ubicación"</small>
+                </div>
               </div>
             </div>
           </div>
         </div>
 
-        <!-- Panel de confirmación -->
-        <div class="map-selected-panel" *ngIf="destinoCoordenadas">
+        <!-- Panel de confirmación cuando selecciona su ubicación -->
+        <div class="map-selected-panel" *ngIf="ubicacionClienteSeleccionada && !ubicacionGuardada">
           <div class="selected-panel-card">
             <div class="selected-header">
-              <span class="selected-icon">✅</span>
-              <strong>Destino Seleccionado</strong>
+              <span class="selected-icon">📍</span>
+              <strong>Ubicación Seleccionada</strong>
             </div>
             <div class="selected-content">
-              <div class="selected-point origen">
+              <div class="selected-point ubicacion-cliente">
                 <span class="dot">🟢</span>
                 <div>
-                  <strong>Origen (Tu ubicación)</strong>
-                  <small *ngIf="origenCoordenadas">{{ origenCoordenadas.lat.toFixed(4) }}, {{ origenCoordenadas.lng.toFixed(4) }}</small>
-                </div>
-              </div>
-              <div class="selected-point destino">
-                <span class="dot">🔴</span>
-                <div>
-                  <strong>Destino</strong>
-                  <small *ngIf="destinoCoordenadas">{{ destinoCoordenadas.lat.toFixed(4) }}, {{ destinoCoordenadas.lng.toFixed(4) }}</small>
+                  <strong>Tu ubicación</strong>
+                  <small>{{ ubicacionClienteSeleccionada.lat.toFixed(6) }}, {{ ubicacionClienteSeleccionada.lng.toFixed(6) }}</small>
                 </div>
               </div>
             </div>
             
-            <!-- Estado de cálculo -->
-            <div class="calculation-status" *ngIf="calculandoRuta">
-              <div class="loading-spinner">⏳</div>
-              <span>Calculando ruta...</span>
+            <!-- Botón para guardar -->
+            <div class="action-buttons">
+              <button 
+                type="button"
+                class="btn-guardar-ubicacion"
+                [disabled]="guardandoUbicacion"
+                (click)="guardarUbicacionCliente()">
+                <span *ngIf="!guardandoUbicacion">💾 Guardar Ubicación</span>
+                <span *ngIf="guardandoUbicacion">⏳ Guardando...</span>
+              </button>
+              <button 
+                type="button"
+                class="btn-limpiar-ubicacion"
+                (click)="limpiarUbicacionCliente()">
+                🗑️ Cambiar ubicación
+              </button>
             </div>
-            <div class="calculation-status success" *ngIf="distanciaCalculada && !calculandoRuta">
-              <div class="success-icon">✅</div>
-              <div class="calculation-info">
-                <strong>Ruta calculada</strong>
-                <small>{{ distanciaCalculada.toFixed(2) }} km · ${{ costoCalculado?.toFixed(2) }}</small>
+          </div>
+        </div>
+
+        <!-- Panel de éxito cuando ya guardó -->
+        <div class="map-selected-panel" *ngIf="ubicacionGuardada">
+          <div class="selected-panel-card success-panel">
+            <div class="selected-header success">
+              <span class="selected-icon">✅</span>
+              <strong>¡Ubicación Guardada Exitosamente!</strong>
+            </div>
+            <div class="selected-content">
+              <div class="success-message">
+                <p>Tu ubicación ha sido registrada correctamente</p>
+                <div class="ubicacion-guardada-info">
+                  <span class="dot">🟢</span>
+                  <div>
+                    <strong>Coordenadas guardadas:</strong>
+                    <small>{{ ubicacionClienteSeleccionada?.lat?.toFixed(6) }}, {{ ubicacionClienteSeleccionada?.lng?.toFixed(6) }}</small>
+                  </div>
+                </div>
               </div>
-              <button class="btn-continuar" (click)="pasoSiguiente()" style="margin-top: 15px;">
-                Continuar → Resumen
+            </div>
+            
+            <!-- Botón continuar -->
+            <div class="action-buttons">
+              <button 
+                type="button"
+                class="btn-continuar-grande"
+                (click)="pasoSiguiente()">
+                Continuar al Resumen →
               </button>
             </div>
           </div>
@@ -245,7 +276,7 @@
         <!-- Mapa en pantalla completa -->
         <div class="fullscreen-map-absolute">
           <app-selector-ubicacion
-            (ubicacionSeleccionada)="onDestinoSeleccionado($event)">
+            (ubicacionSeleccionada)="onUbicacionClienteSeleccionada($event)">
           </app-selector-ubicacion>
         </div>
       </div>
@@ -294,7 +325,7 @@
         </div>
       </div>
 
-      <!-- PARA CLIENTE: Resumen -->
+      <!-- ✅ PARA CLIENTE: Resumen del Pedido -->
       <div class="wizard-step" *ngIf="pasoActual === 3 && esCliente">
         <div class="step-content">
           <div class="step-header">
@@ -316,36 +347,50 @@
               </div>
             </div>
 
-            <!-- Datos de la Ruta -->
-            <div class="resumen-card" *ngIf="distanciaCalculada && costoCalculado">
+            <!-- Ubicación Guardada -->
+            <div class="resumen-card">
               <div class="resumen-header">
                 <span class="resumen-icon">📍</span>
-                <strong>Datos del Viaje</strong>
+                <strong>Tu Ubicación</strong>
                 <button type="button" class="btn-editar" (click)="irAPaso(2)">✏️ Editar</button>
               </div>
               <div class="resumen-body">
-                <div class="stats-grid">
-                  <div class="stat-box">
-                    <div class="stat-icon">📏</div>
-                    <div class="stat-value">{{ distanciaCalculada.toFixed(2) }} km</div>
-                    <div class="stat-label">Distancia Total</div>
-                  </div>
-                  <div class="stat-box">
-                    <div class="stat-icon">⏱️</div>
-                    <div class="stat-value">{{ tiempoEstimado?.toFixed(0) }} min</div>
-                    <div class="stat-label">Tiempo Estimado</div>
-                  </div>
-                  <div class="stat-box">
-                    <div class="stat-icon">💰</div>
-                    <div class="stat-value">${{ costoCalculado.toFixed(2) }}</div>
-                    <div class="stat-label">Costo del Envío</div>
+                <div class="ubicacion-info-resumen">
+                  <span class="dot-grande">🟢</span>
+                  <div>
+                    <strong>Ubicación registrada</strong>
+                    <p *ngIf="ubicacionClienteSeleccionada">
+                      {{ ubicacionClienteSeleccionada.lat.toFixed(6) }}, 
+                      {{ ubicacionClienteSeleccionada.lng.toFixed(6) }}
+                    </p>
                   </div>
                 </div>
+              </div>
+            </div>
+
+            <!-- Información adicional -->
+            <div class="resumen-card info-card">
+              <div class="resumen-header">
+                <span class="resumen-icon">ℹ️</span>
+                <strong>¿Qué sigue?</strong>
+              </div>
+              <div class="resumen-body">
+                <ul class="info-list">
+                  <li>✓ Asignaremos un repartidor disponible</li>
+                  <li>✓ Calcularemos la ruta óptima</li>
+                  <li>✓ Te notificaremos cuando esté en camino</li>
+                  <li>✓ Podrás hacer seguimiento en tiempo real</li>
+                </ul>
               </div>
             </div>
           </div>
         </div>
       </div>
+
+<!-- CONTINÚA EN PARTE 2... -->
+<!-- CONTINÚA EN PARTE 2... -->
+ <!-- src/app/modules/gestion-pedidos/crear-pedidos/crear-pedidos.html -->
+<!-- PARTE 2 DE 2 - Continúa desde PARTE 1 -->
 
       <!-- ============================================= -->
       <!-- PASO 4: SELECCIÓN DE UBICACIONES EN MAPA (ADMIN) -->
@@ -531,7 +576,9 @@
 
     </form>
 
-    <!-- Navegación del Wizard -->
+    <!-- ============================================= -->
+    <!-- NAVEGACIÓN DEL WIZARD -->
+    <!-- ============================================= -->
     <div class="wizard-navigation">
       <button 
         type="button" 
@@ -559,7 +606,7 @@
         class="btn-nav btn-crear" 
         *ngIf="pasoActual === totalPasos"
         (click)="onSubmit()"
-        [disabled]="pedidoForm.invalid || cargando || !origenCoordenadas || !destinoCoordenadas">
+        [disabled]="pedidoForm.invalid || cargando || (esCliente && !ubicacionGuardada) || (!esCliente && (!origenCoordenadas || !destinoCoordenadas))">
         <span *ngIf="!cargando">✅ Crear Pedido</span>
         <span *ngIf="cargando">⏳ Creando...</span>
       </button>
@@ -567,3 +614,5 @@
 
   </div>
 </div>
+
+<!-- FIN DEL ARCHIVO -->

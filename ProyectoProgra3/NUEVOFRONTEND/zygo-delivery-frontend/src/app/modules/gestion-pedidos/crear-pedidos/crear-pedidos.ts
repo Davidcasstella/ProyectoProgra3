@@ -1,4 +1,5 @@
 // src/app/modules/gestion-pedidos/crear-pedidos/crear-pedidos.ts
+// PARTE 1 DE 2
 
 import { Component, OnInit, ViewChild, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
@@ -35,7 +36,6 @@ export class CrearPedidos implements OnInit {
   // Detectar si el usuario es CLIENTE
   esCliente = false;
   usuarioActual: any = null;
-  ubicacionCliente: { latitud: number; longitud: number } | null = null;
   
   // Estados disponibles para el selector
   estadosDisponibles = [
@@ -58,9 +58,16 @@ export class CrearPedidos implements OnInit {
     { numero: 6, titulo: 'Ruta', icono: '🧭' }
   ];
   
-  // Coordenadas seleccionadas desde el mapa
+  // ✅ NUEVA PROPIEDAD: Ubicación del cliente (un solo punto)
+  ubicacionClienteSeleccionada: Coordenadas | null = null;
+  
+  // Coordenadas seleccionadas desde el mapa (para ADMIN)
   origenCoordenadas: Coordenadas | null = null;
   destinoCoordenadas: Coordenadas | null = null;
+  
+  // Control de ubicación guardada
+  ubicacionGuardada = false;
+  guardandoUbicacion = false;
   
   // Datos de ruta calculada
   distanciaCalculada: number | null = null;
@@ -110,7 +117,7 @@ export class CrearPedidos implements OnInit {
       console.log('✅ Usuario es CLIENTE');
       this.esCliente = true;
       this.ajustarWizardParaCliente();
-      this.cargarUbicacionCliente();
+      this.cargarClienteId();
     } else {
       console.log('👨‍💼 Usuario es ADMIN/REPARTIDOR');
       this.esCliente = false;
@@ -124,10 +131,10 @@ export class CrearPedidos implements OnInit {
   ajustarWizardParaCliente(): void {
     console.log('🔧 Ajustando wizard para CLIENTE...');
     
-    // Para clientes: Descripción → Ubicación (Destino) → Resumen
+    // Para clientes: Descripción → Ubicación (UN punto) → Resumen
     this.pasos = [
       { numero: 1, titulo: 'Descripción', icono: '📝' },
-      { numero: 2, titulo: 'Destino', icono: '🗺️' },
+      { numero: 2, titulo: 'Ubicación', icono: '📍' },
       { numero: 3, titulo: 'Resumen', icono: '📊' }
     ];
     this.totalPasos = 3;
@@ -136,56 +143,31 @@ export class CrearPedidos implements OnInit {
   }
 
   /**
-   * Cargar ubicación guardada del cliente
+   * Cargar solo el clienteId
    */
-  cargarUbicacionCliente(): void {
-    console.log('📍 Cargando ubicación del cliente...');
+  cargarClienteId(): void {
+    console.log('🔍 Cargando perfil del cliente...');
     
     this.clienteService.obtenerPerfil().subscribe({
       next: (perfil: any) => {
         console.log('✅ Perfil del cliente cargado:', perfil);
         
-        if (perfil.latitud && perfil.longitud) {
-          this.ubicacionCliente = {
-            latitud: perfil.latitud,
-            longitud: perfil.longitud
-          };
-          
-          // Pre-llenar el origen con la ubicación guardada
-          this.origenCoordenadas = {
-            lat: perfil.latitud,
-            lng: perfil.longitud
-          };
-          
-          this.pedidoForm.patchValue({
-            clienteId: perfil.id,
-            direccionOrigen: `📍 Mi ubicación: ${perfil.latitud.toFixed(6)}, ${perfil.longitud.toFixed(6)}`
-          });
-          
-          console.log('✅ Origen pre-llenado:', this.origenCoordenadas);
-          
-          setTimeout(() => {
-            this.mostrarExito('Tu ubicación ha sido cargada automáticamente');
-            this.cdr.detectChanges();
-          }, 0);
-        } else {
-          console.warn('⚠️ Cliente sin ubicación guardada');
-          
-          setTimeout(() => {
-            this.mostrarError('Por favor, guarda tu ubicación primero en "Guardar Ubicación"');
-            this.cdr.detectChanges();
-          }, 0);
-          
-          setTimeout(() => {
-            this.router.navigate(['/dashboard/guardar-ubicacion']);
-          }, 3000);
-        }
+        this.pedidoForm.patchValue({
+          clienteId: perfil.id
+        });
+        
+        console.log('✅ Cliente ID configurado:', perfil.id);
+        
+        setTimeout(() => {
+          this.mostrarExito('¡Listo para crear tu pedido!');
+          this.cdr.detectChanges();
+        }, 0);
       },
       error: (err: any) => {
         console.error('❌ Error al cargar perfil del cliente:', err);
         
         setTimeout(() => {
-          this.mostrarError('Error al cargar tu ubicación');
+          this.mostrarError('Error al cargar tu perfil');
           this.cdr.detectChanges();
         }, 0);
       }
@@ -232,14 +214,18 @@ export class CrearPedidos implements OnInit {
    * Avanza al siguiente paso
    */
   pasoSiguiente(): void {
-    console.log('⭐️ Intentando avanzar desde paso:', this.pasoActual);
+    console.log('⭐ Intentando avanzar desde paso:', this.pasoActual);
     
     if (!this.puedeContinuar()) {
       if (this.esCliente && this.pasoActual === 1) {
         this.mostrarError('⚠️ La descripción debe tener al menos 10 caracteres');
         this.pedidoForm.get('descripcion')?.markAsTouched();
-      } else if (this.pasoActual === 2 && this.esCliente && !this.destinoCoordenadas) {
-        this.mostrarError('⚠️ Debes seleccionar el destino en el mapa');
+      } else if (this.pasoActual === 2 && this.esCliente) {
+        if (!this.ubicacionClienteSeleccionada) {
+          this.mostrarError('⚠️ Debes seleccionar tu ubicación en el mapa');
+        } else if (!this.ubicacionGuardada) {
+          this.mostrarError('⚠️ Debes guardar tu ubicación antes de continuar');
+        }
       } else {
         this.mostrarError('⚠️ Completa los campos requeridos antes de continuar');
       }
@@ -271,7 +257,7 @@ export class CrearPedidos implements OnInit {
   }
 
   /**
-   * Verifica si se puede continuar al siguiente paso
+   * ✅ ACTUALIZADO: Verifica si se puede continuar al siguiente paso
    */
   puedeContinuar(): boolean {
     if (this.esCliente) {
@@ -281,16 +267,12 @@ export class CrearPedidos implements OnInit {
           const descripcionValor = this.pedidoForm.get('descripcion')?.value || '';
           return descripcionValor.trim().length >= 10;
         
-        case 2: // Destino
-          return !!(this.origenCoordenadas && 
-                   this.destinoCoordenadas && 
-                   this.distanciaCalculada);
+        case 2: // Ubicación del cliente (UN SOLO PUNTO + guardado)
+          return !!(this.ubicacionClienteSeleccionada && this.ubicacionGuardada);
         
         case 3: // Resumen
           return this.pedidoForm.valid && 
-                 !!(this.origenCoordenadas && 
-                    this.destinoCoordenadas && 
-                    this.distanciaCalculada);
+                 !!(this.ubicacionClienteSeleccionada && this.ubicacionGuardada);
         
         default:
           return false;
@@ -378,19 +360,99 @@ export class CrearPedidos implements OnInit {
     return repartidorId ? this.repartidores.find(r => r.id === repartidorId) : undefined;
   }
 
+  // CONTINÚA EN PARTE 2...
+  // src/app/modules/gestion-pedidos/crear-pedidos/crear-pedidos.ts
+// PARTE 2 DE 2 - Continúa desde la Parte 1
+
+ // src/app/modules/gestion-pedidos/crear-pedidos/crear-pedidos.ts
+// PARTE 2 DE 2 - Continúa desde la Parte 1
+
   // ========================================
-  // 🗺️ FUNCIONES DEL MAPA
+  // 🗺️ FUNCIONES DEL MAPA - NUEVAS PARA CLIENTE
   // ========================================
 
   /**
-   * Maneja la selección de origen (solo ADMIN)
+   * 📍 NUEVO: Maneja cuando el CLIENTE selecciona SU ubicación (un solo punto)
    */
-  onOrigenSeleccionado(coords: Coordenadas): void {
-    if (this.esCliente) {
-      console.log('⚠️ Los clientes no pueden cambiar su ubicación de origen');
+  onUbicacionClienteSeleccionada(coords: Coordenadas): void {
+    console.log('📍 Cliente seleccionó su ubicación:', coords);
+    
+    this.ubicacionClienteSeleccionada = { ...coords };
+    this.ubicacionGuardada = false; // Reset del estado de guardado
+    
+    // Guardar también como origen (para compatibilidad con el formulario)
+    this.origenCoordenadas = { ...coords };
+    
+    // Mostrar en el formulario
+    this.pedidoForm.patchValue({
+      direccionOrigen: `Lat: ${coords.lat.toFixed(6)}, Lng: ${coords.lng.toFixed(6)}`
+    });
+    
+    this.cdr.detectChanges();
+  }
+
+  /**
+   * 💾 GUARDAR la ubicación del cliente en el backend
+   */
+  guardarUbicacionCliente(): void {
+    if (!this.ubicacionClienteSeleccionada) {
+      this.mostrarError('⚠️ Debes seleccionar tu ubicación primero');
       return;
     }
+
+    this.guardandoUbicacion = true;
+    console.log('💾 Guardando ubicación del cliente...', this.ubicacionClienteSeleccionada);
+
+    this.clienteService.guardarMiUbicacion(
+      this.ubicacionClienteSeleccionada.lat,
+      this.ubicacionClienteSeleccionada.lng
+    ).subscribe({
+      next: (response) => {
+        this.guardandoUbicacion = false;
+        this.ubicacionGuardada = true;
+        
+        console.log('✅ Ubicación guardada exitosamente:', response);
+        this.mostrarExito('✅ ¡Ubicación guardada exitosamente!');
+        
+        this.cdr.detectChanges();
+      },
+      error: (err) => {
+        this.guardandoUbicacion = false;
+        console.error('❌ Error al guardar ubicación:', err);
+        this.mostrarError(err.error?.error || 'Error al guardar tu ubicación');
+      }
+    });
+  }
+
+  /**
+   * 🗑️ Limpiar la ubicación seleccionada del cliente
+   */
+  limpiarUbicacionCliente(): void {
+    console.log('🗑️ Limpiando ubicación del cliente');
     
+    this.ubicacionClienteSeleccionada = null;
+    this.ubicacionGuardada = false;
+    this.origenCoordenadas = null;
+    
+    this.pedidoForm.patchValue({
+      direccionOrigen: ''
+    });
+
+    if (this.mapaComponent) {
+      this.mapaComponent.limpiarMapa();
+    }
+    
+    this.cdr.detectChanges();
+  }
+
+  // ========================================
+  // 🗺️ FUNCIONES DEL MAPA - PARA ADMIN
+  // ========================================
+
+  /**
+   * Maneja la selección de origen (ADMIN)
+   */
+  onOrigenSeleccionado(coords: Coordenadas): void {
     console.log('🟢 Origen seleccionado:', coords);
     this.origenCoordenadas = { ...coords };
     
@@ -400,12 +462,11 @@ export class CrearPedidos implements OnInit {
 
     if (this.destinoCoordenadas) {
       this.calcularRutaAutomatica();
-      this.ocultarPanelSelectorUbicacion();
     }
   }
 
   /**
-   * Maneja la selección de destino
+   * Maneja la selección de destino (ADMIN o segundo punto)
    */
   onDestinoSeleccionado(coords: Coordenadas): void {
     console.log('🔴 Destino seleccionado:', coords);
@@ -417,38 +478,11 @@ export class CrearPedidos implements OnInit {
 
     if (this.origenCoordenadas) {
       this.calcularRutaAutomatica();
-      this.ocultarPanelSelectorUbicacion();
     }
   }
 
   /**
-   * Oculta el panel interno del componente selector-ubicacion
-   */
-  ocultarPanelSelectorUbicacion(): void {
-    setTimeout(() => {
-      const paneles = document.querySelectorAll(
-        'app-selector-ubicacion .map-sidebar, ' +
-        'app-selector-ubicacion .panel-lateral, ' +
-        'app-selector-ubicacion .instrucciones-panel, ' +
-        'app-selector-ubicacion .ubicaciones-panel, ' +
-        'app-selector-ubicacion .control-panel, ' +
-        'app-selector-ubicacion [class*="panel"], ' +
-        'app-selector-ubicacion [class*="sidebar"]'
-      );
-      
-      paneles.forEach((panel: Element) => {
-        const htmlPanel = panel as HTMLElement;
-        htmlPanel.style.display = 'none';
-        htmlPanel.style.visibility = 'hidden';
-        htmlPanel.style.opacity = '0';
-      });
-      
-      console.log('🚫 Paneles ocultos:', paneles.length);
-    }, 100);
-  }
-
-  /**
-   * Calcula la ruta automáticamente
+   * Calcula la ruta automáticamente (para ADMIN)
    */
   calcularRutaAutomatica(): void {
     if (!this.origenCoordenadas || !this.destinoCoordenadas) {
@@ -514,7 +548,7 @@ export class CrearPedidos implements OnInit {
       tiempoEstimadoMinutos: this.tiempoEstimado,
       costoEstimado: this.costoCalculado,
       instrucciones: this.instruccionesRuta ? 
-        this.instruccionesRuta.map(i => i.texto).join(' | ') : 
+        this.instruccionesRuta.map((i: any) => i.texto).join(' | ') : 
         'Ruta directa',
       nodos: rutaResponse.nodos || [],
       segmentos: rutaResponse.segmentos || []
@@ -634,14 +668,7 @@ export class CrearPedidos implements OnInit {
   limpiarUbicaciones(): void {
     console.log('🗑️ Limpiando ubicaciones');
     
-    // Si es CLIENTE, no limpiar el origen
-    if (!this.esCliente) {
-      this.origenCoordenadas = null;
-      this.pedidoForm.patchValue({
-        direccionOrigen: ''
-      });
-    }
-    
+    this.origenCoordenadas = null;
     this.destinoCoordenadas = null;
     this.distanciaCalculada = null;
     this.costoCalculado = null;
@@ -649,6 +676,7 @@ export class CrearPedidos implements OnInit {
     this.instruccionesRuta = null;
     
     this.pedidoForm.patchValue({
+      direccionOrigen: '',
       direccionDestino: '',
       distanciaKm: '',
       costo: ''
@@ -664,7 +692,7 @@ export class CrearPedidos implements OnInit {
   // ========================================
 
   /**
-   * Enviar formulario
+   * ✅ ACTUALIZADO: Enviar formulario
    */
   onSubmit(): void {
     console.log('📤 Intentando enviar formulario...');
@@ -680,35 +708,73 @@ export class CrearPedidos implements OnInit {
       return;
     }
 
-    if (!this.origenCoordenadas || !this.destinoCoordenadas) {
-      this.mostrarError('Por favor selecciona origen y destino en el mapa');
-      return;
-    }
+    // Validación específica para CLIENTES
+    if (this.esCliente) {
+      if (!this.ubicacionClienteSeleccionada) {
+        this.mostrarError('Por favor selecciona tu ubicación en el mapa');
+        return;
+      }
 
-    if (!this.distanciaCalculada || !this.costoCalculado) {
-      this.mostrarError('Por favor espera a que se calcule la ruta');
-      return;
+      if (!this.ubicacionGuardada) {
+        this.mostrarError('⚠️ Debes guardar tu ubicación antes de crear el pedido');
+        return;
+      }
+    } else {
+      // Validación para ADMIN
+      if (!this.origenCoordenadas || !this.destinoCoordenadas) {
+        this.mostrarError('Por favor selecciona origen y destino en el mapa');
+        return;
+      }
+
+      if (!this.distanciaCalculada || !this.costoCalculado) {
+        this.mostrarError('Por favor espera a que se calcule la ruta');
+        return;
+      }
     }
 
     this.cargando = true;
     this.error = null;
 
-    const pedidoData = {
+    // 🔥 CORREGIDO: Crear objeto con datos básicos
+    const pedidoData: any = {
       clienteId: this.pedidoForm.get('clienteId')?.value,
-      repartidorId: this.pedidoForm.get('repartidorId')?.value || null,
       descripcion: this.pedidoForm.get('descripcion')?.value,
-      estado: this.pedidoForm.get('estado')?.value,
-      direccionOrigen: this.pedidoForm.get('direccionOrigen')?.value,
-      direccionDestino: this.pedidoForm.get('direccionDestino')?.value,
-      distanciaKm: this.distanciaCalculada,
-      costo: this.costoCalculado,
-      latOrigen: this.origenCoordenadas.lat,
-      lonOrigen: this.origenCoordenadas.lng,
-      latDestino: this.destinoCoordenadas.lat,
-      lonDestino: this.destinoCoordenadas.lng
+      estado: this.pedidoForm.get('estado')?.value
     };
 
-    console.log('📦 Enviando pedido:', pedidoData);
+    // Para CLIENTES: enviamos su ubicación como origen y destino temporales
+    if (this.esCliente) {
+      // Enviamos la ubicación del cliente en el formato que espera el backend
+      const ubicacionTexto = `Cliente - Lat: ${this.ubicacionClienteSeleccionada!.lat.toFixed(6)}, Lng: ${this.ubicacionClienteSeleccionada!.lng.toFixed(6)}`;
+      
+      pedidoData.direccionOrigen = ubicacionTexto;
+      pedidoData.direccionDestino = ubicacionTexto;
+      pedidoData.latOrigen = this.ubicacionClienteSeleccionada!.lat;
+      pedidoData.lonOrigen = this.ubicacionClienteSeleccionada!.lng;
+      pedidoData.latDestino = this.ubicacionClienteSeleccionada!.lat;
+      pedidoData.lonDestino = this.ubicacionClienteSeleccionada!.lng;
+      pedidoData.distanciaKm = 0.01; // 🔥 Valor mínimo positivo (el backend calculará la ruta real)
+      pedidoData.costo = 1000; // 🔥 Costo mínimo positivo (el backend calculará el costo real)
+      pedidoData.repartidorId = null; // Sin asignar inicialmente
+      
+      console.log('📦 DATOS DEL PEDIDO A ENVIAR:', JSON.stringify(pedidoData, null, 2));
+      
+      // El backend debe calcular después: Repartidor → Restaurante → Cliente
+      console.log('📦 Enviando pedido de cliente (con su ubicación):', pedidoData);
+    } else {
+      // Para ADMIN: enviamos origen y destino completos
+      pedidoData.repartidorId = this.pedidoForm.get('repartidorId')?.value || null;
+      pedidoData.direccionOrigen = this.pedidoForm.get('direccionOrigen')?.value;
+      pedidoData.direccionDestino = this.pedidoForm.get('direccionDestino')?.value;
+      pedidoData.distanciaKm = this.distanciaCalculada;
+      pedidoData.costo = this.costoCalculado;
+      pedidoData.latOrigen = this.origenCoordenadas!.lat;
+      pedidoData.lonOrigen = this.origenCoordenadas!.lng;
+      pedidoData.latDestino = this.destinoCoordenadas!.lat;
+      pedidoData.lonDestino = this.destinoCoordenadas!.lng;
+      
+      console.log('📦 Enviando pedido de admin:', pedidoData);
+    }
 
     this.pedidoService.crear(pedidoData).subscribe({
       next: (response: any) => {
@@ -718,20 +784,19 @@ export class CrearPedidos implements OnInit {
         this.cargando = false;
         this.mostrarExito('¡Pedido creado exitosamente! Redirigiendo...');
         
-        // ✅ Redirigir después de 2 segundos
+        // Redirigir después de 2 segundos
         setTimeout(() => {
           if (this.esCliente) {
-            // Los clientes van a su dashboard
             this.router.navigate(['/dashboard']);
           } else {
-            // Los admins van a la lista de pedidos
             this.router.navigate(['/pedidos/listar-pedidos']);
           }
         }, 2000);
       },
       error: (err: any) => {
         console.error('❌ Error al crear pedido:', err);
-        this.mostrarError(err.error?.mensaje || 'Error al crear el pedido');
+        console.error('❌ Detalles del error:', JSON.stringify(err, null, 2));
+        this.mostrarError(err.error?.mensaje || err.error?.message || 'Error al crear el pedido');
         this.cargando = false;
       }
     });
@@ -742,14 +807,12 @@ export class CrearPedidos implements OnInit {
   // ========================================
 
   /**
-   * Volver atrás (al dashboard o lista de pedidos)
+   * Volver atrás
    */
   volverAtras(): void {
     if (this.esCliente) {
-      // Los clientes siempre vuelven a su dashboard
       this.router.navigate(['/dashboard']);
     } else {
-      // Los admins vuelven a la lista de pedidos si ya crearon uno, sino al dashboard
       if (this.pedidoCreado) {
         this.router.navigate(['/pedidos/listar-pedidos']);
       } else {
@@ -785,3 +848,5 @@ export class CrearPedidos implements OnInit {
   get direccionOrigen() { return this.pedidoForm.get('direccionOrigen'); }
   get direccionDestino() { return this.pedidoForm.get('direccionDestino'); }
 }
+
+// FIN DEL ARCHIVO
