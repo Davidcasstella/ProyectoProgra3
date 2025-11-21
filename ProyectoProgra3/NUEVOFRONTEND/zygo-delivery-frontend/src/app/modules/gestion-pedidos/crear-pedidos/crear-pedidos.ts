@@ -15,6 +15,10 @@ import { EstadoPedido } from '../../../models/pedido.model';
 import { Coordenadas } from '../../../models/ruta.model';
 import { SelectorUbicacionComponent } from '../../gestion-mapas/selector-ubicacion/selector-ubicacion';
 import { RutaService } from '../../../services/ruta.service';
+import { HttpClient } from '@angular/common/http';
+import { environment } from '../../../../environments/environment';
+
+
 
 @Component({
   selector: 'app-crear-pedidos',
@@ -84,6 +88,10 @@ export class CrearPedidos implements OnInit {
   error: string | null = null;
   exito: string | null = null;
   pedidoCreado = false;
+  private pollingInterval?: any;
+  private intentosPolling = 0;
+  private readonly MAX_INTENTOS_POLLING = 15;
+  private pedidoIdCreado: number | null = null;
 
   constructor(
     private fb: FormBuilder,
@@ -94,7 +102,9 @@ export class CrearPedidos implements OnInit {
     private rutaService: RutaService,
     private authService: AuthService,
     private router: Router,
-    private cdr: ChangeDetectorRef
+    private cdr: ChangeDetectorRef,
+    private http: HttpClient
+    
   ) {}
 
   ngOnInit(): void {
@@ -691,116 +701,79 @@ export class CrearPedidos implements OnInit {
   // 📤 ENVÍO DEL FORMULARIO
   // ========================================
 
-  /**
-   * ✅ ACTUALIZADO: Enviar formulario
-   */
-  onSubmit(): void {
-    console.log('📤 Intentando enviar formulario...');
+ onSubmit(): void {
+  console.log('📤 Intentando enviar formulario...');
 
-    if (this.pedidoForm.invalid) {
-      this.mostrarError('Por favor completa todos los campos requeridos');
-      Object.keys(this.pedidoForm.controls).forEach(key => {
-        const control = this.pedidoForm.get(key);
-        if (control?.invalid) {
-          control.markAsTouched();
-        }
-      });
+  if (this.pedidoForm.invalid) {
+    this.mostrarError('Por favor completa todos los campos requeridos');
+    return;
+  }
+
+  if (this.esCliente) {
+    if (!this.ubicacionClienteSeleccionada || !this.ubicacionGuardada) {
+      this.mostrarError('⚠️ Debes guardar tu ubicación antes de crear el pedido');
       return;
     }
+  }
 
-    // Validación específica para CLIENTES
-    if (this.esCliente) {
-      if (!this.ubicacionClienteSeleccionada) {
-        this.mostrarError('Por favor selecciona tu ubicación en el mapa');
-        return;
-      }
+  this.cargando = true;
+  this.error = null;
 
-      if (!this.ubicacionGuardada) {
-        this.mostrarError('⚠️ Debes guardar tu ubicación antes de crear el pedido');
-        return;
-      }
-    } else {
-      // Validación para ADMIN
-      if (!this.origenCoordenadas || !this.destinoCoordenadas) {
-        this.mostrarError('Por favor selecciona origen y destino en el mapa');
-        return;
-      }
+  const pedidoData: any = {
+    clienteId: this.pedidoForm.get('clienteId')?.value,
+    descripcion: this.pedidoForm.get('descripcion')?.value,
+    estado: 'PENDIENTE'
+  };
 
-      if (!this.distanciaCalculada || !this.costoCalculado) {
-        this.mostrarError('Por favor espera a que se calcule la ruta');
-        return;
-      }
-    }
-
-    this.cargando = true;
-    this.error = null;
-
-    // 🔥 CORREGIDO: Crear objeto con datos básicos
-    const pedidoData: any = {
-      clienteId: this.pedidoForm.get('clienteId')?.value,
-      descripcion: this.pedidoForm.get('descripcion')?.value,
-      estado: this.pedidoForm.get('estado')?.value
-    };
-
-    // Para CLIENTES: enviamos su ubicación como origen y destino temporales
-    if (this.esCliente) {
-      // Enviamos la ubicación del cliente en el formato que espera el backend
-      const ubicacionTexto = `Cliente - Lat: ${this.ubicacionClienteSeleccionada!.lat.toFixed(6)}, Lng: ${this.ubicacionClienteSeleccionada!.lng.toFixed(6)}`;
-      
-      pedidoData.direccionOrigen = ubicacionTexto;
-      pedidoData.direccionDestino = ubicacionTexto;
-      pedidoData.latOrigen = this.ubicacionClienteSeleccionada!.lat;
-      pedidoData.lonOrigen = this.ubicacionClienteSeleccionada!.lng;
-      pedidoData.latDestino = this.ubicacionClienteSeleccionada!.lat;
-      pedidoData.lonDestino = this.ubicacionClienteSeleccionada!.lng;
-      pedidoData.distanciaKm = 0.01; // 🔥 Valor mínimo positivo (el backend calculará la ruta real)
-      pedidoData.costo = 1000; // 🔥 Costo mínimo positivo (el backend calculará el costo real)
-      pedidoData.repartidorId = null; // Sin asignar inicialmente
-      
-      console.log('📦 DATOS DEL PEDIDO A ENVIAR:', JSON.stringify(pedidoData, null, 2));
-      
-      // El backend debe calcular después: Repartidor → Restaurante → Cliente
-      console.log('📦 Enviando pedido de cliente (con su ubicación):', pedidoData);
-    } else {
-      // Para ADMIN: enviamos origen y destino completos
-      pedidoData.repartidorId = this.pedidoForm.get('repartidorId')?.value || null;
-      pedidoData.direccionOrigen = this.pedidoForm.get('direccionOrigen')?.value;
-      pedidoData.direccionDestino = this.pedidoForm.get('direccionDestino')?.value;
-      pedidoData.distanciaKm = this.distanciaCalculada;
-      pedidoData.costo = this.costoCalculado;
-      pedidoData.latOrigen = this.origenCoordenadas!.lat;
-      pedidoData.lonOrigen = this.origenCoordenadas!.lng;
-      pedidoData.latDestino = this.destinoCoordenadas!.lat;
-      pedidoData.lonDestino = this.destinoCoordenadas!.lng;
-      
-      console.log('📦 Enviando pedido de admin:', pedidoData);
-    }
-
+  if (this.esCliente) {
+    // ✅ SOLO ENVIAR UBICACIÓN DEL CLIENTE
+    pedidoData.latOrigen = this.ubicacionClienteSeleccionada!.lat;
+    pedidoData.lonOrigen = this.ubicacionClienteSeleccionada!.lng;
+    pedidoData.distanciaKm = 0.01;
+    pedidoData.costo = 1000;
+    
+    console.log('📧 Datos del pedido del cliente:', JSON.stringify(pedidoData, null, 2));
+    
+    // 🆕 CREAR PEDIDO E INICIAR POLLING
+    this.http.post<any>(`${environment.apiUrl}/pedidos/crear-pedido-cliente`, pedidoData)
+      .subscribe({
+        next: (response: any) => {
+          console.log('✅ Pedido creado:', response);
+          
+          this.pedidoIdCreado = response.id;
+          
+          // 🆕 Mostrar mensaje de "calculando ruta..."
+          this.mostrarExito('✅ ¡Pedido creado! Calculando la mejor ruta...');
+          
+          // 🆕 INICIAR POLLING para verificar cuando la ruta esté lista
+          this.iniciarPollingRuta(response.id);
+        },
+        error: (err: any) => {
+          console.error('❌ Error:', err);
+          this.cargando = false;
+          this.mostrarError(err.error?.error || err.error?.mensaje || 'Error al crear el pedido');
+        }
+      });
+  } else {
+    // Lógica para admin (sin cambios)
     this.pedidoService.crear(pedidoData).subscribe({
       next: (response: any) => {
-        console.log('✅ Pedido creado exitosamente:', response);
-        
-        this.pedidoCreado = true;
+        console.log('✅ Pedido creado:', response);
         this.cargando = false;
-        this.mostrarExito('¡Pedido creado exitosamente! Redirigiendo...');
+        this.mostrarExito('¡Pedido creado exitosamente!');
         
-        // Redirigir después de 2 segundos
         setTimeout(() => {
-          if (this.esCliente) {
-            this.router.navigate(['/dashboard']);
-          } else {
-            this.router.navigate(['/pedidos/listar-pedidos']);
-          }
+          this.router.navigate(['/pedidos/listar-pedidos']);
         }, 2000);
       },
       error: (err: any) => {
-        console.error('❌ Error al crear pedido:', err);
-        console.error('❌ Detalles del error:', JSON.stringify(err, null, 2));
-        this.mostrarError(err.error?.mensaje || err.error?.message || 'Error al crear el pedido');
+        console.error('❌ Error:', err);
         this.cargando = false;
+        this.mostrarError(err.error?.error || 'Error al crear el pedido');
       }
     });
   }
+}
 
   // ========================================
   // 🎨 UTILIDADES
@@ -847,6 +820,115 @@ export class CrearPedidos implements OnInit {
   get estado() { return this.pedidoForm.get('estado'); }
   get direccionOrigen() { return this.pedidoForm.get('direccionOrigen'); }
   get direccionDestino() { return this.pedidoForm.get('direccionDestino'); }
+
+
+  /**
+ * 🆕 Polling para verificar si la ruta ya fue calculada
+ */
+private iniciarPollingRuta(pedidoId: number): void {
+  console.log('🔄 Iniciando polling para pedido:', pedidoId);
+  
+  this.intentosPolling = 0;
+  
+  // Detener polling anterior si existe
+  if (this.pollingInterval) {
+    clearInterval(this.pollingInterval);
+  }
+
+  // Verificar cada 2 segundos
+  this.pollingInterval = setInterval(() => {
+    this.intentosPolling++;
+    console.log(`🔍 Intento ${this.intentosPolling}/${this.MAX_INTENTOS_POLLING} - Verificando pedido ${pedidoId}`);
+
+    this.pedidoService.obtenerPorId(pedidoId).subscribe({
+      next: (pedido: any) => {
+        console.log('📦 Estado actual del pedido:', {
+          id: pedido.id,
+          estado: pedido.estado,
+          tieneRestaurante: !!pedido.restaurante,
+          tieneRepartidor: !!pedido.repartidor,
+          tieneNodoCliente: !!pedido.nodoCliente
+        });
+        
+        // ✅ Verificar si el pedido ya tiene ruta calculada
+        const tieneRutaCompleta = 
+          pedido.restaurante && 
+          pedido.repartidor && 
+          pedido.nodoCliente &&
+          (pedido.estado === 'ASIGNADO' || pedido.estado === 'EN_CAMINO');
+        
+        if (tieneRutaCompleta) {
+          console.log('🎉 ¡Ruta calculada! Pedido completo:', pedido);
+          this.detenerPolling();
+          
+          // Mostrar éxito con detalles
+          this.mostrarExito(
+            `✅ ¡Pedido creado exitosamente!\n\n` +
+            `📍 Restaurante: ${pedido.restaurante?.nombre || 'Asignado'}\n` +
+            `🚴 Repartidor: ${pedido.repartidor?.nombre || 'Asignado'}\n` +
+            `📏 Distancia: ${pedido.distanciaKm?.toFixed(2) || '0'} km\n` +
+            `💵 Costo: $${pedido.costo?.toLocaleString('es-CO') || '0'}`
+          );
+          
+          this.cargando = false;
+          
+          // Redirigir después de 3 segundos
+          setTimeout(() => {
+            this.router.navigate(['/dashboard']);
+          }, 3000);
+        } 
+        else if (this.intentosPolling >= this.MAX_INTENTOS_POLLING) {
+          // ⏰ Timeout: la ruta está tardando demasiado
+          console.warn('⏰ Timeout: La asignación está tardando más de lo esperado');
+          this.detenerPolling();
+          
+          this.mostrarExito(
+            '✅ Pedido creado correctamente.\n\n' +
+            'La asignación de restaurante y repartidor se está procesando en segundo plano.\n\n' +
+            'Puedes ver el estado en tu panel de pedidos.'
+          );
+          
+          this.cargando = false;
+          
+          setTimeout(() => {
+            this.router.navigate(['/dashboard']);
+          }, 3000);
+        }
+        // Si no, continuar esperando...
+      },
+      error: (error: any) => {
+        console.error('❌ Error verificando pedido:', error);
+        
+        // Si hay error y ya intentamos varias veces, detenemos
+        if (this.intentosPolling >= 5) {
+          this.detenerPolling();
+          this.mostrarError('⚠️ El pedido se creó pero hubo un problema verificando la ruta');
+          this.cargando = false;
+        }
+      }
+    });
+    
+  }, 2000); // Verificar cada 2 segundos
+}
+
+/**
+ * 🆕 Detener polling
+ */
+private detenerPolling(): void {
+  if (this.pollingInterval) {
+    clearInterval(this.pollingInterval);
+    this.pollingInterval = undefined;
+    console.log('🛑 Polling detenido');
+  }
+}
+
+/**
+ * 🔧 MODIFICAR ngOnDestroy() existente - agregar esta línea al inicio
+ */
+ngOnDestroy(): void {
+  this.detenerPolling(); // 🆕 Agregar esta línea
+  // ... resto del código existente si lo tienes ...
+}
 }
 
 // FIN DEL ARCHIVO

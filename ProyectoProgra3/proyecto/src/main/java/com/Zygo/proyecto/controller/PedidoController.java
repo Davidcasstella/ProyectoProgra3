@@ -2,14 +2,18 @@ package com.Zygo.proyecto.controller;
 
 import com.Zygo.proyecto.dto.PedidoDTO;
 import com.Zygo.proyecto.model.Pedido.EstadoPedido;
+import com.Zygo.proyecto.model.Usuario;
 import com.Zygo.proyecto.service.PedidoService;
 import com.Zygo.proyecto.service.AsignacionService;
+import com.Zygo.proyecto.repository.UsuarioRepository;
 import jakarta.validation.Valid;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.HashMap;
@@ -28,6 +32,9 @@ public class PedidoController {
     private PedidoService pedidoService;
     
     @Autowired
+    private UsuarioRepository usuarioRepository;
+    
+    @Autowired
     private AsignacionService asignacionService;
     
     /**
@@ -38,20 +45,6 @@ public class PedidoController {
      * - Restaurante más cercano
      * - Repartidor disponible más cercano
      * - Calcula ruta óptima
-     * 
-     * Ejemplo:
-     * POST /api/pedidos/crear-con-asignacion
-     * {
-     *   "clienteId": 1,
-     *   "descripcion": "Pizza mediana + bebida",
-     *   "direccionOrigen": "Calle 10 #5-20",
-     *   "direccionDestino": "Carrera 3 #8-15",
-     *   "latOrigen": 5.73,
-     *   "lonOrigen": -72.93,
-     *   "latDestino": 5.74,
-     *   "lonDestino": -72.92,
-     *   "distanciaKm": 1.5
-     * }
      */
     @PostMapping("/crear-con-asignacion")
     public ResponseEntity<Map<String, Object>> crearPedidoConAsignacion(
@@ -103,11 +96,112 @@ public class PedidoController {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(error);
         }
     }
+    /**
+ * 🎯 CREAR PEDIDO PARA CLIENTE
+ * Solo recibe ubicación del cliente
+ * El backend busca todo lo demás
+ */
+
+@PostMapping("/crear-pedido-cliente")
+public ResponseEntity<Map<String, Object>> crearPedidoCliente(
+        @Valid @RequestBody PedidoDTO pedidoDTO) {
+    
+    log.info("🎯 POST /api/pedidos/crear-pedido-cliente");
+    log.info("📍 Cliente ubicado en: ({}, {})", 
+             pedidoDTO.getLatOrigen(), pedidoDTO.getLonOrigen());
+    
+    try {
+        long tiempoInicio = System.currentTimeMillis();
+        
+        // ✅ IMPORTANTE: Asegurarse que latDestino/lonDestino sean iguales a latOrigen/lonOrigen
+        // (El AsignacionService los actualizará después con la ubicación del restaurante)
+        if (pedidoDTO.getLatDestino() == null) {
+            pedidoDTO.setLatDestino(pedidoDTO.getLatOrigen());
+        }
+        if (pedidoDTO.getLonDestino() == null) {
+            pedidoDTO.setLonDestino(pedidoDTO.getLonOrigen());
+        }
+        
+        // PASO 1: Crear pedido básico (solo con ubicación cliente)
+        PedidoDTO pedidoCreado = pedidoService.crearPedido(pedidoDTO);
+        log.info("✅ Pedido creado con ID: {}", pedidoCreado.getId());
+        
+        // PASO 2: INICIAR ASIGNACIÓN EN HILO SEPARADO
+        log.info("🔄 Iniciando asignación automática en HILO SEPARADO...");
+        
+        // ✅ Llamar al método correcto con los 3 parámetros
+        asignacionService.asignarPedidoClienteAsync(
+            pedidoCreado.getId(),
+            pedidoDTO.getLatOrigen(),
+            pedidoDTO.getLonOrigen()
+        );
+        
+        log.info("✅ Método async invocado correctamente");
+        
+        long duracion = System.currentTimeMillis() - tiempoInicio;
+        
+        // PASO 3: RESPUESTA INMEDIATA (sin esperar asignación)
+        Map<String, Object> respuesta = new HashMap<>();
+        respuesta.put("pedido", pedidoCreado);
+        respuesta.put("estado", "CREADO_Y_EN_PROCESAMIENTO");
+        respuesta.put("mensaje", "Tu pedido se está procesando. Te notificaremos cuando el repartidor esté asignado.");
+        respuesta.put("id", pedidoCreado.getId());
+        respuesta.put("clienteId", pedidoDTO.getClienteId());
+        respuesta.put("tiempoMs", duracion);
+        
+        Map<String, Object> siguientosPasos = new HashMap<>();
+        siguientosPasos.put("paso1", "🍽️ Buscando restaurante más cercano...");
+        siguientosPasos.put("paso2", "🚴 Buscando repartidor disponible...");
+        siguientosPasos.put("paso3", "🗺️ Calculando rutas óptimas...");
+        siguientosPasos.put("paso4", "📱 Te enviaremos una notificación");
+        respuesta.put("siguientosPasos", siguientosPasos);
+        
+        return ResponseEntity.status(HttpStatus.CREATED).body(respuesta);
+        
+    } catch (Exception e) {
+        log.error("❌ Error creando pedido cliente: {}", e.getMessage(), e);
+        
+        Map<String, Object> error = new HashMap<>();
+        error.put("error", e.getMessage());
+        error.put("estado", "ERROR");
+        error.put("timestamp", System.currentTimeMillis());
+        
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(error);
+    }
+}
+    
+    /**
+     * 📋 LISTAR MIS PEDIDOS (Solo Cliente)
+     * IMPORTANTE: Este endpoint debe ir ANTES de /{id}
+     */
+    @GetMapping("/mis-pedidos")
+    public ResponseEntity<List<PedidoDTO>> listarMisPedidos() {
+        log.info("📋 GET /api/pedidos/mis-pedidos");
+        
+        try {
+            // Obtener usuario autenticado
+            Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+            String email = authentication.getName();
+            
+            // Buscar el usuario por email
+            Usuario usuario = usuarioRepository.findByEmail(email)
+                    .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
+            
+            // Obtener pedidos del cliente
+            List<PedidoDTO> misPedidos = pedidoService.obtenerPedidosPorCliente(usuario.getId());
+            
+            log.info("✅ Cliente {} tiene {} pedidos", usuario.getNombre(), misPedidos.size());
+            
+            return ResponseEntity.ok(misPedidos);
+            
+        } catch (Exception e) {
+            log.error("❌ Error obteniendo mis pedidos: {}", e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        }
+    }
     
     /**
      * 📊 ESTADÍSTICAS DE ASIGNACIÓN
-     * 
-     * Muestra estado de restaurantes y repartidores
      */
     @GetMapping("/estadisticas/asignacion")
     public ResponseEntity<Map<String, Object>> obtenerEstadisticasAsignacion() {
@@ -134,6 +228,7 @@ public class PedidoController {
     
     /**
      * ✅ OBTENER PEDIDO POR ID
+     * IMPORTANTE: Este debe ir DESPUÉS de /mis-pedidos
      */
     @GetMapping("/{id}")
     public ResponseEntity<PedidoDTO> obtenerPedido(@PathVariable Long id) {
@@ -159,7 +254,7 @@ public class PedidoController {
     }
     
     /**
-     * 📍 HISTORIAL CON COORDENADAS
+     * 📜 HISTORIAL CON COORDENADAS
      */
     @GetMapping("/historial")
     public ResponseEntity<List<PedidoDTO>> obtenerHistorial(

@@ -43,12 +43,14 @@ public class Edge {
     @Column(nullable = false)
     private Boolean activo = true;
     
+    // ✅ ENUM ACTUALIZADO CON ACCESO_RESTAURANTE
     public enum TipoCalle {
         AVENIDA_PRINCIPAL,
         CALLE_SECUNDARIA,
         CALLEJON,
         CICLOVIA,
-        PEATONAL
+        PEATONAL,
+        ACCESO_RESTAURANTE  // ← NUEVO: Para conexiones de restaurantes al grafo
     }
     
     // Constructores

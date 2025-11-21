@@ -5,16 +5,17 @@ import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 import * as L from 'leaflet';
 import { LugarService } from '../../../services/lugar.service';
-import { UsuarioService } from '../../../services/usuario.service'; // ✅ NUEVO
-import { AuthService } from '../../../services/auth.service'; // ✅ NUEVO
+import { UsuarioService } from '../../../services/usuario.service';
+import { AuthService } from '../../../services/auth.service';
+import { HistorialRutaService, HistorialRutaDTO } from '../../../services/historial-ruta.service';
 import { RutaOptima, Coordenadas } from '../../../models/ruta.model';
-import { FormsModule } from '@angular/forms'; // ✅ AGREGAR ESTE IMPORT
+import { FormsModule } from '@angular/forms';
+import { HistorialRutasSidebarComponent } from '../../../components/historial-rutas-sidebar/historial-rutas-sidebar';
 
 @Component({
   selector: 'app-selector-ubicacion',
   standalone: true,
-  
-  imports: [CommonModule, FormsModule], // ✅ AGREGAR FormsModule AQUÍ
+  imports: [CommonModule, FormsModule, HistorialRutasSidebarComponent],
   templateUrl: './selector-ubicacion.html',
   styleUrls: ['./selector-ubicacion.css']
 })
@@ -30,11 +31,14 @@ export class SelectorUbicacionComponent implements OnInit, OnDestroy {
   // Marcadores
   private marcadorOrigen?: L.Marker;
   private marcadorDestino?: L.Marker;
-  private marcadoresRestaurantes: L.Marker[] = []; // ✅ NUEVO
-  private marcadoresRepartidores: L.Marker[] = []; // ✅ NUEVO
+  private marcadoresRestaurantes: L.Marker[] = [];
+  private marcadoresRepartidores: L.Marker[] = [];
+  private marcadoresPuntosClave: L.Marker[] = [];
   
-  // Polyline de la ruta
+  // Polylines de rutas
   private polylineRuta?: L.Polyline;
+  private polylinePickup?: L.Polyline; // 🆕 Ruta PICKUP
+  private polylineDelivery?: L.Polyline; // 🆕 Ruta DELIVERY
   
   // Estado
   origenSeleccionado: Coordenadas | null = null;
@@ -43,12 +47,15 @@ export class SelectorUbicacionComponent implements OnInit, OnDestroy {
   calculandoRuta = false;
   errorMensaje = '';
   
-  // ✅ NUEVO: Control de visibilidad de capas
+  // 🆕 Estado del historial
+  rutaHistorialActiva: HistorialRutaDTO | null = null;
+  
+  // Control de visibilidad de capas
   mostrarRestaurantes = true;
   mostrarRepartidores = true;
   esAdmin = false;
   
-  // ✅ NUEVO: Datos
+  // Datos
   restaurantes: any[] = [];
   repartidores: any[] = [];
   
@@ -71,7 +78,6 @@ export class SelectorUbicacionComponent implements OnInit, OnDestroy {
     shadowSize: [41, 41]
   });
   
-  // ✅ NUEVO: Iconos para restaurantes y repartidores
   private iconoRestaurante = L.icon({
     iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-orange.png',
     shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-shadow.png',
@@ -92,20 +98,19 @@ export class SelectorUbicacionComponent implements OnInit, OnDestroy {
 
   constructor(
     private lugarService: LugarService,
-    private usuarioService: UsuarioService, // ✅ NUEVO
-    private authService: AuthService, // ✅ NUEVO
+    private usuarioService: UsuarioService,
+    private authService: AuthService,
+    private historialService: HistorialRutaService, // 🆕
     private cdr: ChangeDetectorRef,
     private router: Router
   ) {}
 
   ngOnInit(): void {
-    // ✅ NUEVO: Verificar si es admin
     this.verificarUsuario();
     
     setTimeout(() => {
       this.inicializarMapa();
       
-      // ✅ NUEVO: Cargar restaurantes y repartidores si es admin
       if (this.esAdmin) {
         this.cargarRestaurantes();
         this.cargarRepartidores();
@@ -119,7 +124,6 @@ export class SelectorUbicacionComponent implements OnInit, OnDestroy {
     }
   }
   
-  // ✅ NUEVO: Verificar tipo de usuario
   private verificarUsuario(): void {
     const usuario = this.authService.getUsuarioActual();
     this.esAdmin = usuario?.tipo === 'ADMIN';
@@ -151,30 +155,20 @@ export class SelectorUbicacionComponent implements OnInit, OnDestroy {
   }
   
   private cargarRestaurantes(): void {
-  console.log('🍽️ Cargando restaurantes...');
-  console.log('🔗 URL del servicio:', this.lugarService); // ✅ NUEVO LOG
+    console.log('🍽️ Cargando restaurantes...');
+    
+    this.lugarService.obtenerRestaurantes().subscribe({
+      next: (restaurantes) => {
+        console.log('✅ Restaurantes recibidos:', restaurantes);
+        this.restaurantes = restaurantes;
+        setTimeout(() => this.mostrarMarcadoresRestaurantes(), 500);
+      },
+      error: (error) => {
+        console.error('❌ Error cargando restaurantes:', error);
+      }
+    });
+  }
   
-  this.lugarService.obtenerRestaurantes().subscribe({
-    next: (restaurantes) => {
-      console.log('✅ Restaurantes recibidos:', restaurantes);
-      console.log('📊 Cantidad:', restaurantes.length); // ✅ NUEVO LOG
-      this.restaurantes = restaurantes;
-      
-      // ✅ FORZAR LA VISUALIZACIÓN
-      setTimeout(() => {
-        this.mostrarMarcadoresRestaurantes();
-      }, 500);
-    },
-    error: (error) => {
-      console.error('❌ Error cargando restaurantes:', error);
-      console.error('❌ Detalles del error:', error.message); // ✅ NUEVO LOG
-      console.error('❌ Status:', error.status); // ✅ NUEVO LOG
-    }
-  });
-}
-
-  
-  // ✅ NUEVO: Cargar repartidores desde el backend
   private cargarRepartidores(): void {
     console.log('🚴 Cargando repartidores...');
     
@@ -190,9 +184,7 @@ export class SelectorUbicacionComponent implements OnInit, OnDestroy {
     });
   }
   
-  // ✅ NUEVO: Mostrar marcadores de restaurantes en el mapa
   private mostrarMarcadoresRestaurantes(): void {
-    // Limpiar marcadores previos
     this.marcadoresRestaurantes.forEach(m => m.remove());
     this.marcadoresRestaurantes = [];
     
@@ -218,9 +210,7 @@ export class SelectorUbicacionComponent implements OnInit, OnDestroy {
     console.log(`✅ ${this.marcadoresRestaurantes.length} restaurantes mostrados en el mapa`);
   }
   
-  // ✅ NUEVO: Mostrar marcadores de repartidores en el mapa
   private mostrarMarcadoresRepartidores(): void {
-    // Limpiar marcadores previos
     this.marcadoresRepartidores.forEach(m => m.remove());
     this.marcadoresRepartidores = [];
     
@@ -250,7 +240,6 @@ export class SelectorUbicacionComponent implements OnInit, OnDestroy {
     console.log(`✅ ${this.marcadoresRepartidores.length} repartidores mostrados en el mapa`);
   }
   
-  // ✅ NUEVO: Toggle visibilidad de restaurantes
   toggleRestaurantes(): void {
     this.mostrarRestaurantes = !this.mostrarRestaurantes;
     
@@ -262,7 +251,6 @@ export class SelectorUbicacionComponent implements OnInit, OnDestroy {
     }
   }
   
-  // ✅ NUEVO: Toggle visibilidad de repartidores
   toggleRepartidores(): void {
     this.mostrarRepartidores = !this.mostrarRepartidores;
     
@@ -283,8 +271,6 @@ export class SelectorUbicacionComponent implements OnInit, OnDestroy {
     };
 
     if (this.modoSeleccionSimple) {
-      console.log('📍 Modo simple - Seleccionando ubicación...');
-      
       if (this.marcadorOrigen) {
         this.marcadorOrigen.remove();
       }
@@ -295,22 +281,17 @@ export class SelectorUbicacionComponent implements OnInit, OnDestroy {
         .bindPopup('📍 Ubicación seleccionada')
         .openPopup();
 
-      console.log('✅ Emitiendo ubicación:', coords);
       this.ubicacionSeleccionada.emit(coords);
       return;
     }
 
-    // MODO NORMAL (origen y destino para calcular rutas)
     if (!this.origenSeleccionado) {
-      console.log('🟢 Estableciendo origen...');
       this.establecerOrigen(coords);
     } 
     else if (!this.destinoSeleccionado) {
-      console.log('🎯 Estableciendo destino...');
       this.establecerDestino(coords);
     } 
     else {
-      console.log('🔄 Reiniciando con nuevo origen...');
       this.limpiarMapa();
       this.establecerOrigen(coords);
     }
@@ -419,6 +400,281 @@ export class SelectorUbicacionComponent implements OnInit, OnDestroy {
     });
   }
 
+// 🆕 MÉTODO PRINCIPAL: Visualizar ruta del historial
+visualizarRutaHistorial(ruta: HistorialRutaDTO): void {
+  console.log('🎨 Visualizando ruta del historial:', ruta);
+  
+  // Limpiar mapa actual
+  this.limpiarRutasHistorial();
+  
+  // Guardar ruta activa
+  this.rutaHistorialActiva = ruta;
+  
+  // 🆕 Cargar AMBAS rutas del mismo pedido (PICKUP + DELIVERY)
+  this.historialService.obtenerPorPedido(ruta.pedidoId).subscribe({
+    next: (response: any) => {
+      // ✅ El backend devuelve { historial: [...] }
+      const rutas = response.historial || response;
+      console.log('✅ Rutas del pedido recibidas:', rutas);
+      
+      // Dibujar cada ruta
+      rutas.forEach((r: HistorialRutaDTO) => {
+        this.dibujarRutaHistorial(r);
+      });
+      
+      // Ajustar el mapa para mostrar todas las rutas
+      this.ajustarVistaParaRutas();
+    },
+    error: (err) => {
+      console.error('❌ Error obteniendo rutas del pedido:', err);
+      // Si falla, dibujar solo la ruta actual
+      this.dibujarRutaHistorial(ruta);
+    }
+  });
+}
+
+// 🆕 Ajustar vista para mostrar todas las rutas
+private ajustarVistaParaRutas(): void {
+  const bounds = L.latLngBounds([]);
+  
+  if (this.polylinePickup) {
+    bounds.extend(this.polylinePickup.getBounds());
+  }
+  if (this.polylineDelivery) {
+    bounds.extend(this.polylineDelivery.getBounds());
+  }
+  
+  if (bounds.isValid()) {
+    this.map.fitBounds(bounds, { padding: [50, 50] });
+  }
+}
+
+ // 🆕 Dibujar ruta del historial con marcadores
+private dibujarRutaHistorial(ruta: HistorialRutaDTO): void {
+  // ✅ FIX: Usar nodosRutaJson
+  let nodos: any = ruta.nodosRutaJson;
+  
+  if (typeof nodos === 'string') {
+    try {
+      nodos = JSON.parse(nodos);
+    } catch (e) {
+      console.error('Error parseando nodos:', e);
+      return;
+    }
+  }
+
+  if (!nodos || nodos.length === 0) {
+    console.warn('⚠️ No hay nodos para dibujar');
+    return;
+  }
+
+  console.log('📍 Nodos a dibujar:', nodos.length);
+
+  // Convertir nodos a coordenadas
+  const coordenadas: L.LatLngExpression[] = nodos.map((nodo: any) => 
+    [nodo.latitud, nodo.longitud] as L.LatLngExpression
+  );
+
+  // Determinar color según tipo de ruta
+  const esPickup = ruta.tipoCalculo === 'RUTA_PICKUP';
+  const color = esPickup ? '#3b82f6' : '#10b981';
+  const label = esPickup ? '📦 PICKUP' : '🚚 DELIVERY';
+
+  // Crear polyline
+  const polyline = L.polyline(coordenadas, {
+    color: color,
+    weight: 6,
+    opacity: 0.8,
+    dashArray: esPickup ? '10, 5' : undefined
+  }).addTo(this.map);
+
+  // Guardar referencia
+  if (esPickup) {
+    this.polylinePickup = polyline;
+  } else {
+    this.polylineDelivery = polyline;
+  }
+
+  // Agregar popup a la línea
+  polyline.bindPopup(`
+    <div style="text-align: center;">
+      <strong>${label}</strong><br>
+      <small>📏 ${this.formatearDistancia(ruta.distanciaTotalKm)}</small><br>
+      <small>⏱️ ${ruta.tiempoEstimadoMin} min</small>
+    </div>
+  `);
+
+  // 🆕 AGREGAR MARCADORES DE PUNTOS CLAVE
+  this.agregarMarcadoresPuntosClave(ruta, nodos, esPickup);
+
+  // Ajustar vista del mapa
+  this.map.fitBounds(polyline.getBounds(), {
+    padding: [50, 50]
+  });
+
+  console.log(`✅ Ruta ${label} dibujada con ${nodos.length} nodos`);
+}
+
+// 🆕 Marcadores para puntos clave
+
+
+// 🆕 Agregar marcadores de puntos clave (Restaurante, Repartidor, Cliente)
+private agregarMarcadoresPuntosClave(ruta: HistorialRutaDTO, nodos: any[], esPickup: boolean): void {
+  
+  // Icono personalizado para el restaurante (naranja)
+  const iconoRestauranteMarcador = L.divIcon({
+    className: 'custom-marker',
+    html: `<div style="
+      background: #f97316;
+      color: white;
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 18px;
+      border: 3px solid white;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.3);
+    ">🍽️</div>`,
+    iconSize: [36, 36],
+    iconAnchor: [18, 18]
+  });
+
+  // Icono para el repartidor (azul)
+  const iconoRepartidorMarcador = L.divIcon({
+    className: 'custom-marker',
+    html: `<div style="
+      background: #3b82f6;
+      color: white;
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 18px;
+      border: 3px solid white;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.3);
+    ">🚴</div>`,
+    iconSize: [36, 36],
+    iconAnchor: [18, 18]
+  });
+
+  // Icono para el cliente (verde)
+  const iconoClienteMarcador = L.divIcon({
+    className: 'custom-marker',
+    html: `<div style="
+      background: #10b981;
+      color: white;
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 18px;
+      border: 3px solid white;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.3);
+    ">👤</div>`,
+    iconSize: [36, 36],
+    iconAnchor: [18, 18]
+  });
+
+  // El primer nodo es el origen, el último es el destino
+  const primerNodo = nodos[0];
+  const ultimoNodo = nodos[nodos.length - 1];
+
+  if (esPickup) {
+    // PICKUP: Repartidor → Restaurante
+    // Primer nodo = Repartidor, Último nodo = Restaurante
+    
+    // Marcador Repartidor (inicio)
+    const marcadorRepartidor = L.marker(
+      [primerNodo.latitud, primerNodo.longitud],
+      { icon: iconoRepartidorMarcador }
+    ).addTo(this.map)
+     .bindPopup(`
+       <div style="text-align: center;">
+         <strong>🚴 Repartidor</strong><br>
+         <small>${ruta.repartidorNombre || 'Repartidor asignado'}</small><br>
+         <small style="color: #3b82f6;">📍 Punto de inicio</small>
+       </div>
+     `);
+    this.marcadoresPuntosClave.push(marcadorRepartidor);
+
+    // Marcador Restaurante (fin del pickup)
+    const marcadorRestaurante = L.marker(
+      [ultimoNodo.latitud, ultimoNodo.longitud],
+      { icon: iconoRestauranteMarcador }
+    ).addTo(this.map)
+     .bindPopup(`
+       <div style="text-align: center;">
+         <strong>🍽️ Restaurante</strong><br>
+         <small>${ruta.restauranteNombre || 'Restaurante'}</small><br>
+         <small style="color: #f97316;">📦 Recoger pedido aquí</small>
+       </div>
+     `);
+    this.marcadoresPuntosClave.push(marcadorRestaurante);
+
+  } else {
+    // DELIVERY: Restaurante → Cliente
+    // Primer nodo = Restaurante, Último nodo = Cliente
+    
+    // Marcador Restaurante (inicio del delivery)
+    const marcadorRestaurante = L.marker(
+      [primerNodo.latitud, primerNodo.longitud],
+      { icon: iconoRestauranteMarcador }
+    ).addTo(this.map)
+     .bindPopup(`
+       <div style="text-align: center;">
+         <strong>🍽️ Restaurante</strong><br>
+         <small>${ruta.restauranteNombre || 'Restaurante'}</small><br>
+         <small style="color: #f97316;">📦 Salida del pedido</small>
+       </div>
+     `);
+    this.marcadoresPuntosClave.push(marcadorRestaurante);
+
+    // Marcador Cliente (fin)
+    const marcadorCliente = L.marker(
+      [ultimoNodo.latitud, ultimoNodo.longitud],
+      { icon: iconoClienteMarcador }
+    ).addTo(this.map)
+     .bindPopup(`
+       <div style="text-align: center;">
+         <strong>👤 Cliente</strong><br>
+         <small>Destino de entrega</small><br>
+         <small style="color: #10b981;">🎯 Entregar aquí</small>
+       </div>
+     `);
+    this.marcadoresPuntosClave.push(marcadorCliente);
+  }
+}
+
+
+
+  // 🆕 Cerrar visualización de ruta del historial
+  cerrarRutaHistorial(): void {
+    this.limpiarRutasHistorial();
+    this.rutaHistorialActiva = null;
+  }
+
+ // 🆕 Limpiar rutas del historial
+private limpiarRutasHistorial(): void {
+  if (this.polylinePickup) {
+    this.polylinePickup.remove();
+    this.polylinePickup = undefined;
+  }
+  
+  if (this.polylineDelivery) {
+    this.polylineDelivery.remove();
+    this.polylineDelivery = undefined;
+  }
+  
+  // 🆕 Limpiar marcadores de puntos clave
+  this.marcadoresPuntosClave.forEach(m => m.remove());
+  this.marcadoresPuntosClave = [];
+}
   private limpiarRuta(): void {
     if (this.polylineRuta) {
       this.polylineRuta.remove();
@@ -437,9 +693,11 @@ export class SelectorUbicacionComponent implements OnInit, OnDestroy {
       this.marcadorDestino = undefined;
     }
     this.limpiarRuta();
+    this.limpiarRutasHistorial();
     this.origenSeleccionado = null;
     this.destinoSeleccionado = null;
     this.errorMensaje = '';
+    this.rutaHistorialActiva = null;
   }
 
   formatearDistancia(km: number): string {

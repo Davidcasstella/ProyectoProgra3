@@ -2,7 +2,7 @@
 
 <div class="mapa-container">
   
-  <!-- Panel de Control -->
+  <!-- Panel de Control IZQUIERDO -->
   <div class="panel-control">
     <!-- Botón de Volver -->
     <div class="header-panel">
@@ -75,6 +75,19 @@
           <span>🎯 Destino</span>
         </div>
       </div>
+      
+      <!-- 🆕 LEYENDA DE RUTAS -->
+      <h4 style="margin-top: 1rem;">🛣️ Rutas</h4>
+      <div class="leyenda-items">
+        <div class="leyenda-item">
+          <div class="linea-ejemplo" style="background: #3b82f6;"></div>
+          <span>📦 Pickup (Repartidor → Restaurante)</span>
+        </div>
+        <div class="leyenda-item">
+          <div class="linea-ejemplo" style="background: #10b981;"></div>
+          <span>🚚 Delivery (Restaurante → Cliente)</span>
+        </div>
+      </div>
     </div>
     
     <!-- Instrucciones -->
@@ -84,6 +97,7 @@
         <li>Click en el mapa para seleccionar <span class="origen">origen</span></li>
         <li>Click nuevamente para seleccionar <span class="destino">destino</span></li>
         <li>Presiona "Calcular Ruta" para ver la ruta óptima</li>
+        <li *ngIf="esAdmin">📋 O selecciona una ruta del historial →</li>
       </ol>
     </div>
 
@@ -168,9 +182,25 @@
     </div>
   </div>
 
-  <!-- Mapa -->
+  <!-- Mapa CENTRAL -->
   <div class="mapa-wrapper">
     <div id="map"></div>
+    
+    <!-- 🆕 Badge flotante cuando se visualiza una ruta del historial -->
+    <div *ngIf="rutaHistorialActiva" class="badge-ruta-historial">
+      <span class="badge-icon">{{ rutaHistorialActiva.tipoCalculo === 'RUTA_PICKUP' ? '📦' : '🚚' }}</span>
+      <div class="badge-info">
+        <strong>{{ rutaHistorialActiva.tipoCalculo }}</strong>
+        <small>Pedido #{{ rutaHistorialActiva.pedidoId }}</small>
+      </div>
+      <button class="badge-close" (click)="cerrarRutaHistorial()">✕</button>
+    </div>
   </div>
+
+  <!-- 🆕 SIDEBAR DERECHO - Historial de Rutas (SOLO ADMIN) -->
+  <app-historial-rutas-sidebar 
+    *ngIf="esAdmin"
+    (rutaSeleccionada)="visualizarRutaHistorial($event)">
+  </app-historial-rutas-sidebar>
   
 </div>

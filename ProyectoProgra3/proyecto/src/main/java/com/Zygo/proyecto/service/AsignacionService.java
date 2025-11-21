@@ -16,23 +16,18 @@ import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
 
 /**
- * 🎯 SERVICIO DE ASIGNACIÓN AUTOMÁTICA
- * Integra Dijkstra + Ubicaciones + Asignación de repartidores
+ * 🎯 SERVICIO DE ASIGNACIÓN AUTOMÁTICA CON 2 RUTAS
  * 
- * Flujo:
- * 1. Cliente crea pedido con su ubicación GPS
- * 2. Sistema busca restaurante más cercano
- * 3. Sistema busca repartidor disponible más cercano
- * 4. Calcula ruta óptima: Repartidor → Restaurante → Cliente
- * 5. Asigna automáticamente y comienza entrega
+ * FLUJO COMPLETO:
+ * 1. Repartidor → Restaurante (pickup)
+ * 2. Restaurante → Cliente (delivery)
  */
 @Service
 public class AsignacionService {
     
     private static final Logger log = LoggerFactory.getLogger(AsignacionService.class);
-    
-    // Distancia máxima para considerar un repartidor disponible (en km)
     private static final double DISTANCIA_MAXIMA_REPARTIDOR = 10.0;
+    private static final int TIEMPO_PREPARACION_MIN = 10; // Tiempo que tarda el restaurante en preparar
     
     @Autowired
     private PedidoRepository pedidoRepository;
@@ -43,6 +38,7 @@ public class AsignacionService {
     @Autowired
     private GraphRepository graphRepository;
     
+    
     @Autowired
     private DijkstraServiceOptimizado dijkstraService;
     
@@ -50,11 +46,10 @@ public class AsignacionService {
     private LugarService lugarService;
     
     @Autowired
-    private GraphManagementService graphManagementService;
+    private HistorialRutaService historialRutaService;
     
     /**
-     * 🎯 MÉTODO PRINCIPAL: Asignación automática completa
-     * Se llama cuando un cliente crea un pedido
+     * 🎯 MÉTODO PRINCIPAL: Asignación automática con 2 rutas
      */
     @Async("taskExecutor")
     @Transactional
@@ -65,7 +60,6 @@ public class AsignacionService {
             Pedido pedido = pedidoRepository.findById(pedidoId)
                     .orElseThrow(() -> new RuntimeException("Pedido no encontrado"));
             
-            // Validar que el pedido esté en estado PENDIENTE
             if (pedido.getEstado() != Pedido.EstadoPedido.PENDIENTE) {
                 log.warn("⚠️ Pedido {} no está PENDIENTE, estado actual: {}", 
                         pedidoId, pedido.getEstado());
@@ -74,8 +68,8 @@ public class AsignacionService {
             
             long tiempoInicio = System.currentTimeMillis();
             
-            // PASO 1: Encontrar restaurante más cercano
-            log.info("🍽️ PASO 1: Buscando restaurante más cercano...");
+            // ================== PASO 1: ENCONTRAR RESTAURANTE ==================
+            log.info("🍽️ PASO 1: Buscando restaurante más cercano al cliente...");
             Graph restaurante = encontrarRestauranteMasCercano(
                 pedido.getLatOrigen(), 
                 pedido.getLonOrigen()
@@ -91,8 +85,8 @@ public class AsignacionService {
             pedido.setRestaurante(restaurante);
             log.info("✅ Restaurante asignado: {} (ID: {})", restaurante.getNombre(), restaurante.getId());
             
-            // PASO 2: Encontrar repartidor más cercano disponible
-            log.info("🚴 PASO 2: Buscando repartidor más cercano disponible...");
+            // ================== PASO 2: ENCONTRAR REPARTIDOR ==================
+            log.info("🚴 PASO 2: Buscando repartidor más cercano al restaurante...");
             Usuario repartidor = encontrarRepartidorMasCercano(
                 restaurante.getLatitud(), 
                 restaurante.getLongitud()
@@ -108,37 +102,157 @@ public class AsignacionService {
             pedido.setRepartidor(repartidor);
             log.info("✅ Repartidor asignado: {} (ID: {})", repartidor.getNombre(), repartidor.getId());
             
-            // PASO 3: Calcular ruta óptima completa
-            log.info("📍 PASO 3: Calculando ruta óptima...");
-            RutaOptimaDTO ruta = calcularRutaCompleta(pedido, restaurante);
+            // ================== PASO 3: CALCULAR RUTA 1 (Repartidor → Restaurante) ==================
+            log.info("🗺️ PASO 3A: Calculando RUTA 1 - Repartidor → Restaurante (PICKUP)...");
             
-            if (ruta == null) {
-                log.error("❌ No se pudo calcular la ruta");
+            // Encontrar nodo más cercano al repartidor
+            Graph nodoRepartidor = lugarService.encontrarNodoMasCercano(
+                repartidor.getLatitud(), 
+                repartidor.getLongitud()
+            );
+            
+            if (nodoRepartidor == null) {
+                log.error("❌ No se encontró nodo cercano al repartidor");
                 pedido.setEstado(Pedido.EstadoPedido.CANCELADO);
                 pedidoRepository.save(pedido);
                 return CompletableFuture.completedFuture(null);
             }
             
-            // PASO 4: Actualizar pedido con información calculada
-            log.info("🔄 PASO 4: Actualizando información del pedido...");
-            actualizarPedidoConRuta(pedido, ruta, restaurante);
+            pedido.setNodoRepartidor(nodoRepartidor);
+            
+            // Calcular ruta: Repartidor → Restaurante
+            RutaOptimaDTO rutaPickup = dijkstraService.encontrarRutaOptima(
+                nodoRepartidor.getId(),
+                restaurante.getId(),
+                true
+            );
+            
+            if (rutaPickup == null) {
+                log.error("❌ No se pudo calcular ruta repartidor → restaurante");
+                pedido.setEstado(Pedido.EstadoPedido.CANCELADO);
+                pedidoRepository.save(pedido);
+                return CompletableFuture.completedFuture(null);
+            }
+            
+            log.info("✅ RUTA 1 (Pickup): {:.2f} km en {} minutos", 
+                    rutaPickup.getDistanciaTotalKm(), 
+                    rutaPickup.getTiempoEstimadoMinutos());
+            
+            // ================== PASO 4: CALCULAR RUTA 2 (Restaurante → Cliente) ==================
+            log.info("🗺️ PASO 3B: Calculando RUTA 2 - Restaurante → Cliente (DELIVERY)...");
+            
+            // Encontrar nodo más cercano al cliente
+            Graph nodoCliente = lugarService.encontrarNodoMasCercano(
+                pedido.getLatDestino(), 
+                pedido.getLonDestino()
+            );
+            
+            if (nodoCliente == null) {
+                log.error("❌ No se encontró nodo cercano al cliente");
+                pedido.setEstado(Pedido.EstadoPedido.CANCELADO);
+                pedidoRepository.save(pedido);
+                return CompletableFuture.completedFuture(null);
+            }
+            
+            pedido.setNodoCliente(nodoCliente);
+            
+            // Calcular ruta: Restaurante → Cliente
+            RutaOptimaDTO rutaDelivery = dijkstraService.encontrarRutaOptima(
+                restaurante.getId(),
+                nodoCliente.getId(),
+                true
+            );
+            
+            if (rutaDelivery == null) {
+                log.error("❌ No se pudo calcular ruta restaurante → cliente");
+                pedido.setEstado(Pedido.EstadoPedido.CANCELADO);
+                pedidoRepository.save(pedido);
+                return CompletableFuture.completedFuture(null);
+            }
+            
+            log.info("✅ RUTA 2 (Delivery): {:.2f} km en {} minutos", 
+                    rutaDelivery.getDistanciaTotalKm(), 
+                    rutaDelivery.getTiempoEstimadoMinutos());
+            
+            // ================== PASO 5: ACTUALIZAR PEDIDO ==================
+            log.info("📄 PASO 4: Actualizando información del pedido...");
+            
+            // Distancia total = ruta1 + ruta2
+            double distanciaTotal = rutaPickup.getDistanciaTotalKm() + rutaDelivery.getDistanciaTotalKm();
+            
+            // Tiempo total = ruta1 + preparación + ruta2
+            int tiempoTotal = rutaPickup.getTiempoEstimadoMinutos() + 
+                             TIEMPO_PREPARACION_MIN + 
+                             rutaDelivery.getTiempoEstimadoMinutos();
+            
+            pedido.setDistanciaKm(distanciaTotal);
+            pedido.setCosto(5000.0 + (distanciaTotal * 2000.0));
             pedido.setEstado(Pedido.EstadoPedido.ASIGNADO);
             pedido.setFechaAsignacion(LocalDateTime.now());
             
             Pedido pedidoActualizado = pedidoRepository.save(pedido);
             
-            // PASO 5: Marcar repartidor como no disponible
+            // Marcar repartidor como no disponible
             repartidor.setDisponible(false);
             usuarioRepository.save(repartidor);
             
-            long tiempoTotal = System.currentTimeMillis() - tiempoInicio;
-            log.info("✅ ASIGNACIÓN COMPLETADA EN {}ms", tiempoTotal);
-            log.info("📊 RESUMEN:");
-            log.info("   - Restaurante: {}", restaurante.getNombre());
-            log.info("   - Repartidor: {}", repartidor.getNombre());
-            log.info("   - Distancia total: {:.2f} km", ruta.getDistanciaTotalKm());
-            log.info("   - Tiempo estimado: {} minutos", ruta.getTiempoEstimadoMinutos());
-            log.info("   - Costo estimado: ${:.0f}", ruta.getCostoEstimado());
+            long tiempoCalculo = System.currentTimeMillis() - tiempoInicio;
+            
+            // ================== PASO 6: GUARDAR HISTORIAL (2 RUTAS) ==================
+            log.info("💾 PASO 5: Guardando historial de las 2 rutas...");
+            
+            try {
+                // HISTORIAL 1: Repartidor → Restaurante (PICKUP)
+                historialRutaService.guardarHistorial(
+                    pedidoActualizado.getId(),
+                    rutaPickup,
+                    restaurante,
+                    nodoCliente, // Para referencia
+                    nodoRepartidor,
+                    repartidor,
+                    HistorialRuta.TipoCalculo.RUTA_PICKUP,
+                    tiempoCalculo
+                );
+                log.info("✅ Historial PICKUP guardado");
+                
+                // HISTORIAL 2: Restaurante → Cliente (DELIVERY)
+                historialRutaService.guardarHistorial(
+                    pedidoActualizado.getId(),
+                    rutaDelivery,
+                    restaurante,
+                    nodoCliente,
+                    nodoRepartidor,
+                    repartidor,
+                    HistorialRuta.TipoCalculo.RUTA_DELIVERY,
+                    tiempoCalculo
+                );
+                log.info("✅ Historial DELIVERY guardado");
+                
+            } catch (Exception e) {
+                log.error("⚠️ Error guardando historial (no crítico): {}", e.getMessage());
+            }
+            
+            // ================== RESUMEN ==================
+            log.info("✅ ====== ASIGNACIÓN COMPLETADA EN {}ms ======", tiempoCalculo);
+            log.info("📊 RESUMEN COMPLETO:");
+            log.info("   🍽️  Restaurante: {}", restaurante.getNombre());
+            log.info("   🚴 Repartidor: {}", repartidor.getNombre());
+            log.info("");
+            log.info("   📍 RUTA 1 (PICKUP): Repartidor → Restaurante");
+            log.info("      ├─ Distancia: {:.2f} km", rutaPickup.getDistanciaTotalKm());
+            log.info("      └─ Tiempo: {} minutos", rutaPickup.getTiempoEstimadoMinutos());
+            log.info("");
+            log.info("   ⏱️  PREPARACIÓN: {} minutos", TIEMPO_PREPARACION_MIN);
+            log.info("");
+            log.info("   📍 RUTA 2 (DELIVERY): Restaurante → Cliente");
+            log.info("      ├─ Distancia: {:.2f} km", rutaDelivery.getDistanciaTotalKm());
+            log.info("      └─ Tiempo: {} minutos", rutaDelivery.getTiempoEstimadoMinutos());
+            log.info("");
+            log.info("   📊 TOTALES:");
+            log.info("      ├─ Distancia total: {:.2f} km", distanciaTotal);
+            log.info("      ├─ Tiempo total: {} minutos", tiempoTotal);
+            log.info("      └─ Costo: ${:.0f}", pedido.getCosto());
+            log.info("========================================");
             
         } catch (Exception e) {
             log.error("❌ ERROR EN ASIGNACIÓN AUTOMÁTICA: {}", e.getMessage(), e);
@@ -153,7 +267,6 @@ public class AsignacionService {
     private Graph encontrarRestauranteMasCercano(Double lat, Double lon) {
         log.debug("🔍 Buscando restaurante cercano a ({}, {})", lat, lon);
         
-        // Obtener todos los restaurantes activos
         List<Graph> restaurantes = graphRepository.findByTipo(Graph.TipoNodo.RESTAURANTE);
         
         if (restaurantes.isEmpty()) {
@@ -161,7 +274,6 @@ public class AsignacionService {
             return null;
         }
         
-        // Encontrar el más cercano por distancia euclidiana
         Graph restauranteMasCercano = null;
         double distanciaMinima = Double.MAX_VALUE;
         
@@ -188,7 +300,6 @@ public class AsignacionService {
     private Usuario encontrarRepartidorMasCercano(Double lat, Double lon) {
         log.debug("🔍 Buscando repartidor disponible cerca de ({}, {})", lat, lon);
         
-        // Obtener repartidores disponibles
         List<Usuario> repartidoresDisponibles = usuarioRepository.findAll().stream()
                 .filter(u -> u.getTipo() == Usuario.TipoUsuario.REPARTIDOR)
                 .filter(u -> u.getActivo())
@@ -202,20 +313,17 @@ public class AsignacionService {
         
         log.info("📊 Repartidores disponibles: {}", repartidoresDisponibles.size());
         
-        // Encontrar el más cercano
         Usuario repartidorMasCercano = null;
         double distanciaMinima = Double.MAX_VALUE;
         
         for (Usuario rep : repartidoresDisponibles) {
             if (rep.getLatitud() == null || rep.getLongitud() == null) {
-                // Si no tiene coordenadas, usar ubicación por defecto
                 rep.setLatitud(5.73);
                 rep.setLongitud(-72.93);
             }
             
             double distancia = calcularDistancia(lat, lon, rep.getLatitud(), rep.getLongitud());
             
-            // Solo considerar si está dentro del radio máximo
             if (distancia <= DISTANCIA_MAXIMA_REPARTIDOR && distancia < distanciaMinima) {
                 distanciaMinima = distancia;
                 repartidorMasCercano = rep;
@@ -230,66 +338,6 @@ public class AsignacionService {
         }
         
         return repartidorMasCercano;
-    }
-    
-    /**
-     * 📍 Calcula la ruta completa: Repartidor → Restaurante → Cliente
-     */
-    private RutaOptimaDTO calcularRutaCompleta(Pedido pedido, Graph restaurante) {
-        log.debug("🗺️ Calculando ruta completa para pedido {}", pedido.getId());
-        
-        try {
-            // Encontrar nodo más cercano del cliente
-            Graph nodoCliente = lugarService.encontrarNodoMasCercano(
-                pedido.getLatDestino(), 
-                pedido.getLonDestino()
-            );
-            
-            if (nodoCliente == null) {
-                log.error("❌ No se encontró nodo cercano al cliente");
-                return null;
-            }
-            
-            pedido.setNodoCliente(nodoCliente);
-            pedido.setNodoRepartidor(restaurante); // Temporalmente
-            
-            // Calcular ruta completa usando Dijkstra
-            RutaOptimaDTO ruta = dijkstraService.encontrarRutaOptima(
-                restaurante.getId(),
-                nodoCliente.getId(),
-                true // Considerar tráfico
-            );
-            
-            if (ruta != null) {
-                log.info("✅ Ruta calculada: {:.2f} km en {} minutos", 
-                        ruta.getDistanciaTotalKm(), 
-                        ruta.getTiempoEstimadoMinutos());
-            }
-            
-            return ruta;
-            
-        } catch (Exception e) {
-            log.error("❌ Error calculando ruta: {}", e.getMessage());
-            return null;
-        }
-    }
-    
-    /**
-     * 🔄 Actualiza el pedido con la información de la ruta
-     */
-    private void actualizarPedidoConRuta(Pedido pedido, RutaOptimaDTO ruta, Graph restaurante) {
-        // Actualizar distancia y costo con los valores calculados
-        if (ruta.getDistanciaTotalKm() != null) {
-            pedido.setDistanciaKm(ruta.getDistanciaTotalKm());
-            
-            // Recalcular costo: $5000 base + $2000 por km
-            Double nuevoCosto = 5000.0 + (ruta.getDistanciaTotalKm() * 2000.0);
-            pedido.setCosto(nuevoCosto);
-        }
-        
-        if (ruta.getTiempoEstimadoMinutos() != null) {
-            log.info("⏱️ Tiempo estimado actualizado: {} minutos", ruta.getTiempoEstimadoMinutos());
-        }
     }
     
     /**
@@ -320,7 +368,7 @@ public class AsignacionService {
     }
     
     /**
-     * 📍 Obtiene estadísticas de restaurantes
+     * 📊 Obtiene estadísticas de restaurantes
      */
     public Map<String, Object> obtenerEstadisticasRestaurantes() {
         Map<String, Object> stats = new HashMap<>();
@@ -340,10 +388,10 @@ public class AsignacionService {
     }
     
     /**
-     * 🧮 Calcula distancia entre dos coordenadas (Haversine simplificado)
+     * 🧮 Calcula distancia entre dos coordenadas (Haversine)
      */
     private double calcularDistancia(Double lat1, Double lon1, Double lat2, Double lon2) {
-        final double R = 6371; // Radio de la Tierra en km
+        final double R = 6371;
         
         double latDistance = Math.toRadians(lat2 - lat1);
         double lonDistance = Math.toRadians(lon2 - lon1);
@@ -356,4 +404,207 @@ public class AsignacionService {
         
         return R * c;
     }
+
+
+
+ /**
+ * 🎯 ASIGNACIÓN PARA CLIENTES (NUEVO)
+ * Recibe SOLO ubicación del cliente
+ * Busca: Restaurante → Repartidor → Calcula rutas
+ */
+@Async("taskExecutor")
+public CompletableFuture<Void> asignarPedidoClienteAsync(
+        Long pedidoId, 
+        Double latCliente, 
+        Double lonCliente) {
+    
+    // 🚨 LOGS DE DIAGNÓSTICO CRÍTICOS
+    log.info("🚨🚨🚨 MÉTODO ASYNC EJECUTÁNDOSE - Thread: {}", Thread.currentThread().getName());
+    log.info("🎯 INICIANDO ASIGNACIÓN PARA CLIENTE - Pedido: {}", pedidoId);
+    log.info("📍 Cliente ubicado en: ({}, {})", latCliente, lonCliente);
+    
+    try {
+        // ✅ Llamar al método con la lógica transaccional
+        procesarAsignacionCliente(pedidoId, latCliente, lonCliente);
+    } catch (Exception e) {
+        log.error("❌ ERROR EN ASIGNACIÓN: {}", e.getMessage(), e);
+    }
+    
+    return CompletableFuture.completedFuture(null);
+}
+
+/**
+ * 🔧 MÉTODO PRIVADO CON LÓGICA TRANSACCIONAL
+ * Separado del método @Async para evitar conflictos de proxy
+ */
+@Transactional
+private void procesarAsignacionCliente(Long pedidoId, Double latCliente, Double lonCliente) {
+    
+    Pedido pedido = pedidoRepository.findById(pedidoId)
+            .orElseThrow(() -> new RuntimeException("Pedido no encontrado"));
+    
+    // ✅ PASO 1: Buscar restaurante más cercano al cliente
+    log.info("🍽️ PASO 1: Buscando restaurante más cercano...");
+    Graph restaurante = encontrarRestauranteMasCercano(latCliente, lonCliente);
+    
+    if (restaurante == null) {
+        log.error("❌ No hay restaurantes disponibles");
+        pedido.setEstado(Pedido.EstadoPedido.CANCELADO);
+        pedidoRepository.save(pedido);
+        return;
+    }
+    
+    pedido.setRestaurante(restaurante);
+    pedido.setLatDestino(restaurante.getLatitud());
+    pedido.setLonDestino(restaurante.getLongitud());
+    pedido.setDireccionDestino(restaurante.getNombre());
+    pedidoRepository.save(pedido);
+    
+    log.info("✅ Restaurante asignado: {} (lat: {}, lon: {})", 
+            restaurante.getNombre(), 
+            restaurante.getLatitud(), 
+            restaurante.getLongitud());
+    
+    // ✅ PASO 2: Buscar repartidor más cercano
+    log.info("🚴 PASO 2: Buscando repartidor más cercano...");
+    Usuario repartidor = encontrarRepartidorMasCercano(
+        restaurante.getLatitud(), 
+        restaurante.getLongitud()
+    );
+    
+    if (repartidor == null) {
+        log.error("❌ No hay repartidores disponibles");
+        pedido.setEstado(Pedido.EstadoPedido.CANCELADO);
+        pedidoRepository.save(pedido);
+        return;
+    }
+    
+    pedido.setRepartidor(repartidor);
+    repartidor.setDisponible(false);
+    usuarioRepository.save(repartidor);
+    
+    log.info("✅ Repartidor asignado: {}", repartidor.getNombre());
+    
+    // ✅ PASO 3: Encontrar nodos para calcular rutas
+    log.info("🗺️ PASO 3: Encontrando nodos para rutas...");
+    
+    Graph nodoRepartidor = lugarService.encontrarNodoMasCercano(
+        repartidor.getLatitud(), 
+        repartidor.getLongitud()
+    );
+    
+    Graph nodoRestaurante = restaurante; // El restaurante es un nodo
+    
+    Graph nodoCliente = lugarService.encontrarNodoMasCercano(
+        latCliente, 
+        lonCliente
+    );
+    
+    if (nodoRepartidor == null || nodoCliente == null) {
+        log.error("❌ No se encontraron nodos para las rutas");
+        pedido.setEstado(Pedido.EstadoPedido.CANCELADO);
+        pedidoRepository.save(pedido);
+        return;
+    }
+    
+    pedido.setNodoRepartidor(nodoRepartidor);
+    pedido.setNodoCliente(nodoCliente);
+    
+    log.info("✅ Nodos encontrados");
+    
+    // ✅ PASO 4: Calcular RUTA 1 (Repartidor → Restaurante)
+    log.info("🗺️ PASO 4A: Calculando RUTA 1 - Repartidor → Restaurante (PICKUP)...");
+    
+    RutaOptimaDTO rutaPickup = dijkstraService.encontrarRutaOptima(
+        nodoRepartidor.getId(),
+        restaurante.getId(),
+        true
+    );
+    
+    if (rutaPickup == null) {
+        log.error("❌ No se pudo calcular ruta pickup");
+        pedido.setEstado(Pedido.EstadoPedido.CANCELADO);
+        pedidoRepository.save(pedido);
+        return;
+    }
+    
+    log.info("✅ RUTA 1 (Pickup): {} km en {} minutos", 
+            rutaPickup.getDistanciaTotalKm(), 
+            rutaPickup.getTiempoEstimadoMinutos());
+    
+    // ✅ PASO 5: Calcular RUTA 2 (Restaurante → Cliente)
+    log.info("🗺️ PASO 4B: Calculando RUTA 2 - Restaurante → Cliente (DELIVERY)...");
+    
+    RutaOptimaDTO rutaDelivery = dijkstraService.encontrarRutaOptima(
+        restaurante.getId(),
+        nodoCliente.getId(),
+        true
+    );
+    
+    if (rutaDelivery == null) {
+        log.error("❌ No se pudo calcular ruta delivery");
+        pedido.setEstado(Pedido.EstadoPedido.CANCELADO);
+        pedidoRepository.save(pedido);
+        return;
+    }
+    
+    log.info("✅ RUTA 2 (Delivery): {} km en {} minutos", 
+            rutaDelivery.getDistanciaTotalKm(), 
+            rutaDelivery.getTiempoEstimadoMinutos());
+    
+    // ✅ PASO 6: Actualizar pedido con información completa
+    log.info("📝 PASO 5: Actualizando información del pedido...");
+    
+    double distanciaTotal = rutaPickup.getDistanciaTotalKm() + rutaDelivery.getDistanciaTotalKm();
+    int tiempoTotal = rutaPickup.getTiempoEstimadoMinutos() + 10 + rutaDelivery.getTiempoEstimadoMinutos();
+    
+    pedido.setDistanciaKm(distanciaTotal);
+    pedido.setCosto(5000.0 + (distanciaTotal * 2000.0));
+    pedido.setEstado(Pedido.EstadoPedido.ASIGNADO);
+    pedido.setFechaAsignacion(LocalDateTime.now());
+    pedido.setDireccionOrigen("Ubicación del cliente");
+    
+    Pedido pedidoActualizado = pedidoRepository.save(pedido);
+    
+    log.info("✅ Pedido actualizado");
+    log.info("📊 RESUMEN COMPLETO:");
+    log.info("   🍽️  Restaurante: {}", restaurante.getNombre());
+    log.info("   🚴 Repartidor: {}", repartidor.getNombre());
+    log.info("   📍 Distancia total: {} km", distanciaTotal);
+    log.info("   ⏱️  Tiempo total: {} minutos", tiempoTotal);
+    log.info("   💰 Costo: ${}", pedido.getCosto());
+    
+    // ✅ PASO 7: Guardar historial de rutas
+    log.info("💾 PASO 6: Guardando historial de rutas...");
+    
+    try {
+        historialRutaService.guardarHistorial(
+            pedidoActualizado.getId(),
+            rutaPickup,
+            restaurante,
+            nodoCliente,
+            nodoRepartidor,
+            repartidor,
+            HistorialRuta.TipoCalculo.RUTA_PICKUP,
+            0L
+        );
+        
+        historialRutaService.guardarHistorial(
+            pedidoActualizado.getId(),
+            rutaDelivery,
+            restaurante,
+            nodoCliente,
+            nodoRepartidor,
+            repartidor,
+            HistorialRuta.TipoCalculo.RUTA_DELIVERY,
+            0L
+        );
+        
+        log.info("✅ Historial guardado");
+    } catch (Exception e) {
+        log.error("⚠️ Error guardando historial (no crítico): {}", e.getMessage());
+    }
+    
+    log.info("✅ ====== ASIGNACIÓN COMPLETADA ======");
+}
 }

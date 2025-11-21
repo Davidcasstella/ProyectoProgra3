@@ -39,60 +39,39 @@ public PedidoDTO crearPedido(PedidoDTO dto) {
     Pedido pedido = new Pedido();
     pedido.setCliente(cliente);
     pedido.setDescripcion(dto.getDescripcion());
-    pedido.setDireccionOrigen(dto.getDireccionOrigen());
-    pedido.setDireccionDestino(dto.getDireccionDestino());
-    pedido.setDistanciaKm(dto.getDistanciaKm());
-    pedido.setCosto(calcularCosto(dto.getDistanciaKm()));
     
-    // ✅ CORREGIDO: Respetar el estado que viene del frontend
-    if (dto.getEstado() != null) {
-        pedido.setEstado(dto.getEstado());
-        log.info("✅ Estado personalizado recibido: {}", dto.getEstado());
+    // ✅ NUEVA LÓGICA: Para clientes, guardar su ubicación como origen
+    if (dto.getLatOrigen() != null && dto.getLatDestino() == null) {
+        // Es un cliente que solo envía su ubicación
+        pedido.setDireccionOrigen("Ubicación del cliente");
+        pedido.setDireccionDestino("Restaurante más cercano (a calcular)");
+        pedido.setLatOrigen(dto.getLatOrigen());
+        pedido.setLonOrigen(dto.getLonOrigen());
+        // Dejar latDestino/lonDestino NULL - se llenarán en AsignacionService
+        log.info("✅ Pedido de cliente: ubicación guardada");
     } else {
-        pedido.setEstado(EstadoPedido.PENDIENTE);
-        log.info("Estado por defecto: PENDIENTE");
-    }
-    
-    // Guardar coordenadas si están presentes
-    if (dto.getLatOrigen() != null) {
+        // Es admin con ruta completa
+        pedido.setDireccionOrigen(dto.getDireccionOrigen());
+        pedido.setDireccionDestino(dto.getDireccionDestino());
         pedido.setLatOrigen(dto.getLatOrigen());
         pedido.setLonOrigen(dto.getLonOrigen());
         pedido.setLatDestino(dto.getLatDestino());
         pedido.setLonDestino(dto.getLonDestino());
-        log.info("Coordenadas guardadas - Origen: ({}, {}), Destino: ({}, {})",
-                dto.getLatOrigen(), dto.getLonOrigen(), 
-                dto.getLatDestino(), dto.getLonDestino());
+        log.info("✅ Pedido de admin: ruta completa");
     }
     
-    // ✅ CORREGIDO: Si viene con repartidor, asignarlo directamente
-    if (dto.getRepartidorId() != null) {
-        Usuario repartidor = usuarioRepository.findById(dto.getRepartidorId())
-                .orElseThrow(() -> new RuntimeException("Repartidor no encontrado"));
-        pedido.setRepartidor(repartidor);
-        pedido.setFechaAsignacion(LocalDateTime.now());
-        log.info("✅ Repartidor {} asignado desde la creación", dto.getRepartidorId());
-    }
+    pedido.setDistanciaKm(dto.getDistanciaKm() != null ? dto.getDistanciaKm() : 0.01);
+    pedido.setCosto(calcularCosto(pedido.getDistanciaKm()));
     
-    // ✅ CORREGIDO: Si viene ENTREGADO, establecer fecha de entrega
-    if (dto.getEstado() == EstadoPedido.ENTREGADO) {
-        pedido.setFechaEntrega(LocalDateTime.now());
-        log.info("✅ Fecha de entrega establecida para pedido completado");
+    // ✅ RESPETAR el estado que viene del DTO
+    if (dto.getEstado() != null) {
+        pedido.setEstado(dto.getEstado());
+    } else {
+        pedido.setEstado(EstadoPedido.PENDIENTE);
     }
     
     Pedido guardado = pedidoRepository.save(pedido);
-    log.info("Pedido creado con ID: {} con estado: {}", guardado.getId(), guardado.getEstado());
-    
-    // ❌ COMENTAR ESTO PARA DESACTIVAR LA ASIGNACIÓN AUTOMÁTICA
-    /*
-    if (guardado.getEstado() == EstadoPedido.PENDIENTE) {
-        log.info("🔄 Activando asignación automática para pedido PENDIENTE");
-        asignarRepartidorAsync(guardado.getId());
-    } else {
-        log.info("⏸️ Procesos automáticos desactivados - Estado: {}", guardado.getEstado());
-    }
-    */
-    
-    log.info("✅ Pedido creado sin asignación automática");
+    log.info("✅ Pedido guardado con ID: {}", guardado.getId());
     
     return convertirEntidadADto(guardado);
 }

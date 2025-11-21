@@ -521,3 +521,128 @@ input:checked + .slider:before {
   border: 2px solid white;
   box-shadow: 0 2px 4px rgba(0,0,0,0.2);
 }
+/* src/app/modules/gestion-mapas/selector-ubicacion/selector-ubicacion.css */
+
+/* ========================================
+   🆕 LAYOUT CON SIDEBAR DERECHO
+======================================== */
+
+.mapa-container {
+  display: grid;
+  grid-template-columns: 350px 1fr 350px; /* Panel izquierdo | Mapa | Sidebar derecho */
+  height: 100vh;
+  overflow: hidden;
+}
+
+/* Cuando NO es admin, solo 2 columnas */
+.mapa-container:not(:has(app-historial-rutas-sidebar)) {
+  grid-template-columns: 350px 1fr;
+}
+
+/* ========================================
+   🆕 BADGE FLOTANTE SOBRE EL MAPA
+======================================== */
+
+.badge-ruta-historial {
+  position: absolute;
+  top: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: white;
+  padding: 0.75rem 1.5rem;
+  border-radius: 2rem;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  z-index: 1000;
+  animation: slideDown 0.3s ease-out;
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateX(-50%) translateY(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+  }
+}
+
+.badge-icon {
+  font-size: 1.5rem;
+}
+
+.badge-info {
+  display: flex;
+  flex-direction: column;
+  gap: 0.125rem;
+}
+
+.badge-info strong {
+  font-size: 0.875rem;
+  color: #1f2937;
+}
+
+.badge-info small {
+  font-size: 0.75rem;
+  color: #6b7280;
+}
+
+.badge-close {
+  background: #ef4444;
+  color: white;
+  border: none;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  cursor: pointer;
+  font-size: 0.875rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s;
+}
+
+.badge-close:hover {
+  background: #dc2626;
+  transform: scale(1.1);
+}
+
+/* ========================================
+   🆕 LEYENDA DE LÍNEAS
+======================================== */
+
+.linea-ejemplo {
+  width: 30px;
+  height: 4px;
+  border-radius: 2px;
+}
+
+/* ========================================
+   RESPONSIVE
+======================================== */
+
+@media (max-width: 1400px) {
+  .mapa-container {
+    grid-template-columns: 300px 1fr 300px;
+  }
+}
+
+@media (max-width: 1024px) {
+  .mapa-container {
+    grid-template-columns: 1fr;
+    grid-template-rows: auto 1fr;
+  }
+  
+  .panel-control {
+    height: auto;
+    max-height: 40vh;
+    overflow-y: auto;
+  }
+  
+  app-historial-rutas-sidebar {
+    display: none; /* Ocultar sidebar en móvil */
+  }
+}

@@ -18,10 +18,10 @@ public class PedidoDTO {
     @NotBlank(message = "La descripción es obligatoria")
     private String descripcion;
     
-    @NotBlank(message = "La dirección de origen es obligatoria")
+    // ✅ CAMBIO: Removido @NotBlank - opcional para clientes
     private String direccionOrigen;
     
-    @NotBlank(message = "La dirección de destino es obligatoria")
+    // ✅ CAMBIO: Removido @NotBlank - opcional para clientes
     private String direccionDestino;
     
     @Positive(message = "La distancia debe ser positiva")

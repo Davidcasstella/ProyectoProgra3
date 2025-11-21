@@ -83,4 +83,38 @@ export interface Ubicacion {
   coordenadas: Coordenadas;
   direccion: string;
   nombre?: string;
+  
+}
+/**
+ * 📋 Historial de rutas calculadas
+ */
+export interface HistorialRuta {
+  id: number;
+  pedidoId: number;
+  tipoCalculo: 'RUTA_PICKUP' | 'RUTA_DELIVERY' | 'ASIGNACION_AUTOMATICA' | 'RECALCULO_RUTA';
+  fechaCalculo: Date | string;
+  distanciaTotalKm: number;
+  tiempoEstimadoMin: number;
+  costoCalculado?: number;
+  
+  // Relaciones
+  restauranteId?: number;
+  restauranteNombre?: string;
+  repartidorId?: number;
+  repartidorNombre?: string;
+  clienteNombre?: string;
+  
+  // Nodos de referencia
+  nodoClienteId?: number;
+  nodoRepartidorId?: number;
+  
+  // Datos de la ruta (JSON deserializado)
+  nodosRuta?: NodoRuta[];
+  segmentosRuta?: SegmentoRuta[];
+  instrucciones?: string[];
+  
+  // Metadata
+  consideroTrafico?: boolean;
+  tiempoCalculoMs?: number;
+  activo?: boolean;
 }
