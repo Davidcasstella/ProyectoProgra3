@@ -1,97 +1,144 @@
 <!-- src/app/components/historial-rutas-sidebar/historial-rutas-sidebar.html -->
 
 <div class="sidebar-historial">
-  <!-- Header -->
+  
+  <!-- ========== HEADER ========== -->
   <div class="sidebar-header">
-    <h3>📋 Historial de Rutas</h3>
-    <button class="btn-refresh" (click)="cargarHistorial()" [disabled]="cargando">
+    <div class="header-content">
+      <h3>📋 Historial de Pedidos</h3>
+      <p class="subtitle">{{ pedidosFiltrados.length }} pedidos</p>
+    </div>
+    <button 
+      class="btn-refresh" 
+      (click)="cargarHistorial()" 
+      [disabled]="cargando"
+      title="Actualizar">
       <span *ngIf="!cargando">🔄</span>
-      <span *ngIf="cargando">⏳</span>
+      <span *ngIf="cargando" class="spinning">⏳</span>
     </button>
   </div>
 
-  <!-- Filtros -->
-  <div class="filtros">
-    <button 
-      class="filtro-btn"
-      [class.active]="tipoFiltro === 'todas'"
-      (click)="tipoFiltro = 'todas'">
-      Todas ({{ rutas.length }})
-    </button>
-    <button 
-      class="filtro-btn"
-      [class.active]="tipoFiltro === 'pickup'"
-      (click)="tipoFiltro = 'pickup'">
-      📦 Pickup
-    </button>
-    <button 
-      class="filtro-btn"
-      [class.active]="tipoFiltro === 'delivery'"
-      (click)="tipoFiltro = 'delivery'">
-      🚚 Delivery
-    </button>
+  <!-- ========== FILTROS Y BÚSQUEDA ========== -->
+  <div class="sidebar-filters">
+    
+    <!-- Búsqueda -->
+    <div class="search-box">
+      <input 
+        type="text" 
+        [(ngModel)]="busqueda"
+        (ngModelChange)="aplicarFiltros()"
+        placeholder="🔍 Buscar por pedido, restaurante..."
+        class="search-input">
+      <button 
+        *ngIf="busqueda" 
+        class="btn-clear-search"
+        (click)="limpiarBusqueda()"
+        title="Limpiar búsqueda">
+        ✕
+      </button>
+    </div>
+
+    <!-- Ordenamiento -->
+    <div class="sort-buttons">
+      <button 
+        class="btn-sort"
+        [class.active]="ordenPor === 'fecha'"
+        (click)="cambiarOrden('fecha')"
+        title="Ordenar por fecha">
+        📅
+      </button>
+      <button 
+        class="btn-sort"
+        [class.active]="ordenPor === 'distancia'"
+        (click)="cambiarOrden('distancia')"
+        title="Ordenar por distancia">
+        📏
+      </button>
+      <button 
+        class="btn-sort"
+        [class.active]="ordenPor === 'tiempo'"
+        (click)="cambiarOrden('tiempo')"
+        title="Ordenar por tiempo">
+        ⏱️
+      </button>
+    </div>
   </div>
 
-  <!-- Loading -->
-  <div *ngIf="cargando" class="loading">
-    <div class="spinner"></div>
-    <p>Cargando historial...</p>
-  </div>
+  <!-- ========== LISTA DE PEDIDOS CON SCROLL ========== -->
+  <div class="pedidos-list-container">
+    
+    <!-- Loading -->
+    <div *ngIf="cargando" class="estado-mensaje">
+      <div class="spinner"></div>
+      <p>Cargando historial...</p>
+    </div>
 
-  <!-- Error -->
-  <div *ngIf="error" class="error">
-    <p>{{ error }}</p>
-    <button (click)="cargarHistorial()">Reintentar</button>
-  </div>
+    <!-- Error -->
+    <div *ngIf="error && !cargando" class="estado-mensaje error">
+      <span class="error-icon">⚠️</span>
+      <p>{{ error }}</p>
+      <button class="btn-retry" (click)="cargarHistorial()">
+        Reintentar
+      </button>
+    </div>
 
-  <!-- Lista de rutas -->
-  <div *ngIf="!cargando && !error" class="lista-rutas">
-    <div 
-      *ngFor="let ruta of rutasFiltradas"
-      class="ruta-item"
-      (click)="seleccionarRuta(ruta)"
-      [style.border-left-color]="obtenerColorTipo(ruta.tipoCalculo)">
+    <!-- Sin resultados -->
+    <div *ngIf="!cargando && !error && pedidosFiltrados.length === 0" class="estado-mensaje">
+      <span class="empty-icon">📭</span>
+      <p *ngIf="busqueda">No se encontraron pedidos con "{{ busqueda }}"</p>
+      <p *ngIf="!busqueda">No hay pedidos en el historial</p>
+    </div>
+
+    <!-- Lista de pedidos -->
+    <div *ngIf="!cargando && !error && pedidosFiltrados.length > 0" class="pedidos-list">
       
-      <!-- Tipo e icono -->
-      <div class="ruta-header">
-        <span class="ruta-icono">{{ obtenerIconoTipo(ruta.tipoCalculo) }}</span>
-        <span class="ruta-tipo">{{ ruta.tipoCalculo }}</span>
-        <span class="ruta-fecha">{{ formatearFecha(ruta.fechaCalculo) }}</span>
-      </div>
-
-      <!-- Información principal -->
-      <div class="ruta-info">
-        <div class="info-row">
-          <span class="label">🍽️</span>
-          <span class="valor">{{ ruta.restauranteNombre || 'N/A' }}</span>
-        </div>
+      <div 
+        *ngFor="let pedido of pedidosFiltrados; let i = index"
+        class="pedido-card"
+        (click)="seleccionarPedido(pedido)"
+        [style.animation-delay]="(i * 0.05) + 's'">
         
-        <div class="info-row">
-          <span class="label">🚴</span>
-          <span class="valor">{{ ruta.repartidorNombre || 'N/A' }}</span>
-        </div>
-        
-        <div class="info-stats">
-          <div class="stat">
-            <span class="stat-icon">📏</span>
-            <span class="stat-valor">{{ formatearDistancia(ruta.distanciaTotalKm) }}</span>
+        <!-- Header del pedido -->
+        <div class="pedido-header">
+          <span class="pedido-icono">🚴</span>
+          <div class="pedido-info">
+            <strong class="pedido-id">Pedido #{{ pedido.pedidoId }}</strong>
+            <span class="pedido-fecha">{{ formatearFecha(pedido.fechaCalculo) }}</span>
           </div>
-          <div class="stat">
-            <span class="stat-icon">⏱️</span>
-            <span class="stat-valor">{{ ruta.tiempoEstimadoMin }}min</span>
-          </div>
+          <span class="pedido-badge">{{ pedido.rutas.length }}</span>
         </div>
+
+        <!-- Detalles del pedido -->
+        <div class="pedido-detalles">
+          
+          <div class="detalle-row">
+            <span class="detalle-icono">🍽️</span>
+            <span class="detalle-texto">{{ pedido.restauranteNombre }}</span>
+          </div>
+
+          <div class="detalle-row">
+            <span class="detalle-icono">👤</span>
+            <span class="detalle-texto">{{ pedido.repartidorNombre }}</span>
+          </div>
+
+          <!-- Estadísticas -->
+          <div class="pedido-stats">
+            <div class="stat-item">
+              <span class="stat-label">📏</span>
+              <span class="stat-valor">{{ formatearDistancia(pedido.distanciaTotal) }}</span>
+            </div>
+            <div class="stat-divider"></div>
+            <div class="stat-item">
+              <span class="stat-label">⏱️</span>
+              <span class="stat-valor">{{ pedido.tiempoTotal }} min</span>
+            </div>
+          </div>
+
+        </div>
+
       </div>
 
-      <!-- Badge del pedido -->
-      <div class="ruta-footer">
-        <span class="pedido-badge">Pedido #{{ ruta.pedidoId }}</span>
-      </div>
-    </div>
-
-    <!-- Mensaje si no hay rutas -->
-    <div *ngIf="rutasFiltradas.length === 0" class="sin-rutas">
-      <p>📭 No hay rutas en el historial</p>
     </div>
   </div>
+
 </div>
