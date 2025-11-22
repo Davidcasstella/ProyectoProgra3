@@ -154,21 +154,22 @@ export class SelectorUbicacionComponent implements OnInit, OnDestroy {
     });
   }
   
-  private cargarRestaurantes(): void {
-    console.log('🍽️ Cargando restaurantes...');
-    
-    this.lugarService.obtenerRestaurantes().subscribe({
-      next: (restaurantes) => {
-        console.log('✅ Restaurantes recibidos:', restaurantes);
-        this.restaurantes = restaurantes;
-        setTimeout(() => this.mostrarMarcadoresRestaurantes(), 500);
-      },
-      error: (error) => {
-        console.error('❌ Error cargando restaurantes:', error);
-      }
-    });
-  }
+private cargarRestaurantes(): void {
+  console.log('🍽️ Cargando restaurantes...');
   
+  this.lugarService.obtenerRestaurantes().subscribe({
+    next: (restaurantes) => {
+      console.log('✅ Restaurantes recibidos:', restaurantes);
+      this.restaurantes = restaurantes;
+      // ✅ FIX: Usar detectChanges en lugar de setTimeout
+      this.cdr.detectChanges();
+      this.mostrarMarcadoresRestaurantes();
+    },
+    error: (error) => {
+      console.error('❌ Error cargando restaurantes:', error);
+    }
+  });
+}
   private cargarRepartidores(): void {
     console.log('🚴 Cargando repartidores...');
     
@@ -400,35 +401,26 @@ export class SelectorUbicacionComponent implements OnInit, OnDestroy {
     });
   }
 
-// 🆕 MÉTODO PRINCIPAL: Visualizar ruta del historial
 visualizarRutaHistorial(ruta: HistorialRutaDTO): void {
   console.log('🎨 Visualizando ruta del historial:', ruta);
   
-  // Limpiar mapa actual
   this.limpiarRutasHistorial();
-  
-  // Guardar ruta activa
   this.rutaHistorialActiva = ruta;
   
-  // 🆕 Cargar AMBAS rutas del mismo pedido (PICKUP + DELIVERY)
   this.historialService.obtenerPorPedido(ruta.pedidoId).subscribe({
-    next: (response: any) => {
-      // ✅ El backend devuelve { historial: [...] }
+    next: async (response: any) => {
       const rutas = response.historial || response;
-      console.log('✅ Rutas del pedido recibidas:', rutas);
       
-      // Dibujar cada ruta
-      rutas.forEach((r: HistorialRutaDTO) => {
-        this.dibujarRutaHistorial(r);
-      });
+      // Usar OSRM para cada ruta
+      for (const r of rutas) {
+        await this.dibujarRutaHistorialConOSRM(r);
+      }
       
-      // Ajustar el mapa para mostrar todas las rutas
       this.ajustarVistaParaRutas();
     },
     error: (err) => {
-      console.error('❌ Error obteniendo rutas del pedido:', err);
-      // Si falla, dibujar solo la ruta actual
-      this.dibujarRutaHistorial(ruta);
+      console.error('❌ Error:', err);
+      this.dibujarRutaHistorialConOSRM(ruta);
     }
   });
 }
@@ -707,4 +699,82 @@ private limpiarRutasHistorial(): void {
   formatearCosto(costo: number): string {
     return `$${costo.toLocaleString('es-CO')}`;
   }
+  // Agregar este método para obtener ruta real de OSRM
+private async obtenerRutaOSRM(origen: Coordenadas, destino: Coordenadas): Promise<L.LatLngExpression[]> {
+  const url = `https://router.project-osrm.org/route/v1/driving/${origen.lng},${origen.lat};${destino.lng},${destino.lat}?overview=full&geometries=geojson`;
+  
+  try {
+    const response = await fetch(url);
+    const data = await response.json();
+    
+    if (data.routes && data.routes.length > 0) {
+      // OSRM devuelve [lng, lat], Leaflet necesita [lat, lng]
+      return data.routes[0].geometry.coordinates.map((coord: number[]) => 
+        [coord[1], coord[0]] as L.LatLngExpression
+      );
+    }
+  } catch (error) {
+    console.error('Error obteniendo ruta OSRM:', error);
+  }
+  
+  // Fallback: línea recta
+  return [[origen.lat, origen.lng], [destino.lat, destino.lng]];
+}
+
+// Modificar dibujarRutaHistorial para usar OSRM
+private async dibujarRutaHistorialConOSRM(ruta: HistorialRutaDTO): Promise<void> {
+  let nodos: any = ruta.nodosRutaJson;
+  
+  if (typeof nodos === 'string') {
+    try {
+      nodos = JSON.parse(nodos);
+    } catch (e) {
+      console.error('Error parseando nodos:', e);
+      return;
+    }
+  }
+
+  if (!nodos || nodos.length < 2) {
+    console.warn('⚠️ No hay suficientes nodos');
+    return;
+  }
+
+  // Obtener solo origen y destino
+  const primerNodo = nodos[0];
+  const ultimoNodo = nodos[nodos.length - 1];
+  
+  const origen: Coordenadas = { lat: primerNodo.latitud, lng: primerNodo.longitud };
+  const destino: Coordenadas = { lat: ultimoNodo.latitud, lng: ultimoNodo.longitud };
+
+  // 🚀 Obtener ruta REAL de OSRM
+  const coordenadas = await this.obtenerRutaOSRM(origen, destino);
+
+  const esPickup = ruta.tipoCalculo === 'RUTA_PICKUP';
+  const color = esPickup ? '#3b82f6' : '#10b981';
+  const label = esPickup ? '📦 PICKUP' : '🚚 DELIVERY';
+
+  const polyline = L.polyline(coordenadas, {
+    color: color,
+    weight: 6,
+    opacity: 0.8,
+    dashArray: esPickup ? '10, 5' : undefined
+  }).addTo(this.map);
+
+  if (esPickup) {
+    this.polylinePickup = polyline;
+  } else {
+    this.polylineDelivery = polyline;
+  }
+
+  polyline.bindPopup(`
+    <div style="text-align: center;">
+      <strong>${label}</strong><br>
+      <small>📍 ${this.formatearDistancia(ruta.distanciaTotalKm)}</small><br>
+      <small>⏱️ ${ruta.tiempoEstimadoMin} min</small>
+    </div>
+  `);
+
+  this.agregarMarcadoresPuntosClave(ruta, nodos, esPickup);
+  this.map.fitBounds(polyline.getBounds(), { padding: [50, 50] });
+}
 }
