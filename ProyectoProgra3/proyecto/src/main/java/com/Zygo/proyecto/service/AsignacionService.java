@@ -454,11 +454,24 @@ private void procesarAsignacionCliente(Long pedidoId, Double latCliente, Double 
         return;
     }
     
-    pedido.setRestaurante(restaurante);
-    pedido.setLatDestino(restaurante.getLatitud());
-    pedido.setLonDestino(restaurante.getLongitud());
-    pedido.setDireccionDestino(restaurante.getNombre());
-    pedidoRepository.save(pedido);
+// ✅ CORREGIDO: Guardar coordenadas del restaurante en campos correctos
+pedido.setRestaurante(restaurante);
+
+// 🍽️ Coordenadas del RESTAURANTE
+pedido.setLatRestaurante(restaurante.getLatitud());
+pedido.setLonRestaurante(restaurante.getLongitud());
+pedido.setDireccionRestaurante(restaurante.getNombre());
+pedido.setNombreRestaurante(restaurante.getNombre());
+
+// 🎯 Coordenadas del CLIENTE (destino final)
+pedido.setLatDestino(latCliente);
+pedido.setLonDestino(lonCliente);
+pedido.setDireccionDestino("Ubicación del cliente");
+
+// 📍 Coordenadas del REPARTIDOR (origen)
+// Estas se establecerán más adelante cuando se asigne el repartidor
+
+pedidoRepository.save(pedido);
     
     log.info("✅ Restaurante asignado: {} (lat: {}, lon: {})", 
             restaurante.getNombre(), 
@@ -484,6 +497,10 @@ private void procesarAsignacionCliente(Long pedidoId, Double latCliente, Double 
     usuarioRepository.save(repartidor);
     
     log.info("✅ Repartidor asignado: {}", repartidor.getNombre());
+    pedido.setLatOrigen(repartidor.getLatitud());
+pedido.setLonOrigen(repartidor.getLongitud());
+pedido.setDireccionOrigen("Ubicación del repartidor: " + repartidor.getNombre());
+pedidoRepository.save(pedido);
     
     // ✅ PASO 3: Encontrar nodos para calcular rutas
     log.info("🗺️ PASO 3: Encontrando nodos para rutas...");

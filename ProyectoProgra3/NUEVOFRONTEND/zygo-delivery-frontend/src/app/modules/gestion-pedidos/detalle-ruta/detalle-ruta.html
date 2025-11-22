@@ -1,0 +1,230 @@
+<!-- src/app/modules/gestion-pedidos/detalle-ruta/detalle-ruta.html -->
+
+<div class="detalle-container">
+  
+  <!-- 📙 HEADER CON BOTÓN DE VOLVER -->
+  <div class="header-detalle">
+    <button class="btn-volver" (click)="volver()">
+      ← Volver a Mis Pedidos
+    </button>
+    <div class="header-info" *ngIf="pedido">
+      <h1>🗺️ Ruta del Pedido #{{ pedido.id }}</h1>
+      <span class="badge-estado" [ngClass]="getEstadoColor(pedido.estado)">
+        {{ getEstadoIcono(pedido.estado) }} {{ pedido.estado }}
+      </span>
+    </div>
+  </div>
+
+  <!-- ⏳ LOADING -->
+  <div *ngIf="cargando" class="loading-section">
+    <div class="spinner"></div>
+    <p>Cargando detalles del pedido...</p>
+  </div>
+
+  <!-- ❌ ERROR -->
+  <div *ngIf="error && !cargando" class="error-section">
+    <p>{{ error }}</p>
+    <button class="btn-retry" (click)="volver()">Volver</button>
+  </div>
+
+  <!-- 📦 CONTENIDO PRINCIPAL - USAR [hidden] EN LUGAR DE *ngIf -->
+  <div [hidden]="cargando || error || !pedido" class="contenido-principal">
+    
+    <!-- 📊 RESUMEN DEL PEDIDO -->
+    <div class="card resumen-pedido" *ngIf="pedido">
+      <h2>📦 Información del Pedido</h2>
+      <div class="info-grid">
+        <div class="info-item">
+          <span class="label">👤 Cliente:</span>
+          <span class="value">{{ pedido.nombreCliente }}</span>
+        </div>
+        <div class="info-item">
+          <span class="label">📝 Descripción:</span>
+          <span class="value">{{ pedido.descripcion }}</span>
+        </div>
+        <div class="info-item">
+          <span class="label">💰 Costo:</span>
+          <span class="value">${{ pedido.costo | number:'1.0-0' }}</span>
+        </div>
+        <div class="info-item">
+          <span class="label">📅 Fecha:</span>
+          <span class="value">{{ pedido.fechaCreacion | date:'dd/MM/yyyy HH:mm' }}</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- 🗺️ MAPA GRANDE -->
+    <div class="card mapa-card">
+      <h2>🗺️ Mapa de la Ruta</h2>
+      
+      <!-- ⏳ Loading de rutas -->
+      <div *ngIf="calculandoRutas" class="loading-ruta">
+        <div class="spinner"></div>
+        <p>Calculando rutas óptimas...</p>
+      </div>
+
+      <!-- 🗺️ MAPA - SIEMPRE VISIBLE -->
+      <div class="mapa-wrapper">
+        <div class="mapa-grande">
+          <app-selector-ubicacion></app-selector-ubicacion>
+        </div>
+
+        <!-- ⚠️ Mensaje superpuesto si no hay coordenadas -->
+        <div *ngIf="pedido && !tieneCoordenadasCompletas() && !calculandoRutas" class="sin-coordenadas-overlay">
+          <div class="sin-coordenadas-content">
+            <p>⚠️ Este pedido no tiene coordenadas de mapa guardadas</p>
+            <p class="help-text">Las coordenadas se guardan cuando se crea el pedido usando el selector de mapa</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- ESTADÍSTICAS DE LA RUTA -->
+      <div class="estadisticas-ruta" *ngIf="pedido && (rutaPickup || rutaDelivery)">
+        <div class="stat-box">
+          <span class="stat-icon">📏</span>
+          <div class="stat-info">
+            <span class="stat-label">Distancia Total</span>
+            <span class="stat-value">{{ getDistanciaTotal() | number:'1.2-2' }} km</span>
+          </div>
+        </div>
+        <div class="stat-box">
+          <span class="stat-icon">⏱️</span>
+          <div class="stat-info">
+            <span class="stat-label">Tiempo Total</span>
+            <span class="stat-value">{{ getTiempoTotal() | number:'1.0-0' }} min</span>
+          </div>
+        </div>
+        <div class="stat-box">
+          <span class="stat-icon">💰</span>
+          <div class="stat-info">
+            <span class="stat-label">Costo</span>
+            <span class="stat-value">${{ pedido.costo | number:'1.0-0' }}</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 📋 INSTRUCCIONES - FASE 1: PICKUP (Repartidor → Restaurante) -->
+    <div class="card instrucciones-card" *ngIf="rutaPickup && rutaPickup.instrucciones">
+      <div class="instrucciones-header">
+        <h2>🚴 Fase 1: Recoger Pedido</h2>
+        <div class="fase-badge fase-pickup">Repartidor → Restaurante</div>
+      </div>
+      
+      <div class="ubicaciones-fase">
+        <div class="ubicacion-inicio">
+          <span class="icono">🟢</span>
+          <div class="info">
+            <span class="titulo">Tu ubicación</span>
+            <span class="direccion">{{ pedido!.direccionOrigen }}</span>
+          </div>
+        </div>
+        <div class="flecha-ruta">↓</div>
+        <div class="ubicacion-fin">
+          <span class="icono">🍽️</span>
+          <div class="info">
+            <span class="titulo">{{ pedido!.nombreRestaurante || 'Restaurante' }}</span>
+            <span class="direccion">{{ pedido!.direccionRestaurante }}</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="instrucciones-list">
+        <div 
+          *ngFor="let instruccion of rutaPickup.instrucciones; let i = index"
+          class="instruccion-paso">
+          <div class="paso-numero">{{ i + 1 }}</div>
+          <div class="paso-contenido">
+            <p class="paso-texto">{{ instruccion }}</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="resumen-fase">
+        <div class="resumen-item">
+          <span>📏 Distancia:</span>
+          <strong>{{ rutaPickup.distanciaTotalKm | number:'1.2-2' }} km</strong>
+        </div>
+        <div class="resumen-item">
+          <span>⏱️ Tiempo:</span>
+          <strong>{{ rutaPickup.tiempoEstimadoMinutos | number:'1.0-0' }} min</strong>
+        </div>
+      </div>
+    </div>
+
+    <!-- 📋 INSTRUCCIONES - FASE 2: DELIVERY (Restaurante → Cliente) -->
+    <div class="card instrucciones-card" *ngIf="rutaDelivery && rutaDelivery.instrucciones">
+      <div class="instrucciones-header">
+        <h2>🎯 Fase 2: Entregar Pedido</h2>
+        <div class="fase-badge fase-delivery">Restaurante → Cliente</div>
+      </div>
+      
+      <div class="ubicaciones-fase">
+        <div class="ubicacion-inicio">
+          <span class="icono">🍽️</span>
+          <div class="info">
+            <span class="titulo">{{ pedido!.nombreRestaurante || 'Restaurante' }}</span>
+            <span class="direccion">{{ pedido!.direccionRestaurante }}</span>
+          </div>
+        </div>
+        <div class="flecha-ruta">↓</div>
+        <div class="ubicacion-fin">
+          <span class="icono">🔴</span>
+          <div class="info">
+            <span class="titulo">Cliente: {{ pedido!.nombreCliente }}</span>
+            <span class="direccion">{{ pedido!.direccionDestino }}</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="instrucciones-list">
+        <div 
+          *ngFor="let instruccion of rutaDelivery.instrucciones; let i = index"
+          class="instruccion-paso">
+          <div class="paso-numero">{{ i + 1 }}</div>
+          <div class="paso-contenido">
+            <p class="paso-texto">{{ instruccion }}</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="resumen-fase">
+        <div class="resumen-item">
+          <span>📏 Distancia:</span>
+          <strong>{{ rutaDelivery.distanciaTotalKm | number:'1.2-2' }} km</strong>
+        </div>
+        <div class="resumen-item">
+          <span>⏱️ Tiempo:</span>
+          <strong>{{ rutaDelivery.tiempoEstimadoMinutos | number:'1.0-0' }} min</strong>
+        </div>
+      </div>
+    </div>
+
+    <!-- 🎯 ACCIONES -->
+    <div class="card acciones-card">
+      <h2>🎯 Acciones del Pedido</h2>
+      <div class="botones-accion">
+        
+        <button 
+          *ngIf="puedeMarcarEnCamino()"
+          class="btn-accion btn-en-camino"
+          (click)="cambiarEstado('EN_CAMINO')">
+          🚴 Marcar como "En Camino"
+        </button>
+
+        <button 
+          *ngIf="puedeMarcarEntregado()"
+          class="btn-accion btn-entregado"
+          (click)="cambiarEstado('ENTREGADO')">
+          ✅ Marcar como "Entregado"
+        </button>
+
+        <button class="btn-accion btn-volver-accion" (click)="volver()">
+          ← Volver a la Lista
+        </button>
+      </div>
+    </div>
+
+  </div>
+
+</div>

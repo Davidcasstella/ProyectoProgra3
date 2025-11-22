@@ -24,7 +24,8 @@ public class Pedido {
     @ManyToOne
     @JoinColumn(name = "repartidor_id")
     private Usuario repartidor;
-        // Restaurante asignado automáticamente
+    
+    // Restaurante asignado automáticamente
     @ManyToOne
     @JoinColumn(name = "restaurante_id")
     private Graph restaurante;
@@ -67,13 +68,29 @@ public class Pedido {
     @Column(name = "fecha_entrega")
     private LocalDateTime fechaEntrega;
 
-    // Coordenadas para el mapa
+    // ================== COORDENADAS ==================
+    
+    // 📍 ORIGEN (Repartidor)
     @Column(name = "lat_origen")
     private Double latOrigen;
 
     @Column(name = "lon_origen")
     private Double lonOrigen;
 
+    // 🍽️ RESTAURANTE (NUEVO)
+    @Column(name = "lat_restaurante")
+    private Double latRestaurante;
+
+    @Column(name = "lon_restaurante")
+    private Double lonRestaurante;
+
+    @Column(name = "direccion_restaurante", length = 500)
+    private String direccionRestaurante;
+
+    @Column(name = "nombre_restaurante", length = 200)
+    private String nombreRestaurante;
+
+    // 🎯 DESTINO (Cliente)
     @Column(name = "lat_destino")
     private Double latDestino;
 
@@ -122,7 +139,8 @@ public class Pedido {
         this.fechaEntrega = fechaEntrega;
     }
     
-    // Getters y Setters
+    // ================== GETTERS Y SETTERS ==================
+    
     public Long getId() {
         return id;
     }
@@ -219,7 +237,7 @@ public class Pedido {
         this.fechaEntrega = fechaEntrega;
     }
     
-    // Getters y Setters para coordenadas
+    // Getters y Setters para ORIGEN (Repartidor)
     public Double getLatOrigen() {
         return latOrigen;
     }
@@ -236,6 +254,40 @@ public class Pedido {
         this.lonOrigen = lonOrigen;
     }
 
+    // 🆕 Getters y Setters para RESTAURANTE
+    public Double getLatRestaurante() {
+        return latRestaurante;
+    }
+
+    public void setLatRestaurante(Double latRestaurante) {
+        this.latRestaurante = latRestaurante;
+    }
+
+    public Double getLonRestaurante() {
+        return lonRestaurante;
+    }
+
+    public void setLonRestaurante(Double lonRestaurante) {
+        this.lonRestaurante = lonRestaurante;
+    }
+
+    public String getDireccionRestaurante() {
+        return direccionRestaurante;
+    }
+
+    public void setDireccionRestaurante(String direccionRestaurante) {
+        this.direccionRestaurante = direccionRestaurante;
+    }
+
+    public String getNombreRestaurante() {
+        return nombreRestaurante;
+    }
+
+    public void setNombreRestaurante(String nombreRestaurante) {
+        this.nombreRestaurante = nombreRestaurante;
+    }
+
+    // Getters y Setters para DESTINO (Cliente)
     public Double getLatDestino() {
         return latDestino;
     }
@@ -251,11 +303,13 @@ public class Pedido {
     public void setLonDestino(Double lonDestino) {
         this.lonDestino = lonDestino;
     }
+    
+    // Getters y Setters para nodos y restaurante
     public Graph getRestaurante() {
-    return restaurante;
+        return restaurante;
     }
 
-      public void setRestaurante(Graph restaurante) {
+    public void setRestaurante(Graph restaurante) {
         this.restaurante = restaurante;
     }
 

@@ -44,6 +44,11 @@ export const routes: Routes = [
     loadChildren: () => import('./modules/gestion-mapas/gestion-mapas-routing-module')
       .then(m => m.MAPAS_ROUTES)
   },
+  {
+  path: 'dashboard/pedidos',
+  loadChildren: () => import('./modules/gestion-pedidos/gestion-pedidos-routing-module')
+    .then(m => m.PEDIDOS_ROUTES)
+},
   // ❌ Ruta no encontrada
 
   {

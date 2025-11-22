@@ -161,7 +161,7 @@ private cargarRestaurantes(): void {
     next: (restaurantes) => {
       console.log('✅ Restaurantes recibidos:', restaurantes);
       this.restaurantes = restaurantes;
-      // ✅ FIX: Usar detectChanges en lugar de setTimeout
+      // ✅ Usar detectChanges en lugar de setTimeout
       this.cdr.detectChanges();
       this.mostrarMarcadoresRestaurantes();
     },
@@ -171,19 +171,21 @@ private cargarRestaurantes(): void {
   });
 }
   private cargarRepartidores(): void {
-    console.log('🚴 Cargando repartidores...');
-    
-    this.usuarioService.obtenerRepartidores().subscribe({
-      next: (repartidores) => {
-        console.log('✅ Repartidores recibidos:', repartidores);
-        this.repartidores = repartidores.filter(r => r.latitud && r.longitud);
-        this.mostrarMarcadoresRepartidores();
-      },
-      error: (error) => {
-        console.error('❌ Error cargando repartidores:', error);
-      }
-    });
-  }
+  console.log('🚴 Cargando repartidores...');
+  
+  this.usuarioService.obtenerRepartidores().subscribe({
+    next: (repartidores) => {
+      console.log('✅ Repartidores recibidos:', repartidores);
+      this.repartidores = repartidores.filter(r => r.latitud && r.longitud);
+      // ✅ FIX: Usar detectChanges para evitar ExpressionChangedAfterItHasBeenCheckedError
+      this.cdr.detectChanges();
+      this.mostrarMarcadoresRepartidores();
+    },
+    error: (error) => {
+      console.error('❌ Error cargando repartidores:', error);
+    }
+  });
+}
   
   private mostrarMarcadoresRestaurantes(): void {
     this.marcadoresRestaurantes.forEach(m => m.remove());

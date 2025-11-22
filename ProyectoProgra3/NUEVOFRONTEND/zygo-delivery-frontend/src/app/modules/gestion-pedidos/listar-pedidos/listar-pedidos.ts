@@ -24,7 +24,7 @@ export class ListarPedidos implements OnInit, OnDestroy {
   private lugarService = inject(LugarService);
   private authService = inject(AuthService);
   private router = inject(Router);
-  private cdr = inject(ChangeDetectorRef); // ✅ NUEVO: Para forzar detección de cambios
+  private cdr = inject(ChangeDetectorRef);
 
   pedidos: Pedido[] = [];
   pedidosFiltrados: Pedido[] = [];
@@ -53,7 +53,6 @@ export class ListarPedidos implements OnInit, OnDestroy {
     console.log('🚀 Iniciando ListarPedidos...');
     console.log('👤 Usuario actual:', this.usuarioActual);
     
-    // ✅ CORRECCIÓN: Usar setTimeout para asegurar que el ciclo de Angular esté listo
     setTimeout(() => {
       this.cargarPedidos();
       this.iniciarAutoActualizacion();
@@ -85,12 +84,11 @@ export class ListarPedidos implements OnInit, OnDestroy {
   }
 
   /**
-   * ✅ Carga los pedidos (CORREGIDO con detección de cambios)
+   * ✅ Carga los pedidos y los ordena (más recientes primero)
    */
   cargarPedidos(silencioso: boolean = false): void {
     if (!silencioso) {
       this.cargando = true;
-      // ✅ Forzar detección de cambios para que aparezca el spinner
       this.cdr.detectChanges();
     }
     this.error = null;
@@ -113,27 +111,27 @@ export class ListarPedidos implements OnInit, OnDestroy {
         console.log('📦 Respuesta del backend:', pedidos);
         console.log('📊 Total de pedidos:', pedidos.length);
         
-        const ids = pedidos.map(p => p.id);
-        console.log('🔢 IDs de pedidos:', ids);
-        
         const pedidosAnteriores = this.pedidos.length;
         
-        // ✅ CORRECCIÓN: Actualizar en el orden correcto
-        this.pedidos = [...pedidos]; // Crear nuevo array
+        const pedidosOrdenados = [...pedidos].sort((a, b) => {
+        const fechaA = new Date(a.fechaCreacion || 0).getTime();
+        const fechaB = new Date(b.fechaCreacion || 0).getTime();
+        return fechaB - fechaA;
+      });
+        
+        this.pedidos = pedidosOrdenados;
         this.aplicarFiltros();
         this.cargando = false;
         
-        // ✅ CRÍTICO: Forzar detección de cambios
         this.cdr.detectChanges();
 
         if (!silencioso) {
-          console.log(`✅ ${pedidos.length} pedidos cargados`);
+          console.log(`✅ ${pedidos.length} pedidos cargados y ordenados (más recientes primero)`);
         } else if (pedidos.length !== pedidosAnteriores) {
           console.log(`🔄 Lista actualizada: ${pedidosAnteriores} → ${pedidos.length} pedidos`);
         }
         
         console.log('🎯 pedidosFiltrados.length:', this.pedidosFiltrados.length);
-        console.log('📋 Estado de cargando:', this.cargando);
       },
       error: (err) => {
         this.error = 'Error al cargar pedidos';
@@ -145,7 +143,7 @@ export class ListarPedidos implements OnInit, OnDestroy {
   }
 
   /**
-   * Aplica filtros según el estado seleccionado
+   * ✅ Aplica filtros y mantiene el orden
    */
   aplicarFiltros(): void {
     console.log('🔍 Aplicando filtros - Estado:', this.filtroEstado);
@@ -169,7 +167,7 @@ export class ListarPedidos implements OnInit, OnDestroy {
     console.log(`🔄 Cambiando filtro a: ${estado}`);
     this.filtroEstado = estado;
     this.aplicarFiltros();
-    this.cdr.detectChanges(); // ✅ Forzar detección de cambios
+    this.cdr.detectChanges();
   }
 
   /**
@@ -181,10 +179,18 @@ export class ListarPedidos implements OnInit, OnDestroy {
   }
 
   /**
-   * Abre el modal con la ruta del pedido
+   * ✅ Navega al componente de detalle de ruta
    */
   verRuta(pedido: Pedido): void {
-    console.log('🗺️ Abriendo ruta para pedido:', pedido);
+    console.log('🗺️ Navegando a detalle de ruta para pedido:', pedido.id);
+    this.router.navigate(['/dashboard/pedidos/detalle-ruta', pedido.id]);
+  }
+
+  /**
+   * Ver ruta en modal (mantener para vista rápida)
+   */
+  verRutaModal(pedido: Pedido): void {
+    console.log('🗺️ Abriendo ruta en modal para pedido:', pedido);
     
     this.pedidoSeleccionado = pedido;
     this.mostrarModalRuta = true;
@@ -194,7 +200,7 @@ export class ListarPedidos implements OnInit, OnDestroy {
       this.calcularRutaPedido(pedido);
     } else {
       console.warn('⚠️ El pedido no tiene coordenadas guardadas');
-      alert('Este pedido no tiene coordenadas de mapa. Fue creado antes de implementar esta funcionalidad.');
+      alert('Este pedido no tiene coordenadas de mapa.');
     }
   }
 
@@ -295,18 +301,12 @@ export class ListarPedidos implements OnInit, OnDestroy {
    */
   getEstadoColor(estado?: EstadoPedido): string {
     switch (estado) {
-      case EstadoPedido.PENDIENTE:
-        return 'badge-warning';
-      case EstadoPedido.ASIGNADO:
-        return 'badge-info';
-      case EstadoPedido.EN_CAMINO:
-        return 'badge-primary';
-      case EstadoPedido.ENTREGADO:
-        return 'badge-success';
-      case EstadoPedido.CANCELADO:
-        return 'badge-danger';
-      default:
-        return 'badge-secondary';
+      case EstadoPedido.PENDIENTE: return 'badge-warning';
+      case EstadoPedido.ASIGNADO: return 'badge-info';
+      case EstadoPedido.EN_CAMINO: return 'badge-primary';
+      case EstadoPedido.ENTREGADO: return 'badge-success';
+      case EstadoPedido.CANCELADO: return 'badge-danger';
+      default: return 'badge-secondary';
     }
   }
 
@@ -315,18 +315,12 @@ export class ListarPedidos implements OnInit, OnDestroy {
    */
   getEstadoIcono(estado?: EstadoPedido): string {
     switch (estado) {
-      case EstadoPedido.PENDIENTE:
-        return '⏳';
-      case EstadoPedido.ASIGNADO:
-        return '📋';
-      case EstadoPedido.EN_CAMINO:
-        return '🚴';
-      case EstadoPedido.ENTREGADO:
-        return '✅';
-      case EstadoPedido.CANCELADO:
-        return '❌';
-      default:
-        return '📦';
+      case EstadoPedido.PENDIENTE: return '⏳';
+      case EstadoPedido.ASIGNADO: return '📋';
+      case EstadoPedido.EN_CAMINO: return '🚴';
+      case EstadoPedido.ENTREGADO: return '✅';
+      case EstadoPedido.CANCELADO: return '❌';
+      default: return '📦';
     }
   }
 

@@ -383,119 +383,202 @@ export class HomeComponent implements OnInit, AfterViewInit {
   }
 
   private dibujarPolylineDesdeRuta(ruta: any, pedido: Pedido): void {
-    if (!this.map) return;
+  if (!this.map) return;
 
-    const coordenadas: L.LatLngExpression[] = ruta.nodos.map((nodo: any) => 
-      [nodo.latitud, nodo.longitud] as L.LatLngExpression
-    );
+  const coordenadas: L.LatLngExpression[] = ruta.nodos.map((nodo: any) => 
+    [nodo.latitud, nodo.longitud] as L.LatLngExpression
+  );
 
-    const colorRuta = this.getColorForEstado(pedido.estado || 'PENDIENTE');
+  const colorRuta = this.getColorForEstado(pedido.estado || 'PENDIENTE');
 
-    this.currentPolyline = L.polyline(coordenadas, {
-      color: colorRuta,
-      weight: 4,
-      opacity: 0.8,
-      dashArray: '5, 10',
-      lineJoin: 'round',
-      lineCap: 'round'
-    }).addTo(this.map);
+  this.currentPolyline = L.polyline(coordenadas, {
+    color: colorRuta,
+    weight: 4,
+    opacity: 0.8,
+    dashArray: '5, 10',
+    lineJoin: 'round',
+    lineCap: 'round',
+    interactive: false // ✅ Evita que capture eventos
+  }).addTo(this.map);
+
+  // ✅ Enviar polyline al fondo
+  if (this.currentPolyline) {
+    this.currentPolyline.bringToBack();
+  }
+}
+
+ private dibujarLineaRecta(pedido: Pedido): void {
+  if (!this.map) return;
+
+  const latOrigen = pedido.latOrigen as number;
+  const lonOrigen = pedido.lonOrigen as number;
+  const latDestino = pedido.latDestino as number;
+  const lonDestino = pedido.lonDestino as number;
+
+  const origen: L.LatLngExpression = [latOrigen, lonOrigen];
+  const destino: L.LatLngExpression = [latDestino, lonDestino];
+  
+  const colorRuta = this.getColorForEstado(pedido.estado || 'PENDIENTE');
+
+  this.currentPolyline = L.polyline([origen, destino], {
+    color: colorRuta,
+    weight: 2,
+    opacity: 0.5,
+    dashArray: '2, 4',
+    interactive: false // ✅ Evita que capture eventos
+  }).addTo(this.map);
+
+  // ✅ Enviar polyline al fondo
+  if (this.currentPolyline) {
+    this.currentPolyline.bringToBack();
   }
 
-  private dibujarLineaRecta(pedido: Pedido): void {
-    if (!this.map) return;
+  this.dibujarMarcadores(pedido);
+  
+  const bounds = L.latLngBounds([origen, destino]);
+  this.map.fitBounds(bounds, { padding: [50, 50] });
+  
+  this.pedidoSeleccionado.set(pedido);
+}
 
-    const latOrigen = pedido.latOrigen as number;
-    const lonOrigen = pedido.lonOrigen as number;
-    const latDestino = pedido.latDestino as number;
-    const lonDestino = pedido.lonDestino as number;
+ private dibujarMarcadores(pedido: Pedido): void {
+  if (!this.map) return;
 
-    const origen: L.LatLngExpression = [latOrigen, lonOrigen];
-    const destino: L.LatLngExpression = [latDestino, lonDestino];
-    
-    const colorRuta = this.getColorForEstado(pedido.estado || 'PENDIENTE');
+  const latOrigen = pedido.latOrigen as number;
+  const lonOrigen = pedido.lonOrigen as number;
+  const latDestino = pedido.latDestino as number;
+  const lonDestino = pedido.lonDestino as number;
 
-    this.currentPolyline = L.polyline([origen, destino], {
-      color: colorRuta,
-      weight: 2,
-      opacity: 0.5,
-      dashArray: '2, 4'
-    }).addTo(this.map);
+  // 🔵 Icono del Repartidor (Origen - Azul)
+  const iconoRepartidor = L.divIcon({
+    className: 'custom-marker',
+    html: `
+      <div style="
+        background: linear-gradient(135deg, #3b82f6, #2563eb);
+        width: 32px;
+        height: 32px;
+        border-radius: 50% 50% 50% 0;
+        transform: rotate(-45deg);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        box-shadow: 0 4px 12px rgba(59, 130, 246, 0.5);
+        border: 2px solid white;
+      ">
+        <svg style="transform: rotate(45deg); width: 16px; height: 16px; color: white;" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <circle cx="5.5" cy="17.5" r="3.5"/>
+          <circle cx="18.5" cy="17.5" r="3.5"/>
+          <path d="M12 17.5V14l-3-3 4-3 2 3h2"/>
+        </svg>
+      </div>
+    `,
+    iconSize: [32, 32],
+    iconAnchor: [16, 32]
+  });
 
-    this.dibujarMarcadores(pedido);
-    
-    const bounds = L.latLngBounds([origen, destino]);
-    this.map.fitBounds(bounds, { padding: [50, 50] });
-    
-    this.pedidoSeleccionado.set(pedido);
-  }
+  // 🟠 Icono del Restaurante (Punto medio - Naranja)
+  const iconoRestaurante = L.divIcon({
+    className: 'custom-marker',
+    html: `
+      <div style="
+        background: linear-gradient(135deg, #f59e0b, #fbbf24);
+        width: 32px;
+        height: 32px;
+        border-radius: 50% 50% 50% 0;
+        transform: rotate(-45deg);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        box-shadow: 0 4px 12px rgba(245, 158, 11, 0.5);
+        border: 2px solid white;
+      ">
+        <svg style="transform: rotate(45deg); width: 16px; height: 16px; color: white;" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M3 2v7c0 1.1.9 2 2 2h4a2 2 0 002-2V2M7 2v20M21 15V2v0a5 5 0 00-5 5v6c0 1.1.9 2 2 2h3z"/>
+        </svg>
+      </div>
+    `,
+    iconSize: [32, 32],
+    iconAnchor: [16, 32]
+  });
 
-  private dibujarMarcadores(pedido: Pedido): void {
-    if (!this.map) return;
+  // 🟢 Icono del Cliente (Destino - Verde)
+  const iconoCliente = L.divIcon({
+    className: 'custom-marker',
+    html: `
+      <div style="
+        background: linear-gradient(135deg, #10b981, #34d399);
+        width: 32px;
+        height: 32px;
+        border-radius: 50% 50% 50% 0;
+        transform: rotate(-45deg);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        box-shadow: 0 4px 12px rgba(16, 185, 129, 0.5);
+        border: 2px solid white;
+      ">
+        <svg style="transform: rotate(45deg); width: 16px; height: 16px; color: white;" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
+        </svg>
+      </div>
+    `,
+    iconSize: [32, 32],
+    iconAnchor: [16, 32]
+  });
 
-    const latOrigen = pedido.latOrigen as number;
-    const lonOrigen = pedido.lonOrigen as number;
-    const latDestino = pedido.latDestino as number;
-    const lonDestino = pedido.lonDestino as number;
+  // 🔵 Marcador del Repartidor (Origen)
+  const markerRepartidor = L.marker([latOrigen, lonOrigen], { 
+    icon: iconoRepartidor,
+    zIndexOffset: 1000
+  })
+    .bindPopup(`
+      <div style="text-align: center;">
+        <strong>🚴 Repartidor</strong><br>
+        <small>${pedido.nombreRepartidor || 'Repartidor asignado'}</small><br>
+        <small style="color: #3b82f6;">📍 Punto de inicio</small>
+      </div>
+    `)
+    .addTo(this.map);
 
-    const iconoOrigen = L.divIcon({
-      className: 'custom-marker',
-      html: `
-        <div style="
-          background: linear-gradient(135deg, #f59e0b, #fbbf24);
-          width: 32px;
-          height: 32px;
-          border-radius: 50% 50% 50% 0;
-          transform: rotate(-45deg);
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          box-shadow: 0 4px 12px rgba(245, 158, 11, 0.5);
-          border: 2px solid white;
-        ">
-          <svg style="transform: rotate(45deg); width: 16px; height: 16px; color: white;" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/>
-          </svg>
+  this.currentMarkers = [markerRepartidor];
+
+  // 🟠 Marcador del Restaurante (si existe)
+  if (pedido.latRestaurante != null && pedido.lonRestaurante != null) {
+    const markerRestaurante = L.marker(
+      [pedido.latRestaurante, pedido.lonRestaurante], 
+      { 
+        icon: iconoRestaurante,
+        zIndexOffset: 1000
+      }
+    )
+      .bindPopup(`
+        <div style="text-align: center;">
+          <strong>🍽️ Restaurante</strong><br>
+          <small>${pedido.nombreRestaurante || 'Restaurante'}</small><br>
+          <small style="color: #f59e0b;">📦 Recoger pedido aquí</small>
         </div>
-      `,
-      iconSize: [32, 32],
-      iconAnchor: [16, 32]
-    });
-
-    const iconoDestino = L.divIcon({
-      className: 'custom-marker',
-      html: `
-        <div style="
-          background: linear-gradient(135deg, #10b981, #34d399);
-          width: 32px;
-          height: 32px;
-          border-radius: 50% 50% 50% 0;
-          transform: rotate(-45deg);
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          box-shadow: 0 4px 12px rgba(16, 185, 129, 0.5);
-          border: 2px solid white;
-        ">
-          <svg style="transform: rotate(45deg); width: 16px; height: 16px; color: white;" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
-          </svg>
-        </div>
-      `,
-      iconSize: [32, 32],
-      iconAnchor: [16, 32]
-    });
-
-    const markerOrigen = L.marker([latOrigen, lonOrigen], { icon: iconoOrigen })
-      .bindPopup(`<b>Origen</b><br>${pedido.direccionOrigen}`)
+      `)
       .addTo(this.map);
-
-    const markerDestino = L.marker([latDestino, lonDestino], { icon: iconoDestino })
-      .bindPopup(`<b>Destino</b><br>${pedido.direccionDestino}`)
-      .addTo(this.map);
-
-    this.currentMarkers = [markerOrigen, markerDestino];
+    
+    this.currentMarkers.push(markerRestaurante);
   }
 
+  // 🟢 Marcador del Cliente (Destino)
+  const markerCliente = L.marker([latDestino, lonDestino], { 
+    icon: iconoCliente,
+    zIndexOffset: 1000
+  })
+    .bindPopup(`
+      <div style="text-align: center;">
+        <strong>🏠 Cliente</strong><br>
+        <small>${pedido.nombreCliente || 'Cliente'}</small><br>
+        <small style="color: #10b981;">🎯 Destino de entrega</small>
+      </div>
+    `)
+    .addTo(this.map);
+
+  this.currentMarkers.push(markerCliente);
+}
   private centrarMapaEnRuta(ruta: any): void {
     if (!this.map || !ruta.nodos || ruta.nodos.length === 0) return;
 

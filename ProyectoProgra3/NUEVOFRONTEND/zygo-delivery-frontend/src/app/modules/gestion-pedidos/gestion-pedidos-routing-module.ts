@@ -19,5 +19,10 @@ export const PEDIDOS_ROUTES: Routes = [
   {
     path: 'editar-pedidos/:id',
     loadComponent: () => import('./editar-pedidos/editar-pedidos').then(m => m.EditarPedidos)
+  },
+  // ✅ ESTA RUTA DEBE ESTAR AQUÍ
+  {
+    path: 'detalle-ruta/:id',
+    loadComponent: () => import('./detalle-ruta/detalle-ruta').then(m => m.DetalleRuta)
   }
 ];

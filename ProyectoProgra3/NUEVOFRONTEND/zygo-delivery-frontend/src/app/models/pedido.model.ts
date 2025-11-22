@@ -24,12 +24,19 @@ export interface Pedido {
   nombreCliente?: string;
   nombreRepartidor?: string;
   
-  // ✨ NUEVOS CAMPOS OPCIONALES para el mapa
-  // (solo en frontend por ahora, no se envían al backend)
+  // ✅ Coordenadas de origen (puede ser repartidor o restaurante según el contexto)
   latOrigen?: number;
   lonOrigen?: number;
+  
+  // ✅ Coordenadas de destino (cliente)
   latDestino?: number;
   lonDestino?: number;
+  
+  // ✅ NUEVO: Coordenadas del restaurante (punto intermedio)
+  latRestaurante?: number;
+  lonRestaurante?: number;
+  nombreRestaurante?: string;
+  direccionRestaurante?: string;
 }
 
 export interface PedidoDTO {
@@ -62,4 +69,8 @@ export interface CrearPedidoConMapa {
   lonOrigen: number;
   latDestino: number;
   lonDestino: number;
+  // ✅ NUEVO: Coordenadas opcionales del restaurante
+  latRestaurante?: number;
+  lonRestaurante?: number;
+  restauranteId?: number;
 }

@@ -52,12 +52,14 @@ export class HistorialRutasSidebarComponent implements OnInit {
     }, 30000);
   }
 
-  cargarHistorial(): void {
-    this.cargando = true;
-    this.error = '';
-    
-    this.historialService.obtenerUltimas(50).subscribe({
-      next: (response: any) => {
+ cargarHistorial(): void {
+  this.cargando = true;
+  this.error = '';
+  
+  this.historialService.obtenerUltimas(50).subscribe({
+    next: (response: any) => {
+      // ✅ Envolver en setTimeout para evitar NG0100
+      setTimeout(() => {
         // El servicio puede devolver { historial: [...] } o directamente [...]
         const rutas = response.historial || response || [];
         console.log('✅ Historial cargado:', rutas.length, 'rutas');
@@ -68,16 +70,18 @@ export class HistorialRutasSidebarComponent implements OnInit {
         
         this.cargando = false;
         this.cdr.detectChanges();
-      },
-      error: (err) => {
+      }, 0);
+    },
+    error: (err) => {
+      setTimeout(() => {
         console.error('❌ Error cargando historial:', err);
         this.error = 'Error al cargar el historial';
         this.cargando = false;
         this.cdr.detectChanges();
-      }
-    });
-  }
-
+      }, 0);
+    }
+  });
+}
   private agruparPorPedido(rutas: HistorialRutaDTO[]): void {
     const pedidosMap = new Map<number, PedidoAgrupado>();
     

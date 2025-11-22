@@ -19,13 +19,14 @@ export class PedidoService {
     return this.http.get<Pedido[]>(`${this.apiUrl}?_t=${timestamp}`);
   }
 
+  // ✅ MANTENER SOLO ESTA DECLARACIÓN (eliminar la duplicada)
   obtenerPorId(id: number): Observable<Pedido> {
     return this.http.get<Pedido>(`${this.apiUrl}/${id}`);
   }
 
-crear(pedido: Pedido): Observable<any> {
-  return this.http.post<any>(`${this.apiUrl}/crear-con-asignacion`, pedido);
-}
+  crear(pedido: Pedido): Observable<any> {
+    return this.http.post<any>(`${this.apiUrl}/crear-con-asignacion`, pedido);
+  }
 
   actualizar(id: number, pedido: Pedido): Observable<Pedido> {
     return this.http.put<Pedido>(`${this.apiUrl}/${id}`, pedido);
@@ -73,4 +74,9 @@ crear(pedido: Pedido): Observable<any> {
     const timestamp = new Date().getTime();
     return this.http.get<Pedido[]>(`${this.apiUrl}/historial/activos?_t=${timestamp}`);
   }
+  
+  // ❌ ELIMINAR ESTA LÍNEA DUPLICADA (línea 76):
+  // obtenerPorId(id: number): Observable<Pedido> {
+  //   return this.http.get<Pedido>(`${this.apiUrl}/${id}`);
+  // }
 }
