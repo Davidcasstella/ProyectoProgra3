@@ -4,6 +4,10 @@ import com.Zygo.proyecto.dto.PedidoDTO;
 import com.Zygo.proyecto.model.Pedido.EstadoPedido;
 import com.Zygo.proyecto.model.Usuario;
 import com.Zygo.proyecto.service.PedidoService;
+
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
+
 import com.Zygo.proyecto.service.AsignacionService;
 import com.Zygo.proyecto.repository.UsuarioRepository;
 import jakarta.validation.Valid;
@@ -16,11 +20,13 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
+
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+@Tag(name = "📦 Pedidos", description = "Gestión completa de pedidos de delivery")
 @RestController
 @RequestMapping("/api/pedidos")
 @CrossOrigin(origins = "*")
@@ -46,6 +52,8 @@ public class PedidoController {
      * - Repartidor disponible más cercano
      * - Calcula ruta óptima
      */
+    @Operation(summary = "Crear pedido con asignación automática", 
+           description = "Crea un pedido y asigna automáticamente restaurante y repartidor cercanos")
     @PostMapping("/crear-con-asignacion")
     public ResponseEntity<Map<String, Object>> crearPedidoConAsignacion(
             @Valid @RequestBody PedidoDTO pedidoDTO) {
